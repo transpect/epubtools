@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0">
+  <documentElement localName="epub-config" uri="metadata-conf/metadata-conf.rnc"/>
+</locatingRules>
+

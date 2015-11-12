@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0"
+  datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+  <start>
+    <ref name="hierarchy"/>
+  </start>
+
+  <define name="hierarchy">
+    <element name="hierarchy">
+      <optional>
+        <attribute name="media-type">
+          <text/>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="xml:base">
+          <data type="anyURI"/>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="generated-frontmatter-title">
+          <text/>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="max-population">
+          <data type="integer"/>
+        </attribute>
+      </optional>
+      <attribute name="max-text-length">
+        <data type="integer"/>
+      </attribute>
+      <optional>
+        <ref name="anonymous-division-title"/>
+      </optional>
+      <interleave>
+        <zeroOrMore>
+          <ref name="unconditional-split"/>
+        </zeroOrMore>
+        <zeroOrMore>
+          <ref name="conditional-split"/>
+        </zeroOrMore>
+        <zeroOrMore>
+          <ref name="heading"/>
+        </zeroOrMore>
+      </interleave>
+    </element>
+  </define>
+
+  <define name="anonymous-division-title">
+    <a:documentation>Currently not supported by the splitter.</a:documentation>
+    <attribute name="anonymous-division-title">
+      <text/>
+    </attribute>
+  </define>
+  <define name="title">
+    <a:documentation>Currently not supported by the splitter.</a:documentation>
+    <attribute name="title">
+      <text/>
+    </attribute>
+  </define>
+  <define name="level">
+    <attribute name="level">
+      <data type="integer"/>
+    </attribute>
+  </define>
+
+  <define name="unconditional-split">
+    <element name="unconditional-split">
+      <optional>
+        <choice>
+          <attribute name="remove">
+            <value>yes</value>
+          </attribute>
+          <attribute name="linear">
+            <value>no</value>
+          </attribute>
+        </choice>
+      </optional>
+      <ref name="content-selector"/>
+    </element>
+  </define>
+  
+  <define name="conditional-split">
+    <element name="conditional-split">
+      <optional>
+        <attribute name="remove">
+          <value>yes</value>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="nav">
+          <a:documentation>Whether an up-to-8-word preview of the paragraph (or the next paragraph, if the current is empty 
+            or if it only consists of asterisks etc.) should be included in the toc nav element / the ncx.
+          Default: yes.</a:documentation>
+          <value>no</value>
+        </attribute>
+      </optional>
+      <ref name="content-selector"/>
+    </element>
+  </define>
+
+  <define name="heading">
+    <element name="heading">
+      <a:documentation>Headings that will otherwise be selected for toc generation may be excluded from toc generation
+      by adding a class '_notoc' (in the HTML file).</a:documentation>
+      <ref name="content-selector"/>
+      <optional>
+        <ref name="anonymous-division-title"/>
+      </optional>
+      <optional>
+        <ref name="title"/>
+      </optional>
+      <optional>
+        <ref name="level"/>
+      </optional>
+    </element>
+  </define>
+
+  <define name="content-selector">
+    <choice>
+      <group>
+        <ref name="elt"/>
+        <optional>
+          <ref name="attr"/>
+        </optional>
+      </group>
+      <group>
+        <optional>
+          <ref name="elt"/>
+        </optional>
+        <ref name="attr"/>
+      </group>
+    </choice>
+  </define>
+
+  <define name="elt">
+    <attribute name="elt">
+      <data type="NMTOKEN"/>
+    </attribute>
+  </define>
+
+  <define name="attr">
+    <a:documentation>Currently only epub:type, class, and id will be regarded as specializations
+    of a generic element when it comes to comparing whether a given element matches the selector.</a:documentation>
+    <attribute name="attr">
+      <data type="NMTOKEN"/>
+    </attribute>
+    <attribute name="attval">
+      <data type="NMTOKEN"/>
+    </attribute>
+  </define>
+
+</grammar>

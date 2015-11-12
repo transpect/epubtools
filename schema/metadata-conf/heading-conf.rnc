@@ -1,0 +1,41 @@
+namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
+
+start = hierarchy
+hierarchy =
+  element hierarchy {
+    attribute media-type { text }?,
+    attribute xml:base { xsd:anyURI }?,
+    attribute generated-frontmatter-title { text }?,
+    attribute max-population { xsd:integer }?,
+    attribute max-text-length { xsd:integer },
+    anonymous-division-title?,
+    (unconditional-split* & heading*)
+  }
+
+## Currently not supported by the splitter.
+anonymous-division-title = attribute anonymous-division-title { text }
+
+## Currently not supported by the splitter.
+title = attribute title { text }
+level = attribute level { xsd:integer }
+unconditional-split =
+  element unconditional-split {
+    (attribute remove { "yes" }
+     | attribute linear { "no" })?,
+    content-selector
+  }
+heading =
+  
+  ## Headings that will otherwise be selected for toc generation may be excluded from toc generation
+  ##       by adding a class '_notoc' (in the HTML file).
+  element heading {
+    content-selector, anonymous-division-title?, title?, level?
+  }
+content-selector = (elt, attr?) | (elt?, attr)
+elt = attribute elt { xsd:NMTOKEN }
+
+## Currently only epub:type, class, and id will be regarded as specializations
+##     of a generic element when it comes to comparing whether a given element matches the selector.
+attr =
+  attribute attr { xsd:NMTOKEN },
+  attribute attval { xsd:NMTOKEN }

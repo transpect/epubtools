@@ -1,0 +1,294 @@
+default namespace = ""
+namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
+namespace dc = "http://purl.org/dc/elements/1.1/"
+namespace opf = "http://www.idpf.org/2007/opf"
+namespace s = "http://purl.oclc.org/dsdl/schematron"
+
+s:ns [ uri = "http://purl.org/dc/elements/1.1/" prefix = "dc" ]
+s:ns [ uri = "http://www.idpf.org/2007/opf" prefix = "opf" ]
+include "heading-conf.rnc" {
+  start =
+    element epub-config {
+      format?,
+      layout?,
+      indent?,
+      variant?,
+      css-handling?,
+      page-map-xml?,
+      html-subdir-name?,
+      out-file-basename?,
+      (cover? & types? & meta & hierarchy? & checks?)
+    }
+}
+global-atts =
+  attribute xml:lang { text }?,
+  attribute xml:base { xsd:anyURI }?,
+  attribute xml:space { "preserve" | "default" }?
+format = attribute format { "EPUB2" | "EPUB3" | "KF8" }
+indent =
+  
+  ## Whether the serialized HTML should be indented. Default: true.
+  ##       'selective' means: indent="false" with textual insertions of line breaks and spaces
+  ##       before p, h?, div, nav, aside elements.
+  attribute indent { "true" | "false" | "selective" }
+layout = attribute layout { "reflowable" | "fixed" }
+
+## Space-separated names of arbitrary layout/format variants that may or may not
+##     be recognized by the EPUB builder. Examples: ORIGINAL-CSS, FIXED-Apple
+variant = attribute variant { text }
+
+## Defaults to 'regenerated-per-split', i.e., all CSS that is included or linked in the input file will be
+##       parsed. The common parts will be written to a single file whose name is 'styles/stylesheet.css' by default. All rules with
+##       ID-based selectors be written to an output-file-specific CSS file whose base name is the base name of the corresponding
+##       HTML output file. Rules with ID-based selectors that don’t have a corresponding ID will be discarded. 
+##       'regenerated': All CSS rules will be written to 'styles/stylesheet.css'.
+##       In both regeneration variants, unused class declarations will be removed. Also the @font-face declarations that are only referred to
+##       in these unused rules.
+##      
+css-handling =
+  attribute css-handling {
+    "unchanged" | "regenerated" | "regenerated-per-split"
+  }
+page-map-xml = attribute page-map-xml { "true" | "false" }
+html-subdir-name =
+  
+  ## Whether the HTML files (except for a generated nav.xhtml) should be put in a subdirectory
+  ##       of OEBPS. An empty string or a missing attribute means: no subdirectory.
+  attribute html-subdir-name {
+    xsd:string { pattern = "[\-_a-zA-Z0-9]*" }
+  }
+out-file-basename =
+  
+  ## Will be used as the basename for the output zip file.
+  attribute out-file-basename {
+    xsd:string { pattern = "[\-_.a-zA-Z0-9]+" }
+  }
+
+## http://www.idpf.org/epub/vocab/structure/
+landmark-types =
+  "abstract"
+  | "acknowledgments"
+  | "afterword"
+  | "appendix"
+  | "backmatter"
+  | "bibliography"
+  | "bodymatter"
+  | "chapter"
+  | "colophon"
+  | "contributors"
+  | "copyright-page"
+  | "cover"
+  | "credits"
+  | "dedication"
+  | "division"
+  | "epigraph"
+  | "epilogue"
+  | "errata"
+  | "footnotes"
+  | "foreword"
+  | "frontmatter"
+  | "fulltitle"
+  | "glossary"
+  | "imprint"
+  | "index"
+  | "introduction"
+  | "loa"
+  | "loi"
+  | "lot"
+  | "lov"
+  | "other-credits"
+  | "part"
+  | "preamble"
+  | "preface"
+  | "rearnotes"
+  | "revision-history"
+  | "subchapter"
+  | "subtitle"
+  | "title"
+  | "titlepage"
+  | "volume"
+hidden-attribute =
+  
+  ## Whether the generated typed item (toc, landmarks, lot, …) should be hidden. If missing, should be
+  ##           interpreted as false. 
+  ##           See http://www.idpf.org/epub/301/spec/epub-contentdocs.html#sec-xhtml-nav-def-hidden
+  ##         
+  attribute hidden { "true" | "false" }?
+landmark-type-element =
+  element type {
+    attribute name { "landmarks" },
+    
+    ## Rendered, localized heading (e.g., 'Inhaltsverzeichnis' for type='toc')
+    attribute heading { text }?,
+    hidden-attribute,
+    global-atts,
+    
+    ## A space-separated list of types that should be collected when generating 
+    ##           the landmarks nav element. 
+    ##           If this attribute is missing, all landmark-types as declared in this schema should be considered. 
+    ##           Although not prohibited by the spec, there should not be other types than defined in
+    ##           http://www.idpf.org/epub/vocab/structure/, or more specifically, than present in the landmark-types
+    ##           in this schema.
+    ##           
+    attribute types {
+      list { (landmark-types | "toc")+ }
+    }?
+  }
+toc-type-element =
+  element type {
+    attribute name { "toc" },
+    attribute heading { text }?,
+    hidden-attribute,
+    # This is not configurable (yet). It is fixed to nav.xhtml. <ref name="file-attribute"/>
+    global-atts
+  }
+cover =
+  
+  ## If no *[@epub:type='cover'] or div[@id = 'epub-cover-image-container'] is included in the source, 
+  ##         a cover HTML file will be generated from the PNG or JPEG image with the given href. 
+  ##         (Could be another file type, but not implemented yet)
+  element cover {
+    global-atts,
+    attribute href { xsd:anyURI },
+    
+    ## Whether the generated cover HTML should use svg to wrap the cover image. Should be
+    ##           assumed false if omitted.
+    attribute svg { "true" | "false" }?
+  }
+types =
+  
+  ## Please note that due to Relax NG restrictions, the order in which the types are
+  ##         declared is important: toc first, then landmarks, then other types. Custom types must have a 
+  ##       namespace prefix. Their namespace must be declared.
+  element types {
+    global-atts,
+    toc-type-element?,
+    landmark-type-element?,
+    plain-type-element*
+  }
+plain-type-element = element type { plain-type-attributes, global-atts }
+plain-type-attributes =
+  
+  ## epub:type attribute values ('backmatter', 'tr:bio', …)
+  attribute name {
+    landmark-types
+    | xsd:QName { pattern = "\i\c*:\i\c*" }
+  },
+  
+  ## Rendered, localized heading (e.g., 'Inhaltsverzeichnis' for type='toc')
+  attribute heading { text }?,
+  file-attribute,
+  
+  ## Example: <type name="cover" guide-type="text" heading="Cover"/> will create an EPUB2
+  ##         guide entry <reference type="text" href="cover.xhtml" title="Cover"/>, if cover.xhtml contains 
+  ##         the element with epub:type="cover". If there is a default mapping, for example from epub:type="bodymatter" to
+  ##         guide type="text", this default mapping will be suppressed.
+  ##         It may contain space-separated values. There will be a guide/reference entry for each of the tokens.
+  ##         According to http://support.apple.com/en-us/HT202972 you may use the value of 'other.reader-start-page'
+  ##         for iBooks to open the book at that location.
+  ##         Please see http://www.idpf.org/epub/20/spec/OPF_2.0.1_draft.htm#Section2.6 for the permitted type attribute 
+  ##         values, including custom values starting in 'other.'.
+  ##         Example: <type name="cover" heading="[Cover]" guide-type="text other.reader-start-page"/>
+  ##         
+  attribute guide-type { text }?
+file-attribute =
+  
+  ## Output file base name (e.g., 'chapter', 'appendix', 'cover')
+  attribute file { text }?
+meta =
+  element metadata {
+    global-atts,
+    ((dc-identifier | dc-identifier-mandatory-scheme+)
+     & element dc:title { text }?
+     & element dc:creator {
+         
+         ## To be completed. Also, to be extended wrt EPUB3
+         attribute opf:role { "aut" | "edt" }?,
+         attribute opf:file-as { text }?,
+         text
+       }?
+     & element dc:publisher { text }?
+     & element dc:rights { text }?
+     & element dc:date { text }?
+     & element dc:language { text }?)
+  }
+[
+  s:pattern [
+    id = "multiple_ids_must_have_format"
+    "\x{a}" ~
+    "      "
+    s:rule [
+      context =
+        "dc:identifier[not(opf:scheme)][count(../dc:identifier[not(opf:scheme)]) gt 1]"
+      "\x{a}" ~
+      "        "
+      s:assert [
+        test =
+          "exists(@format) or count(../dc:identifier[not(opf:scheme)][not(@format)]) eq 1"
+        "If there are multiple dc:identifiers without opf:scheme, at most one of them may omit its format attribute."
+      ]
+      "\x{a}" ~
+      "        "
+      s:assert [
+        test =
+          "not(@format = (../dc:identifier[not(opf:scheme)] except current())/@format)"
+        "@format attributes must be distinct"
+      ]
+      "\x{a}" ~
+      "      "
+    ]
+    "\x{a}" ~
+    "    "
+  ]
+  s:pattern [
+    id = "warn_if_identifier_and_conf_declare_format"
+    "\x{a}" ~
+    "      "
+    s:rule [
+      context =
+        "dc:identifier[@format][not(@format = /epub-config/@format)]"
+      "\x{a}" ~
+      "        "
+      s:assert [
+        test =
+          "some $f in ../dc:identifier/@format satisfies ($f = /epub-config/@format)"
+        role = "warn"
+        "This identifier is in a different format than you have specified for\x{a}" ~
+        "        the whole conversion, and there is no other dc:identifier for the specified format. If you specify this format on the Calabash commandline (target="
+        s:value-of [ select = "@format" ]
+        "), it will have precedence over /epub-config/@format."
+      ]
+      "\x{a}" ~
+      "      "
+    ]
+    "\x{a}" ~
+    "    "
+  ]
+]
+dc-identifier =
+  element dc:identifier {
+    global-atts,
+    format?,
+    attribute opf:scheme { text }?,
+    text
+  }+
+dc-identifier-mandatory-scheme =
+  element dc:identifier {
+    global-atts,
+    attribute opf:scheme { text },
+    text
+  }
+checks = element checks { (check | schematron)* }
+check =
+  element check {
+    attribute param { text },
+    attribute value { text },
+    attribute severity { "info" | "warning" | "error" | "fatal-error" }?
+  }
+schematron =
+  element schematron {
+    attribute href { xsd:anyURI },
+    
+    ## not implemented yet
+    attribute phase { xsd:NCName | "#all" }?
+  }

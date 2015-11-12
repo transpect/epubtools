@@ -1,0 +1,714 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://purl.oclc.org/dsdl/schematron" 
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:dbk="http://docbook.org/ns/docbook"
+  xmlns:c="http://www.w3.org/ns/xproc-step"
+  xmlns:tr="http://transpect.io"
+  tr:rule-family="epubtools"
+  queryBinding="xslt2">
+  
+  <ns prefix="opf" uri="http://www.idpf.org/2007/opf"/>
+  <ns prefix="c" uri="http://www.w3.org/ns/xproc-step"/>
+  <ns prefix="cx" uri="http://xmlcalabash.com/ns/extensions"/>
+  <ns prefix="dc" uri="http://purl.org/dc/elements/1.1/"/>
+  <ns prefix="epub" uri="http://www.idpf.org/2007/ops"/>
+  <ns prefix="html" uri="http://www.w3.org/1999/xhtml"/>
+  <ns prefix="tr" uri="http://transpect.io"/>
+  <ns prefix="svg" uri="http://www.w3.org/2000/svg"/>
+  <ns prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
+
+  <let name="opf-package" value="/c:wrap/opf:package"/>
+
+  <p>The abstract patterns in this Schematron need to be processed with oXygen’s iso-schematron-abstract.xsl.
+  The ISO Schematron distribution’s iso_abstract_expand.xsl will not allow the params in the role attribute of an
+  assert or report statement. This means that this Schematron will be processed as expected in oXygen, but not by
+  the standard XProc p:validate-with-schematron step included with Calabash. Until Calabash migrates to oXygen’s 
+  abstract pattern expansion, tr:oxy-validate-with-schematron from https://github.com/transpect/schematron
+  may be used.</p>
+
+  <xsl:include href="http://transpect.io/xslt-util/resolve-uri/xsl/resolve-uri.xsl"/>
+
+  <let name="oebps-paths" value="/c:wrap/cx:document[@name = 'wrap-file-uris']/c:file/@oebps-name"/>
+
+  <let name="source-dir-uri" value="/c:wrap/html:html[1]/html:head/html:meta[@name = 'source-dir-uri']/@content"/>
+
+  <let name="containers" value="('div', 'section', 'body', 'aside', 'nav', 'footer', 'main')"/>
+
+  <let name="epub-version" value="/c:wrap/opf:package/@version"/>
+
+  <pattern id="one-html-input">
+    <rule context="/c:wrap">
+      <assert test="count(html:html) = 1" id="unexpected-validation-input1" diagnostics="unexpected-validation-input1_de" role="error">
+       <span class="srcpath">BC_orphans</span>
+        There is more than one HTML file in the validation input. This is an indication that the splitting failed. You might
+      need developer support.</assert>
+    </rule>
+  </pattern>
+
+  <pattern id="epub-file-size" abstract="true">
+    <rule context="c:zipfile">
+      <let name="size-in-mb" value="number(@size) * 0.00000095367"/>
+      <!-- we need this variable for the diagnostics (the params don’t seem to be in scope there): -->
+      <let name="max" value="$result-max-mb"/>
+      <report test="$size-in-mb &gt; $max" id="epub-size" diagnostics="epub-size_de" role="$severity">
+        <span class="srcpath">BC_orphans</span>
+        EPUB file '<value-of select="@href"/>' is quite large: <value-of 
+          select="format-number($size-in-mb, '#0.0')"/>&#xa0;MB. Limit: <value-of 
+          select="format-number($max, '#0.0')"/>&#xa0;MB
+      </report>
+    </rule>
+  </pattern>
+  
+  <pattern id="epub-size-error" is-a="epub-file-size">
+    <param name="severity" value="error"/>
+    <param name="result-max-mb" 
+      value="/c:wrap/epub-config/checks/check[@param = 'result-max-mb']
+                                             [@severity = 'error' or not(@severity)]/@value"/>
+  </pattern>
+  
+  <pattern id="epub-size-warning" is-a="epub-file-size">
+    <param name="severity" value="warning"/>
+    <param name="result-max-mb" 
+      value="/c:wrap/epub-config/checks/check[@param = 'result-max-mb'][@severity = 'warning']/@value"/>
+  </pattern>
+  
+  <pattern id="broken-raster-images">
+    <rule context="opf:item[matches(@media-type, '^image/(jpeg|png)')][c:error]">
+      <let name="element-in-split" 
+        value="/c:wrap/cx:document[@name = 'wrap-chunks']//html:img[matches(@src, concat('(^|/)', current()/@href, '$'))]"/>
+      <let name="srcpath" value="for $s in $element-in-split/ancestor-or-self::*[@srcpath][1]/@srcpath return tokenize($s, '\s+')"/>
+      <report test="true()" id="read-image" diagnostics="read-image_de" role="error">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        Image file '<value-of select="@href"/>' broken or unavailable:
+        <value-of select="c:error"/>
+      </report>
+    </rule>
+    <rule context="opf:item[matches(@href, '\.(jpe?g|png)$', 'i')][not(c:error)]">
+      <let name="element-in-filelist" 
+        value="/c:wrap/cx:document[@name = 'wrap-file-uris']/c:file[@name = current()/@href]"/>
+      <let name="element-in-split" 
+        value="/c:wrap/cx:document[@name = 'wrap-chunks']//html:img[matches(@src, concat('(^|/)', current()/@href, '$'))]"/>
+      <let name="srcpath" value="for $s in $element-in-split/ancestor-or-self::*[@srcpath][1]/@srcpath return tokenize($s, '\s+')"/>
+      <assert test="exists($element-in-filelist/c:results)" id="image-analysis-failed" diagnostics="image-analysis-failed_de" role="error">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        Image file '<value-of select="@href"/>' broken or unavailable.
+      </assert>
+    </rule>
+  </pattern>
+
+  <pattern id="not-found-raster-images">
+    <rule context="opf:item[matches(@href, '\.(png|jpe?g)$', 'i')]">
+      <let name="regex" value="concat('(^|/)', current()/@href, '$')"/>
+      <let name="element-in-split" 
+        value="/c:wrap/cx:document[@name = 'wrap-chunks']//(
+                                                               html:img[matches(@src, $regex)] 
+                                                             | svg:image[matches(@xlink:href, $regex)]
+                                                            )"/>
+      <let name="srcpath" value="for $s in $element-in-split/ancestor-or-self::*[@srcpath][1]/@srcpath return tokenize($s, '\s+')"/>
+      <report test="@media-type = 'text/plain'" id="dummy-image" diagnostics="dummy-image_de" role="error">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        A 1-byte text replacement has been inserted since <value-of select="@href"/> could not be found at its source path. 
+        Missing images (or text formats instead of images) may affect downstream processes such as kindlegen.
+      </report>
+    </rule>
+  </pattern>
+
+  <pattern id="calc">
+    <rule abstract="true" id="file-calc">
+      <let name="regex" value="concat('(^|/)', current()/@href, '$')"/>
+      <let name="element-in-split" 
+        value="/c:wrap/cx:document[@name = 'wrap-chunks']//(
+                                                               html:img[matches(@src, $regex)] 
+                                                             | svg:image[matches(@xlink:href, $regex)]
+                                                            )"/>
+      <let name="srcpath" value="for $s in $element-in-split/ancestor-or-self::*[@srcpath][1]/@srcpath return tokenize($s, '\s+')"/>
+      <let name="element-in-filelist" 
+        value="/c:wrap/cx:document[@name = 'wrap-file-uris']/c:file[@name = current()/@href]"/>
+      <let name="size-in-mb" value="number($element-in-filelist[1]/@size) * 0.00000095367431640625"/>
+      <let name="width" value="number(
+                                 (for $dim in $element-in-filelist/c:results/c:result[@name = 'width']/@value 
+                                 return replace($dim, 'px$', '')[. castable as xs:double])[1]
+                               )"/>
+      <let name="height" value="number(
+                                 (for $dim in $element-in-filelist/c:results/c:result[@name = 'height']/@value 
+                                 return replace($dim, 'px$', '')[. castable as xs:double])[1]
+                               )"/>
+      <let name="dpi" value="number(
+                               (
+                                 for $dim in $element-in-filelist/c:results/c:result[@name = 'density']/@value 
+                                 return replace($dim, 'dpi$', '')[. castable as xs:double],
+                                 0
+                               )[1]  
+                             )"/>
+      <let name="size-in-mpx" value="$width * $height * 0.000001"/>
+      <let name="colorspace" value="$element-in-filelist/c:results/c:result[@name = 'colorspace']/@value"/>
+    </rule>
+  </pattern>
+  <pattern id="html-file-size" abstract="true">
+    <rule context="opf:item[@media-type = 'application/xhtml+xml']">
+      <extends rule="file-calc"/>
+      <let name="size-in-kb" value="$size-in-mb * 1024"/>
+      <let name="max" value="$html-max-kb"/>
+      <let name="element-in-split"
+        value="/c:wrap/cx:document[@name = 'wrap-chunks']/html:html[ends-with(@xml:base, current()/@href)]/html:body"/>
+      <let name="srcpath" value="for $s in ($element-in-split/descendant::*[@srcpath])[1]/@srcpath return tokenize($s, '\s+')"/>
+      <report test="$size-in-kb &gt; $html-max-kb" id="large-html-file" 
+        diagnostics="large-html-file_de" role="$severity">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        HTML file '<value-of select="@href"/>' is too large for some reading systems: <value-of 
+          select="format-number($size-in-kb, '#0')"/>&#xa0;kB
+      </report>
+    </rule>
+  </pattern>
+  
+  <!--
+    Including a file twice is totally acceptable. We should occasionally make sure that the file list will be 
+    made unique.
+    <pattern id="ambiguous_images">
+    <rule context="opf:item">
+      <extends rule="file-calc"/>
+      <report test="count($element-in-filelist) gt 1" role="error">More than one opf item appears in the list of 
+      processed files. <xsl:sequence select="$element-in-filelist"/></report>
+    </rule>
+  </pattern>-->
+  
+  <pattern id="html-file-size-warnings" is-a="html-file-size">
+    <param name="severity" value="warning"/>
+    <param name="html-max-kb" 
+      value="/c:wrap/epub-config/checks/check[@param = 'html-max-kb'][@severity = 'warning']/@value"/>
+  </pattern>
+  
+  <pattern id="html-file-size-errors" is-a="html-file-size">
+    <param name="severity" value="error"/>
+    <param name="html-max-kb" 
+      value="/c:wrap/epub-config/checks/check[@param = 'html-max-kb']
+                                              [@severity = 'error' or empty(@severity)]/@value"/>
+  </pattern>
+
+  <pattern id="cover-image" abstract="true">
+    <rule context="opf:item[matches(@media-type, '^image/(jpeg|png)')]
+                           [@id = ../parent::opf:package[@version = '2.0']/opf:metadata/opf:meta[@name = 'cover']/@content
+                            or (ancestor::opf:package/@version = '3.0' and tokenize(@properties, '\s+') = 'cover-image')]">
+      <extends rule="file-calc"/>
+      <!-- we need these variables for the diagnostics (the params don’t seem to be in scope there): -->
+      <let name="min" value="$cover-min-width-px"/>
+      <let name="max" value="$cover-max-width-px"/>
+      <report test="$width &lt; $min" id="cover-too-narrow" diagnostics="cover-too-narrow_de" role="$severity">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        The cover '<value-of select="@href"/>' is too narrow: <value-of 
+          select="format-number($width, '#0')"/>&#xa0;px. Minimum is <value-of select="$min"/>.
+      </report>
+      <report test="$width &gt; $max" id="cover-too-wide" diagnostics="cover-too-wide_de" role="$severity">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        The cover '<value-of select="@href"/>' is too wide: <value-of 
+          select="format-number($width, '#0')"/>&#xa0;px. Maximum is <value-of select="$max"/>.
+      </report>
+    </rule>
+  </pattern>
+  
+  <pattern id="cover-image-warnings" is-a="cover-image">
+    <param name="severity" value="warning"/>
+    <param name="cover-max-width-px" 
+      value="/c:wrap/epub-config/checks/check[@param = 'cover-max-width-px'][@severity = 'warning']/@value"/>
+    <param name="cover-min-width-px" 
+      value="/c:wrap/epub-config/checks/check[@param = 'cover-min-width-px'][@severity = 'warning']/@value"/>
+  </pattern>
+
+  <pattern id="cover-image-errors" is-a="cover-image">
+    <param name="severity" value="error"/>
+    <param name="cover-max-width-px" 
+      value="/c:wrap/epub-config/checks/check[@param = 'cover-max-width-px']
+                                             [@severity = 'error' or empty(@severity)]/@value"/>
+    <param name="cover-min-width-px" 
+      value="/c:wrap/epub-config/checks/check[@param = 'cover-min-width-px']
+                                              [@severity = 'error' or empty(@severity)]/@value"/>
+  </pattern>
+  
+  <pattern id="pixel-size" abstract="true">
+    <rule context="opf:item[matches(@media-type, '^image/(jpeg|png|gif)')]
+                           [/c:wrap/cx:document[@name = 'wrap-file-uris']/c:file[@name = current()/@href]/c:results]">
+      <extends rule="file-calc"/>
+      <!-- we need these variables for the diagnostics (the params don’t seem to be in scope there): -->
+      <let name="max" value="$image-max-mpx"/>
+      <let name="max-mb" value="$image-max-mb"/>
+      <report test="$size-in-mpx &gt; $image-max-mpx" id="large-image" diagnostics="large-image_de" role="$severity">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        Image '<value-of select="@href"/>' is quite large: <value-of select="$width"/>×<value-of select="$height"/> 
+        (<value-of select="format-number($size-in-mpx, '#0.00')"/>&#xa0;Mpx). The threshold is <value-of 
+          select="$max"/>. <xsl:if 
+          test="$size-in-mb &lt;= $max-mb"> The file size (<xsl:value-of 
+            select="format-number($size-in-mb, '#0.00')"/> MB) is still ok though. </xsl:if>
+      </report>
+    </rule>
+  </pattern>
+  
+  <pattern id="pixel-size-warnings" is-a="pixel-size">
+    <param name="severity" value="warning"/>
+    <param name="image-max-mpx" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-max-mpx'][@severity = 'warning']/@value"/>
+    <param name="image-max-mb" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-max-mb'][@severity = 'warning']/@value"/>
+  </pattern>
+  
+  <pattern id="pixel-size-errors" is-a="pixel-size">
+    <param name="severity" value="error"/>
+    <param name="image-max-mpx" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-max-mpx']
+                                             [@severity = 'error' or empty(@severity)]/@value"/>
+    <param name="image-max-mb" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-max-mb']
+                                              [@severity = 'error' or empty(@severity)]/@value"/>
+  </pattern>
+
+  <pattern id="file-size" abstract="true">
+    <rule context="opf:item[matches(@media-type, '^image/(jpeg|png|gif)')]">
+      <extends rule="file-calc"/>
+      <!-- we need this variable for the diagnostics (the params don’t seem to be in scope there): -->
+      <let name="max" value="$image-max-mb"/>
+      <report test="$size-in-mb &gt; $max" id="large-image-file" 
+        diagnostics="large-image-file_de" role="$severity">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        Image file '<value-of select="@href"/>' is quite large: <value-of select="format-number($size-in-mb, '#0.00')"/>&#xa0;MB
+      </report>
+    </rule>
+  </pattern>
+
+  <pattern id="file-size-warnings" is-a="file-size">
+    <param name="severity" value="warning"/>
+    <param name="image-max-mb" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-max-mb'][@severity = 'warning']/@value"/>
+  </pattern>
+  
+  <pattern id="file-size-errors" is-a="file-size">
+    <param name="severity" value="error"/>
+    <param name="image-max-mb" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-max-mb']
+                                             [@severity = 'error' or empty(@severity)]/@value"/>
+  </pattern>
+
+  <pattern id="image-formats" abstract="true">
+    <rule context="opf:item[matches(@media-type, '^image/')]">
+      <extends rule="file-calc"/>
+      <let name="allowed" value="$image-type-regex"/>
+      <assert test="matches(@media-type, $allowed)" id="image-type" diagnostics="image-type_de" role="$severity">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        The media type of image '<value-of select="@href"/>', '<value-of select="@media-type"/>', does not comply with the regex '<value-of 
+          select="$allowed"/>'.
+      </assert>
+    </rule>
+  </pattern>
+
+  <pattern id="image-format-warnings" is-a="image-formats">
+    <param name="severity" value="warning"/>
+    <param name="image-type-regex" 
+      value="(/c:wrap/epub-config/checks/check[@param = 'image-type-regex'][@severity = 'warning']/@value, '^image/')[1]"/>
+  </pattern>
+
+  <pattern id="image-format-errors" is-a="image-formats">
+    <param name="severity" value="error"/>
+    <param name="image-type-regex" 
+      value="(/c:wrap/epub-config/checks/check[@param = 'image-type-regex']
+                                              [@severity = 'error' or empty(@severity)]/@value, '^image/')[1]"/>
+  </pattern>
+
+
+  <pattern id="cmyk">
+    <rule context="opf:item[@media-type = 'image/jpeg']">
+      <extends rule="file-calc"/>      
+      <report test="$colorspace = 'CMYK'" id="cmyk-image" diagnostics="cmyk-image_de" role="warning">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        Image '<value-of select="@href"/>' is CMYK. This is not supported by every reading system.
+      </report>
+    </rule>
+  </pattern>
+
+  <pattern id="dpi" abstract="true">
+    <rule context="opf:item[matches(@media-type, '^image/(jpeg|png)')]">
+      <extends rule="file-calc"/>
+      <!-- we need these variables for the diagnostics (the params don’t seem to be in scope there): -->
+      <let name="min" value="$image-min-dpi"/>
+      <let name="max" value="$image-max-dpi"/>
+      <report test="$dpi[not(. = 0)] &gt; $max" id="max-dpi" diagnostics="max-dpi_de" role="$severity">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        Image '<value-of select="@href"/>' has a dpi value of <value-of select="$dpi"/>. 
+        It should be less than or equal <value-of select="$max"/>.
+      </report>
+      <report test="$dpi[not(. = 0)] &lt; $min" id="min-dpi" diagnostics="min-dpi_de" role="$severity">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        Image '<value-of select="@href"/>' has a dpi value of <value-of select="$dpi"/>. 
+        It should be greater than or equal <value-of select="$min"/>.
+      </report>
+    </rule>
+  </pattern>
+  
+  <pattern id="dpi-warnings" is-a="dpi">
+    <param name="severity" value="warning"/>
+    <param name="image-min-dpi" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-min-dpi'][@severity = 'warning']/@value"/>
+    <param name="image-max-dpi" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-max-dpi'][@severity = 'warning']/@value"/>
+  </pattern>
+  
+  <pattern id="dpi-errors" is-a="dpi">
+    <param name="severity" value="error"/>
+    <param name="image-min-dpi" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-min-dpi']
+                                             [@severity = 'error' or not(@severity)]/@value"/>
+    <param name="image-max-dpi" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-max-dpi']
+                                             [@severity = 'error' or not(@severity)]/@value"/>
+  </pattern>
+
+  <pattern id="links">
+    <!-- Both assertions are also checked against in epubcheck. These checks also locate the error in the source HTML. -->
+    <rule context="/c:wrap/cx:document[@name = 'wrap-chunks']
+                     /html:html
+                       //html:a[@href][not(matches(@href, '^(#|https?:|mailto:)'))]">
+      <let name="srcpath" value="tokenize(ancestor-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
+      <let name="base-uri" value="ancestor::html:html/@xml:base"/>
+      <let name="resolved" value="tr:uri-composer($base-uri, @href)"/>
+      <let name="normalized" value="replace($resolved, '^.+/(OEBPS/[^?#%]+).*$', '$1')"/>
+      <let name="fragment-id" value="substring-after($resolved, '#')[normalize-space()]"/>
+      <assert test="$normalized = $oebps-paths" role="error" id="link-to-file" diagnostics="link-to-file_de">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        Links in the input document must point to an internal anchor, to another file in the archive or to an external site.
+        This link points to: '<value-of select="$normalized"/>'. resolved: '<value-of select="$resolved"/>'. href: '<value-of select="@href"/>'. base-uri: '<value-of select="$base-uri"/>'
+      </assert>
+      <assert test="if ($fragment-id) 
+                    then exists(/c:wrap/cx:document[@name = 'wrap-chunks']/html:html[ends-with(@xml:base, $normalized)]//@id[. = $fragment-id])
+                    else true()"
+        id="link-to-id" role="warning" diagnostics="link-to-id_de">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        The ID '<value-of select="$fragment-id"/>' in file '<value-of select="$normalized"/>' does not exist.
+      </assert>
+    </rule>
+    <rule context="/c:wrap/cx:document[@name = 'wrap-chunks']
+                     /html:html[@xml:base = /c:wrap/cx:document[@name = 'wrap-file-uris']/c:file/@target-filename]
+                       //html:a[not(@href)][normalize-space(.)]">
+      <let name="srcpath" value="tokenize(ancestor-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
+      <let name="orig-href" value="/c:wrap/html:html//html:a[@srcpath = $srcpath]/@href"/>
+      <report test="exists($orig-href)" role="warning" id="dissolved-link" diagnostics="dissolved-link_de">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        The link’s @href attribute '<value-of select="$orig-href"/>' could not be resolved and it was discarded during conversion.
+      </report>
+    </rule>
+  </pattern>
+
+  <pattern id="contains-a">
+    <rule context="/c:wrap/cx:document[@name = 'wrap-chunks']
+                     /html:html
+                       //html:a">
+      <report test="descendant::html:a" role="error" id="contains-a-element" diagnostics="contains-a-element_de">
+        <span class="srcpath"><xsl:value-of select="for $s in tokenize(@srcpath, '\s+') return concat($source-dir-uri, $s)"/></span>
+        This &lt;a&gt; element (<value-of select="string-join(for $a in (@* except @srcpath) return concat($a/name(), '=', $a), ', ')"/>) contains at least one other &lt;a&gt; element.
+      </report>
+    </rule>
+  </pattern>
+
+  <pattern id="nested-a">
+    <rule context="/c:wrap/cx:document[@name = 'wrap-chunks']
+                     /html:html
+                       //html:a">
+      <report test="ancestor::html:a" role="error" id="nested-a-element" diagnostics="nested-a-element_de">
+        <span class="srcpath"><xsl:value-of select="for $s in tokenize(@srcpath, '\s+') return concat($source-dir-uri, $s)"/></span>
+        This &lt;a&gt; element  (<value-of select="string-join(for $a in (@* except @srcpath) return concat($a/name(), '=', $a), ', ')"/>) is nested within another &lt;a&gt; element.
+      </report>
+    </rule>
+  </pattern>
+  
+  <pattern id="unwrapped-text">
+    <rule context="/c:wrap/html:html[1]//*[local-name() = $containers]">
+      <let name="atts" value="@* except @srcpath"/>
+      <let name="atts-string" value="if ($atts) 
+        then concat('(', string-join(for $a in $atts return concat($a/name(), '=', $a), ', '), ') ')
+        else ''"/>
+      <let name="occurrences" value="string-join(for $t in text()[normalize-space()] return concat('''', $t, ''''), ', ')"/>
+      <report test="text()[normalize-space()]" role="error" id="bare-text" diagnostics="bare-text_de">
+        <span class="srcpath"><xsl:value-of select="for $s in tokenize(descendant-or-self::*[@srcpath][1]/@srcpath, '\s+') 
+                                                    return concat($source-dir-uri, $s)"/></span>
+        The container element '<name/>' <xsl:value-of select="$atts-string"/> contains untagged text: <value-of select="$occurrences"/>.
+        Although this may be permitted by the HTML schema, it should be avoided. We report it as an error since it is
+        an indication of mistakes in applying correct document styles or flaws in the conversion process.
+      </report>
+    </rule>
+  </pattern>
+  
+  <pattern id="cover">
+    <rule context="/c:wrap/cx:document[@name = 'wrap-chunks']/html:html//*[@id = 'epub-cover-image-container']">
+      <let name="srcpath" value="tokenize(ancestor-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
+      <report test="exists(html:p[@class = 'error'])" role="error" id="cover-retrieval" diagnostics="cover-retrieval_de">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        Apparently there was a problem attaching the cover: <xsl:copy-of select="html:p[@class = 'error']/node()"/>
+      </report>
+    </rule>
+  </pattern>
+
+  <pattern id="languages">
+    <rule context="/c:wrap/html:html[1][@lang | @xml:lang] | /c:wrap/html:html[1]//*[@lang | @xml:lang]">
+      <let name="srcpath" value="if (self::html:html) 
+                                 then 'BC_orphans' 
+                                 else 
+                                    for $s in (tokenize(@srcpath, '\s+')) 
+                                    return concat($source-dir-uri, $s)"/>
+      <report test="not(@lang)" role="warning" id="xml-lang">
+        <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
+        You should also set @lang in addition to @xml:lang
+      </report>
+      <report test="@lang != @xml:lang" role="warning" id="lang-not-equal-xml-lang">
+        <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
+         @lang '<value-of select="@lang"/>' and @xml:lang '<value-of select="@xml:lang"/>' differ
+      </report>
+      <report test="true()" role="info" id="lang">
+        <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
+        Language: <value-of select="distinct-values(@xml:lang | @lang)"/>
+      </report>
+    </rule>
+  </pattern>
+
+  <pattern id="splits">
+    <rule context="/c:wrap/html:body//html:tr-conditional-split[not(@tr-dont-split-at-genid)]">
+      <let name="doc-elt" value="/c:wrap/cx:document[@name = 'wrap-chunks']//*[@id = current()/@tr-generated-id]"/>
+      <let name="srcpath" value="$doc-elt/descendant-or-self::*[@srcpath][1]/@srcpath"/>
+      <report test="true()" role="info" id="conditional_split" diagnostics="conditional_split_de">
+        <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
+        Conditional split before '<value-of select="substring(normalize-space($doc-elt), 1, 30)"/>…'.
+      </report>
+    </rule>
+  </pattern>
+  
+  <pattern id="empty-chunks">
+    <rule context="/c:wrap/cx:document[@name = 'wrap-chunks']/html:html/html:body[not(@epub:type = 'cover')]">
+      <let name="srcpath" value="tokenize(descendant-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
+      <let name="elements" value="string-join(for $n in .//* 
+                                              return concat('&lt;', name($n), ' ',
+                                                             string-join(
+                                                               for $a in $n/@*[not(name() = 'srcpath')] return concat(name($a), '=', $a),
+                                                               ' '
+                                                             ),
+                                                             '&gt;'
+                                                           ), 
+                                              ', ')"/>
+      <assert test="normalize-space(.)" role="warning" id="no-text-in-chunk" diagnostics="no-text-in-chunk_de">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        Empty split chunk. <xsl:value-of select="if (*) then $elements else 'Doesn’t contain any tagging at all.'"/>
+      </assert>
+    </rule>
+  </pattern>
+
+  <pattern id="http-resources">
+    <rule context="/c:wrap/html:html//*[@error-status]">
+      <let name="srcpath" value="tokenize(ancestor-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
+      <report test="true()" role="warning" id="resource-unavailable" diagnostics="resource-unavailable_de">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        Resource unavailable: <a xmlns="http://www.w3.org/1999/xhtml" href="{@checked-href}"><xsl:value-of select="@checked-href"/></a>. 
+        Status: <value-of select="@error-status"/> 
+      </report>
+    </rule>
+  </pattern>
+
+  <pattern id="metadata">
+    <rule context="opf:package">
+      <assert test="exists(@version) and @version = ('2.0', '3.0')" role="error" id="version" diagnostics="version_de">
+        <span class="srcpath">BC_orphans</span>content.opf: /package/@version must be 2.0 or 3.0. Found: <value-of
+          select="$epub-version"/>
+      </assert>
+      <assert test="if ($epub-version = '2.0') 
+                    then exists(opf:guide)
+                    else true()" id="guide" diagnostics="guide_de" role="warning">
+        <span class="srcpath">BC_orphans</span>content.opf should contain a guide
+      </assert>
+    </rule>
+    <rule context="opf:package/opf:metadata">
+      <let name="mandatory-metadata" value="('dc:title', 'dc:identifier', 'dc:language')"/>
+      <let name="optional-dc-metadata" value="('dc:contributor', 'dc:coverage', 'dc:creator', 'dc:date', 'dc:description', 
+        'dc:format', 'dc:publisher', 'dc:relation', 'dc:rights', 'dc:source', 'dc:subject', 'dc:type')"/>
+      <let name="missing" value="string-join($mandatory-metadata[for $me in . return not(exists(current()/*[name() = $me]))], ', ')"/>
+      <assert test="every $e in $mandatory-metadata satisfies (exists(*[name() = $e]))" id="mandatory-metadata" 
+        diagnostics="mandatory-metadata_de" role="error">
+        <span class="srcpath">BC_orphans</span> content.opf: The following metadata elements are missing: <value-of 
+          select="$missing"/>.</assert>
+      <!-- Will be checked by epubcheck schema validation <report test="dc:*[not(name() = ($mandatory-metadata, $optional-dc-metadata))]" id="unrecognized-dc-metadata" role="error">
+        <span class="srcpath">BC_orphans</span> content.opf: The following metadata elements are unexpected: <value-of 
+          select="string-join(for $n in dc:*[not(name() = ($mandatory-metadata, $optional-dc-metadata))]/name() 
+                              return concat('''', $n, ''''), ', ')"/>.
+      </report>-->
+      <assert test="exists(dc:date[@opf:event = 'modification'])" id="modification-date-missing"
+         diagnostics="modification-date-missing_de" role="warning">
+        <span class="srcpath">BC_orphans</span> content.opf: There should be an opf:metadata/dc:date[@opf:event = 'modification'].</assert>
+      <assert test="if ($epub-version = '2.0') 
+                    then exists(opf:meta[@name = 'cover'])
+                    else true()" role="warning" id="meta-cover" diagnostics="meta-cover_de">
+        <span class="srcpath">BC_orphans</span> content.opf: For best reading system support, there must be an 
+        element opf:metadata/opf:meta[@name = 'cover'] in EPUB2 publications.
+      </assert>
+      <!-- Is this really needed? <assert test="if ($epub-version = '3.0') 
+                    then exists(opf:meta[@name = 'cover'])
+                    else true()" role="warning" id="meta-cover-3" diagnostics="meta-cover-3_de">
+        <span class="srcpath">BC_orphans</span> content.opf: For best reading system support, there should be an 
+        element opf:metadata/opf:meta[@name = 'cover'].
+      </assert>-->
+    </rule>
+
+    <rule context="opf:package/opf:metadata/opf:meta[@name = 'cover']">
+      <let name="item" value="../../opf:manifest/opf:item[@id = current()/@content]"/>
+      <let name="regex" value="concat('(^|/)', $item/@href, '$')"/>
+      <let name="element-in-split" 
+        value="/c:wrap/cx:document[@name = 'wrap-chunks']//(
+                                                               html:img[matches(@src, $regex)] 
+                                                             | svg:image[matches(@xlink:href, $regex)]
+                                                            )"/>
+      <let name="srcpath" value="for $s in $element-in-split/ancestor-or-self::*[@srcpath][1]/@srcpath return tokenize($s, '\s+')"/>
+      <assert test="exists($item)" role="error" 
+        id="meta-cover-points-nowhere-in-manifest" diagnostics="meta-cover-points-nowhere-in-manifest_de">
+        <span class="srcpath">BC_orphans</span> 
+          There is no manifest entry for opf:metadata/opf:meta[@name = 'cover']/@content = '<value-of select="@content"/>'.
+      </assert>
+      <assert test="if (exists($item)) then exists($element-in-split) else true()" role="error" 
+        id="meta-cover-points-nowhere-in-content" diagnostics="meta-cover-points-nowhere-in-content_de">
+        <span class="srcpath">BC_orphans</span> Image file
+          '<value-of select="$item/@href"/>' is marked as cover in opf:metadata/opf:meta[@name = 'cover']. However, this
+        file does not seem to be used in any of the HTML pages.
+      </assert>
+      <assert test="if (exists($element-in-split)) 
+                    then (
+                          exists($element-in-split/ancestor::*/@srcpath = 'epub-cover')
+                          or
+                          exists($element-in-split/ancestor::*/@id = 'epub-cover-image-container')
+                         )
+                    else true()" role="warning" id="meta-cover-points-to-non-cover">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span> Image file
+          '<value-of select="$item/@href"/>' should be included in an element that has (or once had) epub:type='cover'. It may be 
+      ok to refer to the same image twice, but it must also be referred to in the designated cover div.</assert>
+    </rule>
+  </pattern>
+  
+  <pattern id="metadata-title">
+    <rule context="opf:package/opf:metadata/dc:title">
+      <report test="matches(., '^[\p{Zs}\s]*$')" role="error" id="empty-title" diagnostics="empty-title_de">
+        <span class="srcpath">BC_orphans</span> content.opf: metadata/dc:title must not be empty. 
+      </report>
+    </rule>    
+  </pattern>
+
+  <pattern id="structural-vocabulary">
+    <!-- Retrieved on 2015-10-25 with 
+      string-join(for $d in distinct-values(doc('http://www.idpf.org/epub/vocab/structure/')//*:dl[@rev='rdfs:member']/*:dt) 
+                  return concat('''', normalize-space($d), ''''), ', ') 
+      then removed ' [draft]' and removed the items marked as ' [deprecated]' -->
+    <let name="epub-types" value="('cover', 'frontmatter', 'bodymatter', 'backmatter', 'volume', 'part', 'chapter', 
+      'subchapter', 'division', 'abstract', 'foreword', 'preface', 'prologue', 'introduction', 'preamble', 'conclusion', 
+      'epilogue', 'afterword', 'epigraph', 'toc', 'toc-brief', 'landmarks', 'loa', 'loi', 'lot', 'lov', 'appendix', 
+      'colophon', 'credits', 'keywords', 'index', 'index-headnotes', 'index-legend', 'index-group', 'index-entry-list', 
+      'index-entry', 'index-term', 'index-editor-note', 'index-locator', 'index-locator-list', 'index-locator-range', 
+      'index-xref-preferred', 'index-xref-related', 'index-term-category', 'index-term-categories', 'glossary', 'glossterm', 
+      'glossdef', 'bibliography', 'biblioentry', 'titlepage', 'halftitlepage', 'copyright-page', 'seriespage', 
+      'acknowledgments', 'imprint', 'imprimatur', 'contributors', 'other-credits', 'errata', 'dedication', 
+      'revision-history', 'case-study', 'help', 'notice', 'pullquote', 'halftitle', 'fulltitle', 'covertitle', 'title', 
+      'subtitle', 'label', 'ordinal', 'bridgehead', 'learning-objective', 'learning-objectives', 'learning-outcome', 
+      'learning-outcomes', 'learning-resource', 'learning-resources', 'learning-standard', 'learning-standards', 'answer', 
+      'answers', 'assessment', 'assessments', 'feedback', 'fill-in-the-blank-problem', 'general-problem', 'qna', 
+      'match-problem', 'multiple-choice-problem', 'practice', 'practices', 'question', 'true-false-problem', 'panel', 
+      'panel-group', 'balloon', 'text-area', 'sound-area', 'footnote', 'rearnote', 'footnotes', 'rearnotes', 'biblioref', 
+      'glossref', 'noteref', 'referrer', 'credit', 'keyword', 'topic-sentence', 'concluding-sentence', 'pagebreak', 
+      'page-list', 'table', 'table-row', 'table-cell', 'list', 'list-item', 'figure')"/>
+    <rule context="/c:wrap/html:html[1]/html:body//*[@epub:type]">
+      <let name="actual-types" value="tokenize(@epub:type, '\s+')[not(contains(., ':'))]"/>
+      <let name="namespaced-types" value="tokenize(@epub:type, '\s+')[contains(., ':')]"/>
+      <let name="wrong-type-string" 
+        value="string-join(for $t in $actual-types[not(. = $epub-types)] return concat('''', $t, ''''), ', ')"/>
+      <let name="namespaced-type-string" 
+        value="string-join(for $t in $namespaced-types return concat('''', $t, ''''), ', ')"/>
+      <let name="allowed-type-string" value="string-join(for $t in $epub-types return concat('''', $t, ''''), ', ')"/>
+      <assert test="every $t in $actual-types satisfies ($t = $epub-types)" 
+        id="epub-type" role="warning" diagnostics="epub-type_de">
+        <span class="srcpath"><xsl:value-of select="for $s in tokenize(@srcpath, '\s+') return concat($source-dir-uri, $s)"/></span>
+        epub:type <xsl:value-of select="$wrong-type-string"/> not allowed. Allowed values according to <a 
+          xmlns="http://www.w3.org/1999/xhtml" 
+          href="http://www.idpf.org/epub/vocab/structure/">EPUB 3 Structural Semantics Vocabulary</a> (as of 2015-08-26): 
+        <xsl:value-of select="$allowed-type-string"/>.
+      </assert>
+      <report test="exists($namespaced-types)" 
+        id="custom-epub-type" role="info" diagnostics="custom-epub-type_de">
+        <span class="srcpath"><xsl:value-of select="for $s in tokenize(@srcpath, '\s+') return concat($source-dir-uri, $s)"/></span>
+        Namespaced (custom) epub:type: <xsl:value-of select="$namespaced-type-string"/>.
+      </report>
+    </rule>
+  </pattern>
+
+  <diagnostics>
+    <diagnostic id="custom-epub-type_de" xml:lang="de">epub:type in Namespace (Nicht-Standard-Wert): <xsl:value-of 
+      select="$namespaced-type-string"/>.</diagnostic>
+    <diagnostic id="version_de" xml:lang="de">content.opf: /package/@version muss 2.0 oder 3.0 sein. Gefunden: <value-of
+          select="$epub-version"/></diagnostic>
+    <diagnostic id="guide_de" xml:lang="de">content.opf sollte ein guide-Element enthalten.</diagnostic>
+    <diagnostic id="epub-type_de" xml:lang="de">epub:type <xsl:value-of select="$wrong-type-string"/> ist nicht zulässig. 
+      Zulässige Werte gemäß <a 
+          xmlns="http://www.w3.org/1999/xhtml" 
+          href="http://www.idpf.org/epub/vocab/structure/">EPUB 3 Structural Semantics Vocabulary</a> (Stand 2015-08-26): 
+      <xsl:value-of select="$allowed-type-string"/>.</diagnostic>
+    <diagnostic id="meta-cover_de" xml:lang="de">content.opf: Für optimale Lesesystem-Unterstützung muss ein
+        Element opf:metadata/opf:meta[@name = 'cover'] in EPUB2-Publikationen angegeben werden.</diagnostic>
+    <diagnostic id="mandatory-metadata_de" xml:lang="de">content.opf: Die folgenden erforderlichen Metadaten-Elemente fehlen: 
+      <value-of select="$missing"/>.</diagnostic>
+    <diagnostic id="modification-date-missing_de" xml:lang="de">content.opf: Das Datum der letzten Änderung sollte mittels 
+      opf:metadata/dc:date[@opf:event = 'modification'] angegeben werden.</diagnostic>
+    <diagnostic id="meta-cover-points-nowhere-in-content_de" xml:lang="de">Bilddatei
+          '<value-of select="$item/@href"/>' ist in opf:metadata/opf:meta[@name = 'cover'] als Cover ausgewiesen. Allerdings
+      scheint die Bilddatei in keiner der HTML-Dateien vorzukommen.</diagnostic>
+    <diagnostic id="meta-cover-points-nowhere-in-manifest_de" xml:lang="de">Es gibt keinen Manifest-Eintrag für 
+      opf:metadata/opf:meta[@name = 'cover']/@content = '<value-of select="@content"/>'.</diagnostic>
+    <diagnostic id="empty-title_de" xml:lang="de">content.opf: metadata/dc:title darf nicht leer sein</diagnostic>
+    <diagnostic id="conditional_split_de" xml:lang="de">Bedingter Split vor '<value-of select="substring(normalize-space($doc-elt), 1, 30)"/>…'.</diagnostic>
+    <diagnostic id="no-text-in-chunk_de" xml:lang="de">Split-Datei enthält keinen Text. <xsl:value-of 
+      select="if (*) then $elements else 'Enthält nich einmal Tags.'"/></diagnostic>
+    <diagnostic id="resource-unavailable_de" xml:lang="de">Ressource nicht verfügbar: <a xmlns="http://www.w3.org/1999/xhtml" 
+      href="{@checked-href}"><xsl:value-of select="@checked-href"/></a>. 
+      Status: <value-of select="@error-status"/></diagnostic>
+    <diagnostic id="bare-text_de" xml:lang="de">Das Container-Element '<value-of select="name()"/>' <value-of select="$atts-string"/> enthält
+    ungetaggten Text: <value-of select="$occurrences"/>. Dies kann zwar vom HTML-Schema gestattet sein, sollte aber vermieden
+    werden. Es wird hier als Fehler gemeldet, weil es ein typisches Symptom von Auszeichnungs- und/oder Konvertierungsfehlern ist.</diagnostic>
+    <diagnostic id="unexpected-validation-input1_de" xml:lang="de">Es existieren mehr als ein HTML-Element im Validierungsinput. Das ist ein Anzeichen für einen Fehlgeschlagenen Split-Prozess.
+      need developer support.</diagnostic>
+    <diagnostic id="nested-a-element_de" xml:lang="de">Dieses &lt;a&gt;-Element (<value-of 
+      select="string-join(for $a in (@* except @srcpath) return concat($a/name(), '=', $a), ', ')"/>) ist in einem anderen &lt;a&gt;-Element enthalten.</diagnostic>
+    <diagnostic id="contains-a-element_de" xml:lang="de">Dieses &lt;a&gt;-Element (<value-of 
+      select="string-join(for $a in (@* except @srcpath) return concat($a/name(), '=', $a), ', ')"/>) enthält mindestens ein anderes &lt;a&gt;-Element.</diagnostic>
+    <diagnostic id="image-type_de" xml:lang="de">Der Medientyp von Bild '<value-of select="@href"/>', '<value-of 
+      select="@media-type"/>', entspricht nicht dem regulären Ausdruck '<value-of select="$allowed"/>'.</diagnostic>
+    <diagnostic id="dissolved-link_de" xml:lang="de">Der Link auf '<value-of select="$orig-href"/>' konnte nicht aufgelöst werden. Das @href-Attribut wurde entfernt.</diagnostic>
+    <diagnostic id="max-dpi_de" xml:lang="de">Das Bild '<value-of select="@href"/>' hat einen dpi-Wert von <value-of select="$dpi"/>.
+      Er sollte nicht größer sein als <value-of select="$max"/>.</diagnostic>
+    <diagnostic id="min-dpi_de" xml:lang="de">Das Bild '<value-of select="@href"/>' hat einen dpi-Wert von <value-of select="$dpi"/>.
+      Er sollte nicht kleiner sein als <value-of select="$min"/>.</diagnostic>
+    <diagnostic id="cover-too-narrow_de" xml:lang="de">Das Cover '<value-of select="@href"/>' ist zu schmal: <value-of 
+          select="format-number($width, '#0')"/>&#xa0;px. Der Mindestwert ist <value-of select="$min"/></diagnostic>
+    <diagnostic id="cover-too-wide_de" xml:lang="de">Das Cover '<value-of select="@href"/>' ist zu breit: <value-of 
+          select="format-number($width, '#0')"/>&#xa0;px. Der Höchstwert ist <value-of select="$max"/></diagnostic>
+    <diagnostic id="epub-size_de" xml:lang="de">EPUB-Datei '<value-of select="@href"/>' ist recht groß: <value-of 
+          select="format-number($size-in-mb, '#0.0')"/>&#xa0;MB. Grenze: <value-of 
+          select="format-number($max, '#0.0')"/>&#xa0;MB</diagnostic>
+    <diagnostic id="cover-retrieval_de" xml:lang="de">Es gab anscheinend ein Problem beim Anfügen des Coverbildes. Die entspr. Meldung (auf englisch): 
+      <xsl:copy-of select="html:p[@class = 'error']/node()"/></diagnostic>
+    <diagnostic id="cmyk-image_de" xml:lang="de">Bilddatei '<value-of select="@href"/>' ist CMYK. Nicht alle Lesegeräte stellen diese Bilder dar.</diagnostic>
+    <diagnostic id="large-html-file_de" xml:lang="de">HTML-Datei '<value-of select="@href"/>' ist zu groß für manche Lesegeräte: <value-of 
+          select="format-number($size-in-kb, '#0')"/>&#xa0;kB. Grenze: <value-of 
+          select="format-number($max, '#0')"/>&#xa0;kB</diagnostic>
+    <diagnostic id="large-image-file_de" xml:lang="de">Bilddatei '<value-of select="@href"/>' ist recht groß: <value-of 
+          select="format-number($size-in-mb, '#0.00')"/>&#xa0;MB</diagnostic>
+    <diagnostic id="large-image_de" xml:lang="de">Bild '<value-of select="@href"/>' ist recht groß: <value-of 
+      select="$width"/>×<value-of select="$height"/> (<value-of 
+          select="format-number($size-in-mpx, '#0.00')"/>&#xa0;Mpx). <xsl:if test="$size-in-mb &lt;= $max-mb">
+            Die Dateigröße (<xsl:value-of select="format-number($size-in-mb, '#0.00')"/> MB) ist jedoch ok. </xsl:if></diagnostic>
+    <diagnostic id="read-image_de" xml:lang="de">Bilddatei '<value-of select="@href"/>' nicht lesbar:
+        <value-of select="c:error"/></diagnostic>
+    <diagnostic id="image-analysis-failed_de" xml:lang="de">Bilddatei '<value-of select="@href"/>' nicht lesbar.</diagnostic>
+    <diagnostic id="dummy-image_de" xml:lang="de">Eine 1 Byte große Ersatz-Textdatei wurde anstelle von <value-of 
+      select="@href"/> eingezogen, weil die Quelldatei nicht gefunden wurde.
+    Fehlende Bilder (oder Textdateien anstelle der Bilder) können Folgeprozesse wie kindlegen negativ beeinflussen.</diagnostic>
+    <diagnostic id="link-to-file_de" xml:lang="de">Links müssen auf ein Ziel innerhalb der HTML-Quelldatei, auf eine andere
+      Datei innerhalb des EPUBs oder auf eine externe Seite verweisen. Dieser zeigt auf: '<value-of select="$normalized"/>'.</diagnostic>
+    <diagnostic id="link-to-id_de" xml:lang="de">Die ID '<value-of select="$fragment-id"/>' in der Datei '<value-of 
+      select="$normalized"/>' existiert nicht.</diagnostic>
+  </diagnostics>
+  
+</schema>

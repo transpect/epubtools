@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:declare-step xmlns:p="http://www.w3.org/ns/xproc" 
+  xmlns:c="http://www.w3.org/ns/xproc-step"
+  xmlns:cx="http://xmlcalabash.com/ns/extensions" 
+  xmlns:cxf="http://xmlcalabash.com/ns/extensions/fileutils"
+  xmlns:epub="http://transpect.io/epubtools" 
+  xmlns:tr="http://transpect.io"
+  version="1.0"
+  type="epub:convert"
+  name="epub-convert">
+
+  <p:documentation xmlns="http://www.w3.org/1999/xhtml"> 
+    <p>This step takes a HTML file as input and converts it to an epub file. You need a configuration for the HTML splitting and
+      the OPF metadata. Examples can be found in the sample directory. Invoke this step on the command line with:</p>
+    <pre><code>calabash/calabash.sh -i source=sample/b978-3-646-92351-3.xhtml 
+  -i conf=sample/hierarchy.xml -i meta=sample/epub-config.xml epub-convert.xpl </code></pre>
+    <p>Note that it’s advisable to make all file inputs absolute URIs, by using <code>cygpath</code> on Cygwin or <code>readlink -f</code>
+    on Unixy systems. For bash, this is, e.g., <code>source=file:/$(cygpath -ma sample/b978-3-646-92351-3.xhtml)</code> </p>
+  </p:documentation>
+
+  <p:serialization port="result" method="xml" encoding="UTF-8" indent="true" omit-xml-declaration="false"/>
+  <p:serialization port="chunks" method="xml" encoding="UTF-8" indent="true" omit-xml-declaration="false"/>
+  <p:serialization port="opf" method="xml" encoding="UTF-8" indent="true" omit-xml-declaration="false"/>
+  <p:serialization port="files" method="xml" encoding="UTF-8" indent="true" omit-xml-declaration="false"/>
+
+  <p:input port="source" primary="true">
+    <p:documentation>An XHTML file (Version number irrelevant; will be output as 1.1), either loaded from a physical location on
+      disk or, alternatively, with its base URI set in an /*/@xml:base attribute. It is important that the source document have
+      a base URI because the locations of all referenced files (CSS, images) will be determined relative to this base
+      URI.</p:documentation>
+  </p:input>
+  <p:input port="conf" primary="false" sequence="true">
+    <p:documentation>/hierarchy, config file for HTML splitter (see sample/hierarchy.xml).
+      May be included in meta port doc as /epub-config/hierarchy so
+      you don’t have to submit an extra document to this port</p:documentation>
+  </p:input>
+  <p:input port="meta" primary="false">
+    <p:documentation>/epub-config – an EPUB file’s metadata and other configuration settings (see sample/epub-config.xml for an example).
+    Please note that the name “meta” is misleading since the file contains more than just metadata.</p:documentation>
+  </p:input>
+  <p:input port="schematron">
+    <p:document href="schematron/epub.sch.xml"/>
+  </p:input>
+  <p:input port="custom-schematron" sequence="true">
+    <p:empty/>
+    <p:documentation>Additional Schematron checks. See debug/epubtools/input-for-schematron.xml for an example of 
+      the input format (after running this once with debug=yes). The Schematron files should have a /*/@tr:rule-family
+    attribute that identifies the schema’s rule set for the purpose of report generation.</p:documentation>
+  </p:input>
+  
+  <p:output port="result" primary="true">
+    <p:pipe port="result" step="output-file-name"/>
+  </p:output>
+  <p:output port="chunks" primary="false">
+    <p:pipe port="result" step="create-ops"/>
+  </p:output>
+  <p:output port="opf" primary="false">
+    <p:pipe port="result" step="create-opf"/>
+  </p:output>
+  <p:output port="files" primary="false">
+    <p:pipe port="files" step="zip-package"/>
+  </p:output>
+  <p:output port="report" primary="false" sequence="true">
+    <p:pipe port="report" step="create-ops"/>
+    <p:pipe port="report" step="schematron"/>
+  </p:output>
+  <p:output port="html">
+    <p:pipe port="html" step="create-ops"/>
+  </p:output>
+  <p:output port="baseuri" primary="false">
+		<p:pipe port="result" step="base-uri"/>
+	</p:output>
+
+  <p:option name="target" select="''" cx:type="xs:string"/>
+  <!-- EPUB2 | EPUB3 | KF8 // DEFAULT: EPUB2 -->
+  <p:option name="terminate-on-error" select="'yes'" cx:type="xs:string"/>
+  <p:option name="clean-target-dir" select="'no'" cx:type="xs:string">
+    <p:documentation>Whether to erase the target directory prior to splitting etc. Otherwise,
+    files from previous conversions might be included in the resulting zip file.</p:documentation>
+  </p:option>
+  <p:option name="debug" select="'no'" cx:type="xs:string"/>
+  <p:option name="use-svg" select="''" cx:type="xs:string" required="false"/>
+  <p:option name="debug-dir-uri" select="'debug'" cx:type="xs:string"/>
+  <p:option name="status-dir-uri" select="'status'" cx:type="xs:string"/>
+  
+  <!-- URIs are resolved by XML catalogs, which are located as default in xmlcatalog/catalog.xml -->
+  
+  <p:import href="../modules/create-ocf/xpl/create-ocf.xpl"/>
+  <p:import href="../modules/create-ops/xpl/create-ops.xpl"/>
+  <p:import href="../modules/create-opf/xpl/create-opf.xpl"/>
+  <p:import href="../modules/zip-package/xpl/zip-package.xpl"/>
+  
+  <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
+  <p:import href="http://transpect.io/calabash-extensions/transpect-lib.xpl"/>
+  <p:import href="http://transpect.io/xproc-util/simple-progress-msg/xpl/simple-progress-msg.xpl"/>
+	<p:import href="http://transpect.io/xproc-util/file-uri/xpl/file-uri.xpl"/>
+  <p:import href="http://transpect.io/schematron/xpl/oxy-schematron.xpl"/>
+  
+  <p:variable name="wrap-cover-in-svg" select="($use-svg[not(. = '')], /epub-config/cover/@svg, 'true')[1]">
+    <p:pipe port="meta" step="epub-convert"/>
+  </p:variable>
+  <p:variable name="target-format" select="($target[not(. = '')], /epub-config/@format, 'EPUB3')[1]">
+    <p:pipe port="meta" step="epub-convert"/>
+  </p:variable>
+  
+  <tr:simple-progress-msg name="start-msg" file="epub-convert-start.txt">
+    <p:input port="msgs">
+      <p:inline>
+        <c:messages>
+          <c:message xml:lang="en">Starting EPUB generation</c:message>
+          <c:message xml:lang="de">Beginne EPUB-Erzeugung</c:message>
+        </c:messages>
+      </p:inline>
+    </p:input>
+    <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
+  </tr:simple-progress-msg>
+	
+	<tr:file-uri name="base-uri">
+		<p:documentation>
+			The output files are stored relative to the base-uri of the document on the primary input port.
+		</p:documentation>
+		<p:with-option name="filename" select="(base-uri(/*), static-base-uri())[1]"/>
+	</tr:file-uri>	
+
+  <epub:create-ocf name="create-ocf">
+  	<p:with-option name="base-uri" select="/c:result/@local-href">
+    	<p:pipe port="result" step="base-uri"/>
+    </p:with-option>
+    <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
+    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"><p:empty/></p:with-option>
+    <p:input port="meta">
+      <p:pipe port="meta" step="epub-convert"/>
+    </p:input>
+  </epub:create-ocf>
+
+  <p:sink/>
+  
+  <!--<p:label-elements attribute="xml:base" match="/html:html" replace="false" label="base-uri(/*)">
+    <p:documentation>Make base uri explicit if it isn’t already.</p:documentation>
+  </p:label-elements>-->
+  
+  <p:label-elements attribute="srcpath" replace="false" name="srcpaths"
+    match="*[local-name() = ( 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                              'div', 'nav', 'section', 'main',
+                              'ol', 'ul', 'li', 'dd', 'dt', 
+                              'td', 'th', 
+                              'em', 'span', 'b', 'i', 'strong', 
+                              'code', 'pre',
+                              'a', 'img')]">
+    <p:documentation>For the epubtools Schematron checks, we need to add srcpaths on elements that don’t have them yet.</p:documentation>
+    <p:input port="source">
+      <p:pipe port="source" step="epub-convert"/>
+    </p:input>
+  </p:label-elements>
+  
+  <tr:store-debug pipeline-step="epubtools/add-srcpaths-to-input" extension="xhtml">
+    <p:with-option name="active" select="$debug"/>
+    <p:with-option name="base-uri" select="$debug-dir-uri"/>
+  </tr:store-debug>  
+
+  <epub:create-ops name="create-ops">
+    <p:input port="conf">
+      <p:pipe port="conf" step="epub-convert"/>
+    </p:input>
+    <p:input port="meta">
+      <p:pipe port="meta" step="epub-convert"/>
+    </p:input>
+  	<p:with-option name="base-uri" select="/c:result/@local-href">
+  		<p:pipe port="result" step="base-uri"/>
+  	</p:with-option>
+    <p:with-option name="target" select="$target-format"/>
+    <p:with-option name="use-svg" select="$wrap-cover-in-svg"/>
+    <p:with-option name="terminate-on-error" select="$terminate-on-error"/>
+    <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
+    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"><p:empty/></p:with-option>
+  </epub:create-ops>
+
+  <epub:create-opf name="create-opf">
+    <p:input port="source">
+      <p:pipe port="files" step="create-ops"/>
+      <p:pipe port="result" step="create-ops"/>
+    </p:input>
+    <p:input port="meta">
+      <p:pipe port="meta" step="epub-convert"/>
+    </p:input>
+  	<p:with-option name="base-uri" select="/c:result/@local-href">
+  		<p:pipe port="result" step="base-uri"/>
+  	</p:with-option>
+    <p:with-option name="target" select="$target-format"/>
+    <p:with-option name="terminate-on-error" select="$terminate-on-error"/>
+    <p:with-option name="use-svg" select="$wrap-cover-in-svg"/>
+    <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
+    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"><p:empty/></p:with-option>
+  </epub:create-opf>
+
+  <p:sink/>
+  
+  <p:choose name="conditionally-remove-nav-from-filelist-if-epub2">
+    <p:when test="$target-format = 'EPUB2'">
+      <p:output port="result" primary="true"/>
+      <p:delete name="discard-epub2-nav-html" match="/*/c:file[matches(@name, 'nav\.xhtml$')]">
+        <p:documentation>nav.xhtml is only carried along for creating the guide element in EPUB2</p:documentation>
+        <p:input port="source">
+          <p:pipe port="files" step="create-ops"/>
+        </p:input>
+      </p:delete>
+    </p:when>
+    <p:otherwise>
+      <p:output port="result" primary="true"/>
+      <p:identity>
+        <p:input port="source">
+          <p:pipe port="files" step="create-ops"/>
+        </p:input>
+      </p:identity>
+    </p:otherwise>
+  </p:choose>
+
+  <p:sink/>
+  
+  <p:choose name="conditionally-remove-nav-from-chunks-if-epub2">
+    <p:when test="$target-format = 'EPUB2'">
+      <p:output port="result" primary="true"/>
+      <p:delete name="discard-epub2-nav" match="/*/html:html[matches(@xml:base, 'nav\.xhtml$')]">
+        <p:documentation>nav.xhtml is only carried along for creating the guide element in EPUB2</p:documentation>
+        <p:input port="source">
+          <p:pipe port="result" step="create-ops"/>
+        </p:input>
+      </p:delete>
+    </p:when>
+    <p:otherwise>
+      <p:output port="result" primary="true"/>
+      <p:identity>
+        <p:input port="source">
+          <p:pipe port="result" step="create-ops"/>
+        </p:input>
+      </p:identity>
+    </p:otherwise>
+  </p:choose>
+  
+  <p:sink/>
+  
+  <epub:zip-package name="zip-package">
+    <p:input port="ocf-filerefs">
+      <p:pipe port="files" step="create-ocf"/>
+    </p:input>
+    <p:input port="ops-filerefs">
+      <p:pipe port="result" step="conditionally-remove-nav-from-filelist-if-epub2"/>
+    </p:input>
+    <p:input port="opf-fileref">
+      <p:pipe port="files" step="create-opf"/>
+    </p:input>
+    <p:input port="meta">
+      <p:pipe port="meta" step="epub-convert"/>
+    </p:input>
+  	<p:with-option name="base-uri" select="/c:result/@local-href">
+  		<p:pipe port="result" step="base-uri"/>
+  	</p:with-option>
+    <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
+    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"><p:empty/></p:with-option>
+  </epub:zip-package>
+  
+  <cxf:info name="zip-info">
+    <p:with-option name="href" select="/c:zipfile/@href"/>
+  </cxf:info>
+
+  <p:set-attributes match="/*" name="insert-zip-info">
+    <p:input port="source">
+      <p:pipe port="result" step="zip-package"/>
+    </p:input>
+    <p:input port="attributes">
+      <p:pipe port="result" step="zip-info"/>
+    </p:input>
+  </p:set-attributes>
+
+  <tr:file-uri name="output-file-name">
+    <p:with-option name="filename" select="/c:zipfile/@href">
+      <p:pipe port="result" step="zip-package"/>
+    </p:with-option>
+  </tr:file-uri>
+
+  <p:sink/>
+
+  <p:group name="schematron">
+    <p:output port="report" primary="true" sequence="true"/>
+    <!-- No need to anaylze these here again, as their c:file entries have already been processed in create-ops.xpl --> 
+    <!--    <p:viewport match="opf:item[@media-type = ('image/jpeg', 'image/png')]" name="image-infos">
+      <p:viewport-source>
+        <p:pipe port="result" step="create-opf"/>
+      </p:viewport-source>
+      <p:variable name="opf-href" select="/*/@href" cx:type="xs:string"/>
+      <tr:image-identify name="ii">
+        <p:with-option name="href" select="//c:file[@name = $opf-href]/@target-filename">
+          <p:pipe port="result" step="conditionally-remove-nav-from-filelist-if-epub2"/>
+        </p:with-option>
+      </tr:image-identify>
+      <p:insert match="/*" position="last-child">
+        <p:input port="source">
+          <p:pipe port="current" step="image-infos"/>
+        </p:input>
+        <p:input port="insertion">
+          <p:pipe port="report" step="ii"/>
+        </p:input>
+      </p:insert>
+    </p:viewport>
+
+    <p:sink/>
+-->  
+    <p:wrap-sequence name="wrap-for-schematron" wrapper="c:wrap">
+      <p:input port="source">
+        <p:pipe port="meta" step="epub-convert">
+          <p:documentation>conf file (epub-config)</p:documentation>
+        </p:pipe>
+        <p:pipe port="result" step="create-opf"/>
+        <!--<p:pipe port="result" step="image-infos">
+          <p:documentation>opf enhanced with image analysis (opf:package)</p:documentation>
+        </p:pipe>-->
+        <p:pipe port="result" step="conditionally-remove-nav-from-filelist-if-epub2">
+          <p:documentation>ops file list (cx:document)</p:documentation>
+        </p:pipe>
+        <p:pipe port="html" step="create-ops">
+          <p:documentation>HTML input (html:html)</p:documentation>
+        </p:pipe>
+        <p:pipe port="splitting-report" step="create-ops">
+          <p:documentation>Custom HTML markup indicating the unconditional and conditional splitting points (html:body)</p:documentation>
+        </p:pipe>
+        <p:pipe port="result" step="conditionally-remove-nav-from-chunks-if-epub2">
+          <p:documentation>HTML input (cx:document[@name = 'wrap-chunks'], with html:html chunks, c:data for css, ncx:ncx)</p:documentation>
+        </p:pipe>
+        <p:pipe port="result" step="insert-zip-info">
+          <p:documentation>c:zipfile</p:documentation>
+        </p:pipe>
+      </p:input>
+    </p:wrap-sequence>
+
+    <tr:store-debug pipeline-step="epubtools/input-for-schematron">
+      <p:with-option name="active" select="$debug"/>
+      <p:with-option name="base-uri" select="$debug-dir-uri"/>
+    </tr:store-debug>
+
+    <p:for-each name="schematrons">
+      <p:iteration-source>
+        <p:pipe port="schematron" step="epub-convert"/>
+        <p:pipe port="custom-schematron" step="epub-convert"/>
+      </p:iteration-source>
+      <p:output port="report" primary="true"/>
+      
+      <tr:oxy-validate-with-schematron name="sch0">
+        <p:input port="source">
+          <p:pipe port="result" step="wrap-for-schematron"/>
+        </p:input>
+        <p:input port="schema">
+          <p:pipe port="current" step="schematrons"/>
+        </p:input>
+        <p:with-param name="allow-foreign" select="'true'"/>
+        <p:input port="parameters">
+          <p:empty/>
+        </p:input>
+      </tr:oxy-validate-with-schematron>
+
+      <p:sink/>
+
+      <p:add-attribute match="/*" attribute-name="tr:rule-family">
+        <p:with-option name="attribute-value" select="(/*/@tr:rule-family, 'epubtools-custom')[1]">
+          <p:pipe port="current" step="schematrons"/>
+        </p:with-option>
+        <p:input port="source">
+          <p:pipe port="report" step="sch0"/>
+        </p:input>
+      </p:add-attribute>
+      <p:add-attribute name="sch" match="/*" attribute-name="tr:step-name">
+        <p:with-option name="attribute-value" 
+          select="string-join(
+                    (
+                      'epubtools',
+                      (
+                        /opf:package/opf:metadata/dc:identifier[@id = ../@unique-identifier],
+                        /opf:package/opf:metadata/dc:identifier,
+                        /opf:package/opf:metadata/dc:title
+                      )[1]
+                    ),
+                    ' '
+                  )">
+          <p:pipe port="result" step="create-opf"/>
+        </p:with-option>
+      </p:add-attribute>
+    </p:for-each>
+
+  </p:group>
+  
+  <p:sink/>
+
+  <tr:simple-progress-msg name="success-msg" file="epub-convert-success.txt" cx:depends-on="schematron">
+    <p:input port="msgs">
+      <p:inline>
+        <c:messages>
+          <c:message xml:lang="en">EPUB generation finished (see the HTML report though – errors will be reported there)</c:message>
+          <c:message xml:lang="de">EPUB-Erzeugung abgeschlossen (bitte im HTML-Report nachsehen, ob fehlerfrei)</c:message>
+        </c:messages>
+      </p:inline>
+    </p:input>
+    <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
+  </tr:simple-progress-msg>
+  
+  <p:sink/>
+  
+</p:declare-step>

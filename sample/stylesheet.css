@@ -1,0 +1,56 @@
+﻿/* Der einzigste Wert den ihr ändern dürft (müsst) ist die Breite im Body, alles andere bleibt wie es ist */
+/* Bevor ihr neue Elemente einfügt, fragt elro oder Manu */
+
+body {
+	width: 800px;  /* matches  viewport dimensions in head of xhtml */
+	height: 800px; /* matches  viewport dimensions in head of xhtml */
+	margin: 0;
+	background-image:url('images/background.jpg');
+}
+
+@font-face {
+    font-family: 'Gentium';
+    src: url('file:/C:/cygwin/home/Martin/epubtools-frontend/epubtools/sample/fonts/GenBasR.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+div.image img {
+	position: absolute;
+	margin: 0;
+	z-index: -1;
+}
+
+h1.blind { display:none; }
+
+div.image {
+	height: 1100px;
+	z-index: -1;
+}
+
+div.impress {
+	padding-top: 4em;
+	height: 1100px;
+}
+
+div.white {
+	height: 1100px;
+	background-color: white;
+}
+
+div.impress { margin-left:5%; margin-right:5%; }
+div.impress p { text-align: center; font-size: 1em; text-indent:0; line-height:1em; }
+
+a.link {
+  display:block;
+  top:487.5px;
+  width: 150px;
+  height:50px;
+  left:275px;
+  margin: 0;
+  position: relative;
+  font-weight:bold;
+  font-size: 1.2em;
+  color: black;
+  text-decoration: none;
+ }
