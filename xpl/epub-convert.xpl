@@ -3,6 +3,7 @@
   xmlns:c="http://www.w3.org/ns/xproc-step"
   xmlns:cx="http://xmlcalabash.com/ns/extensions" 
   xmlns:cxf="http://xmlcalabash.com/ns/extensions/fileutils"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:epub="http://transpect.io/epubtools" 
   xmlns:tr="http://transpect.io"
   version="1.0"
@@ -39,7 +40,7 @@
     Please note that the name “meta” is misleading since the file contains more than just metadata.</p:documentation>
   </p:input>
   <p:input port="schematron">
-    <p:document href="schematron/epub.sch.xml"/>
+    <p:document href="../schematron/epub.sch.xml"/>
   </p:input>
   <p:input port="custom-schematron" sequence="true">
     <p:empty/>
@@ -92,9 +93,11 @@
   
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
   <p:import href="http://transpect.io/calabash-extensions/transpect-lib.xpl"/>
+  <p:import href="http://transpect.io/schematron/xpl/oxy-schematron.xpl"/>
   <p:import href="http://transpect.io/xproc-util/simple-progress-msg/xpl/simple-progress-msg.xpl"/>
 	<p:import href="http://transpect.io/xproc-util/file-uri/xpl/file-uri.xpl"/>
-  <p:import href="http://transpect.io/schematron/xpl/oxy-schematron.xpl"/>
+  <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl"/>
+  
   
   <p:variable name="wrap-cover-in-svg" select="($use-svg[not(. = '')], /epub-config/cover/@svg, 'true')[1]">
     <p:pipe port="meta" step="epub-convert"/>

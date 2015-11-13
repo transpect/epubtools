@@ -68,7 +68,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl" />
   <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl"/>
   <p:import href="http://transpect.io/xproc-util/simple-progress-msg/xpl/simple-progress-msg.xpl"/>
-  <p:import href="http://transpect.io/css-generate/xpl/css-generate.xpl"/>
+  <p:import href="http://transpect.io/css-tools/xpl/css-generate.xpl"/>
   
   <p:variable name="css-handling" select="(/epub-config/@css-handling, 'regenerated-per-split')[1]">
     <p:pipe port="meta" step="html-splitter"/>

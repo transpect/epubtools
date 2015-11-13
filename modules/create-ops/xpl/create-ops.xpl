@@ -50,7 +50,7 @@
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
   <p:import href="http://transpect.io/calabash-extensions/transpect-lib.xpl"/>
   <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl"/>
-  <p:import href="http://transpect.io/css-expand/xpl/css.xpl"/>
+  <p:import href="http://transpect.io/css-tools/xpl/css.xpl"/>
   <p:import href="http://transpect.io/xproc-util/file-uri/xpl/file-uri.xpl"/>
   
   <p:group name="copy-resources">
@@ -246,7 +246,7 @@
       <p:input port="stylesheet">
         <p:documentation>This stylesheet overwrites certain css:expand templates or variables. This is done because CSS3 isn't supported completely. 
           In that stylesheet text-decoration and other porperties can be changed to supported values. When CSS3 is supported it might be necessary to use this input port dynamically.</p:documentation>
-        <p:document href="http://transpect.io/css-expand/xsl/css2-1-parser.xsl"/>
+        <p:document href="http://transpect.io/css-tools/xsl/css2-1-parser.xsl"/>
       </p:input>
       <p:with-option name="debug" select="$debug"/>
       <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
