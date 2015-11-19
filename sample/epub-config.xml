@@ -98,9 +98,11 @@
   
   <checks>
     <!-- 1 kB = 1024 Bytes, 1 MB = 1024 kB -->
+    <check param="result-max-mb" value="12" severity="warning"/>
+    <!-- result-max-mb: Max total EPUB file size --> 
+    <check param="result-max-mb" value="500" severity="error"/>
     <check param="html-max-kb" value="300" severity="warning"/>
     <check param="image-max-mb" value="1.5" severity="warning"/>
-    <check param="result-max-mb" value="20" severity="warning"/>
     <!-- 1 Mpx = 1e6 px -->
     <check param="image-max-mpx" value="3.2" severity="warning"/>
     <!-- image-dpi: Will require all images that have density information to report this as XXXdpi,
