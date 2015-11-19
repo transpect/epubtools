@@ -38,7 +38,9 @@
 
   <pattern id="one-html-input">
     <rule context="/c:wrap">
-      <assert test="count(html:html) = 1" id="unexpected-validation-input1" diagnostics="unexpected-validation-input1_de" role="error">
+      <!-- 0 html inputs is permitted for checks of already existing EPUBs (as opposed to EPUBs that have been 
+        freshly generated from HTML) -->
+      <assert test="count(html:html) le 1" id="unexpected-validation-input1" diagnostics="unexpected-validation-input1_de" role="error">
        <span class="srcpath">BC_orphans</span>
         There is more than one HTML file in the validation input. This is an indication that the splitting failed. You might
       need developer support.</assert>
@@ -488,7 +490,7 @@
                                                              '&gt;'
                                                            ), 
                                               ', ')"/>
-      <assert test="normalize-space(.)" role="warning" id="no-text-in-chunk" diagnostics="no-text-in-chunk_de">
+      <assert test="normalize-space(.) or exists(.//html:img | .//svg:svg)" role="warning" id="no-text-in-chunk" diagnostics="no-text-in-chunk_de">
         <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
         Empty split chunk. <xsl:value-of select="if (*) then $elements else 'Doesn’t contain any tagging at all.'"/>
       </assert>
