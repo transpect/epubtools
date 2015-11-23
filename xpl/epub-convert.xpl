@@ -6,6 +6,10 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:epub="http://transpect.io/epubtools" 
   xmlns:tr="http://transpect.io"
+  xmlns:html="http://www.w3.org/1999/xhtml"
+  xmlns:opf="http://www.idpf.org/2007/opf" 
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:ops="http://www.idpf.org/2007/ops" 
   version="1.0"
   type="epub:convert"
   name="epub-convert">

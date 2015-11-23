@@ -64,7 +64,7 @@
     </xsl:copy>
   </xsl:template>
   
-  <xsl:function name="letex:contains-token" as="xs:boolean">
+  <xsl:function name="tr:contains-token" as="xs:boolean">
     <xsl:param name="string" as="xs:string?"/>
     <xsl:param name="tokens" as="xs:string*"/>
     <xsl:sequence select="if ($string) then tokenize($string, '\s+') = $tokens else false()"/>
@@ -74,7 +74,7 @@
     Scenario: #mydiv h1 { display: none; }
     Kindlegen will regard the complete #mydiv as display:none. Any link into #mydiv
     will be regarded as an E24010, making the whole conversion fail. -->
-  <xsl:template match="html:*[letex:contains-token(@class, '_hidden')][@id]">
+  <xsl:template match="html:*[tr:contains-token(@class, '_hidden')][@id]">
     <a id="{@id}"></a>
     <xsl:apply-templates select="." mode="rm-id"/>
   </xsl:template>

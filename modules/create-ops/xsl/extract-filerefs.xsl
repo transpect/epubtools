@@ -69,7 +69,7 @@
       <!-- process css resources using css-expands xml-representation -->
 <!--      <xsl:message select="concat('&#xa;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&#xa;',
         'FOUND CSS FILE REFERENCES:&#xa;&#xa;', 
-        string-join( for $i in collection()//css:resource return letex:patch-fileref($i/@src), '&#xa;'), 
+        string-join( for $i in collection()//css:resource return tr:patch-fileref($i/@src), '&#xa;'), 
         '&#xa;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
         )"/>-->
       <xsl:for-each-group select="collection()//css:resource" group-by="@src">
