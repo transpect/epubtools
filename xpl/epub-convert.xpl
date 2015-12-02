@@ -67,7 +67,7 @@
   </p:output>
   <p:output port="report" primary="false" sequence="true">
     <p:pipe port="report" step="create-ops"/>
-    <p:pipe port="report" step="schematron"/>
+    <p:pipe port="report" step="schematrons"/>
   </p:output>
   <p:output port="html">
     <p:pipe port="html" step="create-ops"/>
@@ -75,6 +75,9 @@
   <p:output port="baseuri" primary="false">
 		<p:pipe port="result" step="base-uri"/>
 	</p:output>
+  <p:output port="input-for-schematron" primary="false">
+    <p:pipe port="result" step="wrap-for-schematron"/>
+  </p:output>
 
   <p:option name="target" select="''" cx:type="xs:string"/>
   <!-- EPUB2 | EPUB3 | KF8 // DEFAULT: EPUB2 -->
@@ -287,116 +290,91 @@
 
   <p:sink/>
 
-  <p:group name="schematron">
-    <p:output port="report" primary="true" sequence="true"/>
-    <!-- No need to anaylze these here again, as their c:file entries have already been processed in create-ops.xpl --> 
-    <!--    <p:viewport match="opf:item[@media-type = ('image/jpeg', 'image/png')]" name="image-infos">
-      <p:viewport-source>
-        <p:pipe port="result" step="create-opf"/>
-      </p:viewport-source>
-      <p:variable name="opf-href" select="/*/@href" cx:type="xs:string"/>
-      <tr:image-identify name="ii">
-        <p:with-option name="href" select="//c:file[@name = $opf-href]/@target-filename">
-          <p:pipe port="result" step="conditionally-remove-nav-from-filelist-if-epub2"/>
-        </p:with-option>
-      </tr:image-identify>
-      <p:insert match="/*" position="last-child">
-        <p:input port="source">
-          <p:pipe port="current" step="image-infos"/>
-        </p:input>
-        <p:input port="insertion">
-          <p:pipe port="report" step="ii"/>
-        </p:input>
-      </p:insert>
-    </p:viewport>
-
-    <p:sink/>
--->  
-    <p:wrap-sequence name="wrap-for-schematron" wrapper="c:wrap">
-      <p:input port="source">
-        <p:pipe port="meta" step="epub-convert">
-          <p:documentation>conf file (epub-config)</p:documentation>
-        </p:pipe>
-        <p:pipe port="result" step="create-opf"/>
-        <!--<p:pipe port="result" step="image-infos">
-          <p:documentation>opf enhanced with image analysis (opf:package)</p:documentation>
-        </p:pipe>-->
-        <p:pipe port="result" step="conditionally-remove-nav-from-filelist-if-epub2">
-          <p:documentation>ops file list (cx:document)</p:documentation>
-        </p:pipe>
-        <p:pipe port="html" step="create-ops">
-          <p:documentation>HTML input (html:html)</p:documentation>
-        </p:pipe>
-        <p:pipe port="splitting-report" step="create-ops">
-          <p:documentation>Custom HTML markup indicating the unconditional and conditional splitting points (html:body)</p:documentation>
-        </p:pipe>
-        <p:pipe port="result" step="conditionally-remove-nav-from-chunks-if-epub2">
-          <p:documentation>HTML input (cx:document[@name = 'wrap-chunks'], with html:html chunks, c:data for css, ncx:ncx)</p:documentation>
-        </p:pipe>
-        <p:pipe port="result" step="insert-zip-info">
-          <p:documentation>c:zipfile</p:documentation>
-        </p:pipe>
-      </p:input>
-    </p:wrap-sequence>
-
-    <tr:store-debug pipeline-step="epubtools/input-for-schematron">
-      <p:with-option name="active" select="$debug"/>
-      <p:with-option name="base-uri" select="$debug-dir-uri"/>
-    </tr:store-debug>
-
-    <p:for-each name="schematrons">
-      <p:iteration-source>
-        <p:pipe port="schematron" step="epub-convert"/>
-        <p:pipe port="custom-schematron" step="epub-convert"/>
-      </p:iteration-source>
-      <p:output port="report" primary="true"/>
-      
-      <tr:oxy-validate-with-schematron name="sch0">
-        <p:input port="source">
-          <p:pipe port="result" step="wrap-for-schematron"/>
-        </p:input>
-        <p:input port="schema">
-          <p:pipe port="current" step="schematrons"/>
-        </p:input>
-        <p:with-param name="allow-foreign" select="'true'"/>
-        <p:input port="parameters">
-          <p:empty/>
-        </p:input>
-      </tr:oxy-validate-with-schematron>
-
-      <p:sink/>
-
-      <p:add-attribute match="/*" attribute-name="tr:rule-family">
-        <p:with-option name="attribute-value" select="(/*/@tr:rule-family, 'epubtools-custom')[1]">
-          <p:pipe port="current" step="schematrons"/>
-        </p:with-option>
-        <p:input port="source">
-          <p:pipe port="report" step="sch0"/>
-        </p:input>
-      </p:add-attribute>
-      <p:add-attribute name="sch" match="/*" attribute-name="tr:step-name">
-        <p:with-option name="attribute-value" 
-          select="string-join(
-                    (
-                      'epubtools',
-                      (
-                        /opf:package/opf:metadata/dc:identifier[@id = ../@unique-identifier],
-                        /opf:package/opf:metadata/dc:identifier,
-                        /opf:package/opf:metadata/dc:title
-                      )[1]
-                    ),
-                    ' '
-                  )">
-          <p:pipe port="result" step="create-opf"/>
-        </p:with-option>
-      </p:add-attribute>
-    </p:for-each>
-
-  </p:group>
+  <p:wrap-sequence name="wrap-for-schematron" wrapper="c:wrap">
+    <p:input port="source">
+      <p:pipe port="meta" step="epub-convert">
+        <p:documentation>conf file (epub-config)</p:documentation>
+      </p:pipe>
+      <p:pipe port="result" step="create-opf"/>
+      <!--<p:pipe port="result" step="image-infos">
+        <p:documentation>opf enhanced with image analysis (opf:package)</p:documentation>
+      </p:pipe>-->
+      <p:pipe port="result" step="conditionally-remove-nav-from-filelist-if-epub2">
+        <p:documentation>ops file list (cx:document)</p:documentation>
+      </p:pipe>
+      <p:pipe port="html" step="create-ops">
+        <p:documentation>HTML input (html:html)</p:documentation>
+      </p:pipe>
+      <p:pipe port="splitting-report" step="create-ops">
+        <p:documentation>Custom HTML markup indicating the unconditional and conditional splitting points (html:body)</p:documentation>
+      </p:pipe>
+      <p:pipe port="result" step="conditionally-remove-nav-from-chunks-if-epub2">
+        <p:documentation>HTML input (cx:document[@name = 'wrap-chunks'], with html:html chunks, c:data for css, ncx:ncx)</p:documentation>
+      </p:pipe>
+      <p:pipe port="result" step="insert-zip-info">
+        <p:documentation>c:zipfile</p:documentation>
+      </p:pipe>
+    </p:input>
+  </p:wrap-sequence>
+  
+  <tr:store-debug pipeline-step="epubtools/input-for-schematron">
+    <p:with-option name="active" select="$debug"/>
+    <p:with-option name="base-uri" select="$debug-dir-uri"/>
+  </tr:store-debug>
   
   <p:sink/>
 
-  <tr:simple-progress-msg name="success-msg" file="epub-convert-success.txt" cx:depends-on="schematron">
+  <p:for-each name="schematrons">
+    <p:iteration-source>
+      <p:pipe port="schematron" step="epub-convert"/>
+      <p:pipe port="custom-schematron" step="epub-convert"/>
+    </p:iteration-source>
+    <p:output port="report" primary="true"/>
+    
+    <tr:oxy-validate-with-schematron name="sch0">
+      <p:input port="source">
+        <p:pipe port="result" step="wrap-for-schematron"/>
+      </p:input>
+      <p:input port="schema">
+        <p:pipe port="current" step="schematrons"/>
+      </p:input>
+      <p:with-param name="allow-foreign" select="'true'"/>
+      <p:input port="parameters">
+        <p:empty/>
+      </p:input>
+    </tr:oxy-validate-with-schematron>
+
+    <p:sink/>
+
+    <p:add-attribute match="/*" attribute-name="transpect:rule-family">
+      <p:with-option name="attribute-value" select="(/*/@transpect:rule-family, 'epubtools-custom')[1]">
+        <p:pipe port="current" step="schematrons"/>
+      </p:with-option>
+      <p:input port="source">
+        <p:pipe port="report" step="sch0"/>
+      </p:input>
+    </p:add-attribute>
+    <p:add-attribute name="sch" match="/*" attribute-name="transpect:step-name">
+      <p:with-option name="attribute-value" 
+        select="string-join(
+                  (
+                    'epubtools',
+                    (
+                      /opf:package/opf:metadata/dc:identifier[@id = ../@unique-identifier],
+                      /opf:package/opf:metadata/dc:identifier,
+                      /opf:package/opf:metadata/dc:title
+                    )[1]
+                  ),
+                  ' '
+                )">
+        <p:pipe port="result" step="create-opf"/>
+      </p:with-option>
+    </p:add-attribute>
+  </p:for-each>
+
+  <p:sink/>
+
+  <tr:simple-progress-msg name="success-msg" file="epub-convert-success.txt" cx:depends-on="schematrons">
     <p:input port="msgs">
       <p:inline>
         <c:messages>

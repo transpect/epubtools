@@ -120,10 +120,10 @@
     <rule abstract="true" id="file-calc">
       <let name="regex" value="concat('(^|/)', current()/@href, '$')"/>
       <let name="element-in-split" 
-        value="/c:wrap/cx:document[@name = 'wrap-chunks']//(
+        value="(/c:wrap/cx:document[@name = 'wrap-chunks']//(
                                                                html:img[matches(@src, $regex)] 
                                                              | svg:image[matches(@xlink:href, $regex)]
-                                                            )"/>
+                                                            ))[1]"/>
       <let name="srcpath" value="for $s in $element-in-split/ancestor-or-self::*[@srcpath][1]/@srcpath return tokenize($s, '\s+')"/>
       <let name="element-in-filelist" 
         value="/c:wrap/cx:document[@name = 'wrap-file-uris']/c:file[@name = current()/@href]"/>

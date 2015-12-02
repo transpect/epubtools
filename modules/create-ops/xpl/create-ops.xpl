@@ -330,7 +330,7 @@
       <p:viewport-source>
         <p:pipe port="result" step="generate-filelist"/>
       </p:viewport-source>
-      <p:output port="result">
+      <p:output port="result" primary="true">
         <p:pipe port="result" step="http-or-file"/>
       </p:output>
       <p:variable name="uri" select="(/c:file/@href, /c:file/@oebps-name)[1]"/>
@@ -342,7 +342,7 @@
 
       <p:choose name="http-or-file">
         <p:when test="matches($uri, 'https?:')">
-          <p:output port="result">
+          <p:output port="result" primary="true">
             <p:pipe port="result" step="apply-hash"/>
           </p:output>
           
@@ -443,7 +443,7 @@
           
         </p:when>
         <p:otherwise>
-          <p:output port="result">
+          <p:output port="result" primary="true">
             <p:pipe port="result" step="try-copy"/>
           </p:output>
           
@@ -512,20 +512,21 @@
    
   </p:group>
 
-  <p:viewport match="c:file[@media-type=('image/jpeg', 'image/png')]" name="ii-content">
+  <p:viewport match="c:file[@media-type=('image/jpeg', 'image/png')]" name="ii-content0">
+    <p:output port="result" primary="true"/>
     <tr:image-identify name="iiii">
       <p:with-option name="href" select="/*/@target-filename"/>
     </tr:image-identify>
     <p:sink/>
     <cxf:info fail-on-error="false" name="ii-content-info">
       <p:with-option name="href" select="/*/@target-filename">
-        <p:pipe port="current" step="ii-content"/>
+        <p:pipe port="current" step="ii-content0"/>
       </p:with-option>
     </cxf:info>
     <p:sink/>
     <p:set-attributes match="/*">
       <p:input port="source">
-        <p:pipe port="current" step="ii-content"/>
+        <p:pipe port="current" step="ii-content0"/>
       </p:input>
       <p:input port="attributes">
         <p:pipe port="result" step="ii-content-info"/>
@@ -537,6 +538,11 @@
       </p:input>
     </p:insert>
   </p:viewport>
+
+  <tr:store-debug pipeline-step="epubtools/create-ops/image-identify-content" name="ii-content">
+    <p:with-option name="active" select="$debug" />
+    <p:with-option name="base-uri" select="$debug-dir-uri" />
+  </tr:store-debug>
 
   <p:sink  name="sink7"/>
     
