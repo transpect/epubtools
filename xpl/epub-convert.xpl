@@ -346,15 +346,15 @@
 
     <p:sink/>
 
-    <p:add-attribute match="/*" attribute-name="transpect:rule-family">
-      <p:with-option name="attribute-value" select="(/*/@transpect:rule-family, 'epubtools-custom')[1]">
+    <p:add-attribute match="/*" attribute-name="tr:rule-family">
+      <p:with-option name="attribute-value" select="(/*/@tr:rule-family, 'epubtools-custom')[1]">
         <p:pipe port="current" step="schematrons"/>
       </p:with-option>
       <p:input port="source">
         <p:pipe port="report" step="sch0"/>
       </p:input>
     </p:add-attribute>
-    <p:add-attribute name="sch" match="/*" attribute-name="transpect:step-name">
+    <p:add-attribute name="sch" match="/*" attribute-name="tr:step-name">
       <p:with-option name="attribute-value" 
         select="string-join(
                   (

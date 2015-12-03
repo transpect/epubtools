@@ -3,6 +3,7 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:c="http://www.w3.org/ns/xproc-step"
   xmlns:html="http://www.w3.org/1999/xhtml"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
   xmlns="http://www.w3.org/1999/xhtml"
   version="2.0"
   exclude-result-prefixes="xs">
