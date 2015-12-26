@@ -1386,7 +1386,15 @@
           <xsl:sequence
             select="tr:group-for-ncx(current-group(), xs:integer(min(current-group()//@tr-heading-level)), false())"/>
         </xsl:when>
-        <xsl:when test="$topmost and (matches(string-join(current-group(), ''), '\S'))">
+        <xsl:when test="$topmost 
+                        and 
+                        (matches(string-join(current-group(), ''), '\S'))
+                        and 
+                        not( (: nav entry should be suppressed if @generated-frontmatter-title='' :)
+                          exists($heading-conf/@generated-frontmatter-title) 
+                          and 
+                          not(normalize-space($heading-conf/@generated-frontmatter-title))
+                        )">
           <!-- generic front matter nav point before first actual split point -->
           <navPoint id="" class="default" playOrder="0" xmlns="http://www.daisy.org/z3986/2005/ncx/">
             <navLabel>

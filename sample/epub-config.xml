@@ -81,7 +81,8 @@
   	<dc:language>de</dc:language>
   </metadata>
 
-  <hierarchy media-type="application/xhtml+xml" max-population="40" max-text-length="200000">
+  <hierarchy media-type="application/xhtml+xml" max-population="40" max-text-length="200000" generated-frontmatter-title="">
+    <!-- see schema heading-conf.rng for generated-frontmatter-title -->
     <unconditional-split elt="div" attr="class" attval="white"/>
     <unconditional-split elt="h1"/>
     <conditional-split elt="p" attr="class" attval="asterism"/>

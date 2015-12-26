@@ -20,6 +20,10 @@
       </optional>
       <optional>
         <attribute name="generated-frontmatter-title">
+          <a:documentation>If there is content before the first splitting point,
+          it will be referred to by the toc as 'Frontmatter' or, if present, the
+          value of generated-frontmatter-title. If generated-frontmatter-title 
+          is the empty string (or whitespace-only), the toc entry will be left out.</a:documentation>
           <text/>
         </attribute>
       </optional>
