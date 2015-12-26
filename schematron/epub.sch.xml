@@ -585,6 +585,15 @@
     </rule>
   </pattern>
   
+  <pattern id="empty-alt-pattern">
+    <rule context="/c:wrap/cx:document[@name = 'wrap-chunks']//html:img[@alt]">
+      <assert role="warning" test="normalize-space(@alt)" id="empty-img-alt" diagnostics="empty-img-alt_de">
+        <span class="srcpath"><xsl:value-of select="for $s in @srcpath return concat($source-dir-uri, $s)"/></span>
+        The alt attribute on image '<value-of select="replace(@src, '^.+/', '')"/>' should not be empty.
+      </assert>
+    </rule>
+  </pattern>
+  
   <pattern id="metadata-title">
     <rule context="opf:package/opf:metadata/dc:title">
       <report test="matches(., '^[\p{Zs}\s]*$')" role="error" id="empty-title" diagnostics="empty-title_de">
@@ -712,6 +721,8 @@
       Datei innerhalb des EPUBs oder auf eine externe Seite verweisen. Dieser zeigt auf: '<value-of select="$normalized"/>'.</diagnostic>
     <diagnostic id="link-to-id_de" xml:lang="de">Die ID '<value-of select="$fragment-id"/>' in der Datei '<value-of 
       select="$normalized"/>' existiert nicht.</diagnostic>
+    <diagnostic id="empty-img-alt_de" xml:lang="de">Das alt-Attribute bei Bild '<value-of select="replace(@src, '^.+/', '')"/>' 
+      sollte nicht leer sein.</diagnostic>
   </diagnostics>
   
 </schema>
