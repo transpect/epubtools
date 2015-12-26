@@ -33,7 +33,7 @@
   <p:output port="report" primary="false">
     <p:pipe port="report" step="html-splitter"/>
   </p:output>
-  <p:output port="splitting-report">
+  <p:output port="splitting-report" sequence="true">
     <p:pipe port="splitting-report" step="html-splitter"/>
   </p:output>
   
