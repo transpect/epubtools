@@ -1317,8 +1317,8 @@
               <navLabel xmlns="http://www.daisy.org/z3986/2005/ncx/">
                 <xsl:variable name="br-to-space" as="xs:string">
                   <xsl:choose>
-                    <xsl:when test="$actual-heading/@title">
-                      <xsl:value-of select="$actual-heading/@title"/>
+                    <xsl:when test="$actual-heading/(@title | svg:title)">
+                      <xsl:value-of select="$actual-heading/(@title | svg:title)"/>
                     </xsl:when>
                     <xsl:when test="tr:is-conditional-split-level($level)">
                       <xsl:choose>

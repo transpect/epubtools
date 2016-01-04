@@ -48,8 +48,14 @@
     <xsl:attribute name="form" select="'true'"/>
   </xsl:template>
 
-  <xsl:template match="epub:switch | svg:svg | html:script | html:nav[@epub:type = 'toc']" mode="props">
+  <xsl:template match="epub:switch | svg:svg | html:script" mode="props">
     <xsl:attribute name="{local-name()}" select="'true'"/>
+  </xsl:template>
+  
+  <!-- normally we would only accept html:nav[@epub:type = 'toc'], but if the nav property is missing in the OPF,
+    ADE 4.5 might get stuck while reading the EPUB -->
+  <xsl:template match="*[@epub:type = 'toc']" mode="props">
+    <xsl:attribute name="nav" select="'true'"/>
   </xsl:template>
 
   <xsl:template match="m:math" mode="props">
