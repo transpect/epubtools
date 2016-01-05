@@ -44,7 +44,7 @@
                     <xsl:attribute name="title" select="collection()/epub-config/types/type[@name = 'cover']/@heading"/>
                   </xsl:if>
                   <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="100%"
-                    height="100%" viewBox="0 0 {$w} {$h}">
+                    height="100%" viewBox="0 0 {$w} {$h}" id="epub-cover-svg-container">
                     <image xlink:href="{collection()/epub-config/cover/@href}" width="{$w}" height="{$h}"/>
                   </svg>
                 </div>
