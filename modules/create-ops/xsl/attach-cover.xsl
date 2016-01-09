@@ -53,7 +53,7 @@
                 <!-- html:div/svg:svg is problematic in ADE 4.x (Desktop) for EPUB3 (stamp-sized rendering no matter what), 
                   therefore we don’t generate a div container for EPUB3 -->
                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="100%"
-                  height="100%" viewBox="0 0 {$w} {$h}" id="epub-cover-svg-container" epub:type="cover">
+                  height="100%" viewBox="0 0 {$w} {$h}" id="epub-cover-svg-container" epub:type="cover" srcpath="epub-cover">
                   <xsl:if test="collection()/epub-config/types/type[@name = 'cover']/@heading">
                     <xsl:element name="title">
                       <xsl:value-of select="collection()/epub-config/types/type[@name = 'cover']/@heading"/>
