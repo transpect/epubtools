@@ -38,7 +38,7 @@
             <xsl:variable name="w" select="xs:integer(number(replace($width, 'px$', '')))" as="xs:integer"/>
             <xsl:variable name="h" select="xs:integer(number(replace($height, 'px$', '')))" as="xs:integer"/>
             <xsl:choose>
-              <xsl:when test="$target = 'EPUB2'">
+              <xsl:when test="$target = ('EPUB2', 'KF8')">
                 <div class="cover" srcpath="epub-cover" id="epub-cover-image-container" epub:type="cover">
                   <xsl:if test="collection()/epub-config/types/type[@name = 'cover']/@heading">
                     <xsl:attribute name="title" select="collection()/epub-config/types/type[@name = 'cover']/@heading"/>
