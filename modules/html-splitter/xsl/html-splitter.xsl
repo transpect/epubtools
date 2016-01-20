@@ -280,7 +280,7 @@
     <!-- write HTML toc nav for EPUB3 (will also be created for EPUB2 etc. but has to be discarded before storing to disk.
       Reason: being able to generate a guide element in the content.opf) -->
     <!-- when *[@epub:type] with value 'toc' is present in content documents, the landmarks nav is created there too -->
-    <xsl:if test="not($chunks//*[tr:contains-token(@epub:type, 'toc')])">
+    <xsl:if test="not($chunks//*[tr:contains-token(@epub:type, 'toc')]) and $final-pub-type ne 'KF8'">
       <xsl:variable name="toc-nav">
         <xsl:call-template name="toc-nav">
           <xsl:with-param name="toc-ncx" select="$toc-ncx"/>
