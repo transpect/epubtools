@@ -391,7 +391,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
               <p:with-option name="href" select="$chunk-file-uri"/>
             </p:store>
           </p:when>
-          <p:when test="$target = 'EPUB2' and matches(base-uri(), 'nav\.xhtml$')">
+          <p:when test="$target = ('EPUB2', 'KF8') and matches(base-uri(), 'nav\.xhtml$')">
             <p:documentation>drop nav.xhtml for EPUB2</p:documentation>
             <p:sink/>
           </p:when>

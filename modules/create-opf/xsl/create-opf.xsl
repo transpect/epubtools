@@ -136,7 +136,7 @@
       </metadata>
 
       <manifest xmlns:opf="http://www.idpf.org/2007/opf">
-        <xsl:for-each-group select="collection()//c:file[not($target = 'EPUB2' and matches(@name, 'nav\.xhtml'))]"
+        <xsl:for-each-group select="collection()//c:file[not($target = ('EPUB2', 'KF8') and matches(@name, 'nav\.xhtml'))]"
           group-by="@name">
 
           <xsl:variable name="strip-path" select="opf:strip-path(@name)"/>
@@ -197,7 +197,7 @@
         <xsl:for-each
           select="collection()//c:file[matches(@name, '\.x?html$')]
                                                   [not(@spine = 'false')]
-                                                  [not($target = 'EPUB2' and matches(@name, 'nav\.xhtml'))]">
+                                                  [not($target = ('EPUB2', 'KF8') and matches(@name, 'nav\.xhtml'))]">
           <xsl:sort select="number(@sequence)" data-type="number"/>
           <xsl:variable name="strip-path" select="replace(@name, 'OEBPS/', '')"/>
           <xsl:variable name="id" select="replace(replace($strip-path, '\.', ''),'/', '__')"/>
@@ -226,10 +226,10 @@
     </reference>
   </xsl:template>
 
-  <xsl:template match="@epub:type[tokenize(., '\s+') = 'toc'][starts-with(../@href, '#')][$target = 'EPUB2']">
-    <!-- don’t link to generated HTML toc as it won’t be included in EPUB2 -->
+  <xsl:template match="@epub:type[tokenize(., '\s+') = 'toc'][starts-with(../@href, '#')][$target = ('EPUB2', 'KF8')]">
+    <!-- don’t link to generated HTML toc as it won’t be included in EPUB2 or mobi (KF8) -->
   </xsl:template>
-
+  
   <xsl:template match="@epub:type">
     <xsl:variable name="context" select=".." as="element(html:a)"/>
     <xsl:for-each select="tokenize(., '\s+')">
