@@ -206,7 +206,7 @@
   <p:sink/>
   
   <p:choose name="conditionally-remove-nav-from-filelist-if-epub2">
-    <p:when test="$target-format = 'EPUB2'">
+    <p:when test="$target-format = ('EPUB2', 'KF8')">
       <p:output port="result" primary="true"/>
       <p:delete name="discard-epub2-nav-html" match="/*/c:file[matches(@name, 'nav\.xhtml$')]">
         <p:documentation>nav.xhtml is only carried along for creating the guide element in EPUB2</p:documentation>
