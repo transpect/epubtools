@@ -13,6 +13,7 @@
   <ns prefix="dc" uri="http://purl.org/dc/elements/1.1/"/>
   <ns prefix="epub" uri="http://www.idpf.org/2007/ops"/>
   <ns prefix="html" uri="http://www.w3.org/1999/xhtml"/>
+  <ns prefix="xs" uri="http://www.w3.org/2001/XMLSchema"/>
   <ns prefix="tr" uri="http://transpect.io"/>
   <ns prefix="svg" uri="http://www.w3.org/2000/svg"/>
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
@@ -535,9 +536,10 @@
           select="string-join(for $n in dc:*[not(name() = ($mandatory-metadata, $optional-dc-metadata))]/name() 
                               return concat('''', $n, ''''), ', ')"/>.
       </report>-->
-      <assert test="exists(dc:date[@opf:event = 'modification'])" id="modification-date-missing"
+      <assert test="exists(opf:meta[@property = 'dcterms:modified'][. castable as xs:dateTime])" id="modification-date-missing"
          diagnostics="modification-date-missing_de" role="warning">
-        <span class="srcpath">BC_orphans</span> content.opf: There should be an opf:metadata/dc:date[@opf:event = 'modification'].</assert>
+        <span class="srcpath">BC_orphans</span> content.opf: There should be an opf:metadata/opf:meta[@property = 'dcterms:modified'],
+        and it should contain a datetime string.</assert>
       <assert test="if ($epub-version = '2.0') 
                     then exists(opf:meta[@name = 'cover'])
                     else true()" role="warning" id="meta-cover" diagnostics="meta-cover_de">
