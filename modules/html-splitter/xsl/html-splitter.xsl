@@ -234,7 +234,7 @@
     <xsl:variable name="landmarks" as="element(*)*">
       <xsl:for-each-group select="$chunks/html:chunks/html:chunk//*[@id | @tr-generated-id]
                                                                    [tr:contains-token(@epub:type, $landmark-types)]"
-                          group-by="tokenize(@epub:type, '\s+')[. = $landmark-types]">
+                          group-by="@epub:type">
         <!-- index, preface, … may occur multiple times. Use only the first item of a kind 
           (also in order to avoid kindlegen warnings). --> 
         <xsl:sequence select="."/>
