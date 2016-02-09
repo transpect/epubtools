@@ -536,10 +536,17 @@
           select="string-join(for $n in dc:*[not(name() = ($mandatory-metadata, $optional-dc-metadata))]/name() 
                               return concat('''', $n, ''''), ', ')"/>.
       </report>-->
-      <assert test="exists(opf:meta[@property = 'dcterms:modified'][. castable as xs:dateTime])" id="modification-date-missing"
-         diagnostics="modification-date-missing_de" role="warning">
+      <assert test="if ($epub-version = '3.0') 
+                    then exists(opf:meta[@property = 'dcterms:modified'][. castable as xs:dateTime])
+                    else true()" id="modification-date-missing-epub3"
+         diagnostics="modification-date-missing-epub3_de" role="warning">
         <span class="srcpath">BC_orphans</span> content.opf: There should be an opf:metadata/opf:meta[@property = 'dcterms:modified'],
         and it should contain a datetime string.</assert>
+      <assert test="if ($epub-version = '2.0')
+                    then exists(dc:date[@opf:event = 'modification'])
+                    else true()" id="modification-date-missing-epub2"
+         diagnostics="modification-date-missing-epub2_de" role="warning">
+        <span class="srcpath">BC_orphans</span> content.opf: There should be an opf:metadata/dc:date[@opf:event = 'modification'].</assert>
       <assert test="if ($epub-version = '2.0') 
                     then exists(opf:meta[@name = 'cover'])
                     else true()" role="warning" id="meta-cover" diagnostics="meta-cover_de">
@@ -664,8 +671,10 @@
         Element opf:metadata/opf:meta[@name = 'cover'] in EPUB2-Publikationen angegeben werden.</diagnostic>
     <diagnostic id="mandatory-metadata_de" xml:lang="de">content.opf: Die folgenden erforderlichen Metadaten-Elemente fehlen: 
       <value-of select="$missing"/>.</diagnostic>
-    <diagnostic id="modification-date-missing_de" xml:lang="de">content.opf: Das Datum der letzten Änderung sollte mittels 
+    <diagnostic id="modification-date-missing-epub2_de" xml:lang="de">content.opf: Das Datum der letzten Änderung sollte mittels 
       opf:metadata/dc:date[@opf:event = 'modification'] angegeben werden.</diagnostic>
+    <diagnostic id="modification-date-missing-epub3_de" xml:lang="de">content.opf: Das Datum der letzten Änderung sollte mittels 
+      opf:metadata/opf:meta[@property = 'dcterms:modified'] angegeben werden, als standardisierter dateTime-String.</diagnostic>
     <diagnostic id="meta-cover-points-nowhere-in-content_de" xml:lang="de">Bilddatei
           '<value-of select="$item/@href"/>' ist in opf:metadata/opf:meta[@name = 'cover'] als Cover ausgewiesen. Allerdings
       scheint die Bilddatei in keiner der HTML-Dateien vorzukommen.</diagnostic>
