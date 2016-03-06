@@ -194,6 +194,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
             </p:with-param>
             <p:with-param name="html-subdir-name" select="$html-subdir-name"/>
             <p:with-param name="debug" select="$debug"/>
+            <p:with-param name="final-pub-type" select="$target"/>
           </p:xslt>
           
           <p:sink/>

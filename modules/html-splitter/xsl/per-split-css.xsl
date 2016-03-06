@@ -2,6 +2,8 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
   xmlns:css="http://www.w3.org/1996/css" 
   xmlns:html="http://www.w3.org/1999/xhtml"
+  xmlns:epub="http://www.idpf.org/2007/ops"
+  xmlns:svg="http://www.w3.org/2000/svg"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   exclude-result-prefixes="#all"
   version="2.0">
@@ -12,6 +14,7 @@
   <xsl:variable name="html-prefix" select="if (normalize-space($html-subdir-name)) then concat($html-subdir-name, '/') else ''"/>
   <xsl:variable name="relative-prefix" as="xs:string" select="if (normalize-space($html-prefix)) then '../' else ''"/>
   <xsl:param name="debug" select="'no'"/>
+  <xsl:param name="final-pub-type" select="'EPUB3'"/>
 
   <xsl:key name="ruleset-by-id" match="css:ruleset[some $rs in css:selector/@raw-selector satisfies (matches($rs, '^(\i[-a-z\d]*)?#\i\c*'))]"
     use="for $rs in css:selector/@raw-selector[matches(., '^(\i[-a-z\d]*)?#\i\c*')] return replace($rs, '^(\i[-a-z\d]*)?#(\i\c*).*$', '$2')"/>
@@ -29,11 +32,25 @@
         <xsl:variable name="ids" as="xs:string*" select=".//@id"/>
         <xsl:if test="exists($ids) and (matches(base-uri(/*), '^file:/'))">
           <xsl:variable name="rulesets" as="element(css:ruleset)*" select="key('ruleset-by-id', $ids, $all-css)"/>
-          <xsl:if test="count($rulesets) gt 0">
+          <xsl:if test="count($rulesets) gt 0
+                        or
+                        (.//@epub:type[not(ancestor::html:nav)] = 'cover' and contains($final-pub-type, 'EPUB3') and exists(.//svg:svg))">
             <css:css id-based-rules="true">
               <xsl:attribute name="xml:base" select="replace(base-uri(/*), concat('^(.+/)', $html-prefix, '(.+)\.xhtml$'), '$1styles/$2.css')"/>
               <xsl:attribute name="relative-name" select="replace(base-uri(/*), '^(.+/)(.+)\.xhtml$', concat($relative-prefix, 'styles/$2.css'))"/>
               <xsl:if test="$debug = 'yes'">
+                <comment xmlns="http://www.w3.org/1996/css">
+                  <xsl:text>/* Original location: diverse (specifically extracted for </xsl:text>
+                  <xsl:value-of select="base-uri(/*)"/>
+                  <xsl:text>) */</xsl:text>
+                </comment>
+              </xsl:if>
+              <xsl:if test=".//@epub:type[not(ancestor::html:nav)] = 'cover' and contains($final-pub-type, 'EPUB3') and exists(.//svg:svg)">
+                <!-- This is a workaround for ADE 4. SVG covers are displayed too small in EPUB3. 
+                     Thanks, @tobias_fischer! https://twitter.com/tobias_fischer/status/679029226419462144 -->
+                <ruleset origin="epubtools/modules/html-splitter/xsl/per-spli-css.xsl">
+                  <raw-css>div.cover svg { max-height:100%; height:99vh; margin:0; }</raw-css>
+                </ruleset>
                 <comment xmlns="http://www.w3.org/1996/css">
                   <xsl:text>/* Original location: diverse (specifically extracted for </xsl:text>
                   <xsl:value-of select="base-uri(/*)"/>
