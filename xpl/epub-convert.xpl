@@ -45,6 +45,8 @@
   </p:input>
   <p:input port="schematron">
     <p:document href="../schematron/epub.sch.xml"/>
+    <p:documentation>You can disable checks by supplying empty Schematron patterns with the same IDs on the custom-schematron 
+      port.</p:documentation>
   </p:input>
   <p:input port="custom-schematron" sequence="true">
     <p:empty/>
@@ -323,10 +325,42 @@
   </tr:store-debug>
   
   <p:sink/>
+  
+  <p:xslt name="filter-default-schematron">
+    <p:documentation>Remove pattern with IDs that match pattern IDs in the custom-schematron documents.
+    The purpose is to be able to disable default checks.</p:documentation>
+    <p:input port="source">
+      <p:pipe port="schematron" step="epub-convert"/>
+      <p:pipe port="custom-schematron" step="epub-convert"/>
+    </p:input>
+    <p:input port="parameters">
+      <p:empty/>
+    </p:input>
+    <p:input port="stylesheet">
+      <p:inline>
+        <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
+          <xsl:template match="* | @*">
+            <xsl:copy>
+              <xsl:apply-templates select="@*, node()"/>
+            </xsl:copy>
+          </xsl:template>
+          <xsl:variable name="custom-ids" as="xs:string*" select="collection()[position() gt 1]//*:pattern/@id"/>
+          <xsl:template match="*:pattern[(@id, @is-a) = $custom-ids]"/>
+        </xsl:stylesheet>
+      </p:inline>
+    </p:input>
+  </p:xslt>
+  
+  <tr:store-debug pipeline-step="epubtools/filter-default-schematron">
+    <p:with-option name="active" select="$debug"/>
+    <p:with-option name="base-uri" select="$debug-dir-uri"/>
+  </tr:store-debug>
+  
+  <p:sink/>
 
   <p:for-each name="schematrons">
     <p:iteration-source>
-      <p:pipe port="schematron" step="epub-convert"/>
+      <p:pipe port="result" step="filter-default-schematron"/>
       <p:pipe port="custom-schematron" step="epub-convert"/>
     </p:iteration-source>
     <p:output port="report" primary="true"/>
