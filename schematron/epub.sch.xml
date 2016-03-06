@@ -263,6 +263,112 @@
       value="/c:wrap/epub-config/checks/check[@param = 'image-max-mb']
                                               [@severity = 'error' or empty(@severity)]/@value"/>
   </pattern>
+  
+  <pattern id="image-dims" abstract="true">
+    <rule context="opf:item[matches(@media-type, '^image/(jpeg|png|gif)')]
+                           [/c:wrap/cx:document[@name = 'wrap-file-uris']/c:file[@name = current()/@href]/c:results]
+                           [not( (: cover will be treated separately :)
+                              @id = ../parent::opf:package[@version = '2.0']/opf:metadata/opf:meta[@name = 'cover']/@content
+                              or (ancestor::opf:package/@version = '3.0' and tokenize(@properties, '\s+') = 'cover-image')
+                           )]">
+      <extends rule="file-calc"/>
+      <!-- we need these variables for the diagnostics (the params don’t seem to be in scope there): -->
+      <let name="_threshold" value="$threshold"/>
+      <let name="_min-or-max" value="$min-or-max"/>
+      <let name="_width-or-height" value="$width-or-height"/>
+      <let name="actual-dim" value="if ($_width-or-height = 'height') 
+                                    then $height 
+                                    else
+                                      if ($_width-or-height = 'width')
+                                      then $width
+                                      else ()"/>
+      <report test="if ($_min-or-max = 'max')
+                    then $actual-dim &gt; $_threshold
+                    else
+                      if ($_min-or-max = 'min')
+                      then $actual-dim &lt; $_threshold
+                      else false()" id="image-dimensions" role="$severity" diagnostics="image-dimensions_de">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        Pixel <value-of select="$_width-or-height"/> of image '<value-of select="@href"/>' too <value-of 
+          select="if ($_min-or-max = 'min') then 'small' else 'large'"/>. Value: <value-of select="$width"/>. Threshold: <value-of 
+          select="$_threshold"/>.
+      </report>
+    </rule>
+  </pattern>
+  
+  <pattern id="image-too-wide-error" is-a="image-dims">
+    <param name="severity" value="error"/>
+    <param name="width-or-height" value="'width'"/>
+    <param name="min-or-max" value="'max'"/>
+    <param name="threshold" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-max-width']
+                                             [@severity = 'error' or empty(@severity)]/@value"/>
+  </pattern>
+  
+  <pattern id="image-too-wide-warning" is-a="image-dims">
+    <param name="severity" value="warning"/>
+    <param name="width-or-height" value="'width'"/>
+    <param name="min-or-max" value="'max'"/>
+    <param name="threshold" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-max-width']
+                                             [@severity = 'warning']/@value"/>
+  </pattern>
+  
+  <pattern id="image-too-narrow-error" is-a="image-dims">
+    <param name="severity" value="error"/>
+    <param name="width-or-height" value="'width'"/>
+    <param name="min-or-max" value="'min'"/>
+    <param name="threshold" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-min-width']
+                                             [@severity = 'error' or empty(@severity)]/@value"/>
+  </pattern>
+  
+  <pattern id="image-too-narrow-warning" is-a="image-dims">
+    <param name="severity" value="warning"/>
+    <param name="width-or-height" value="'width'"/>
+    <param name="min-or-max" value="'min'"/>
+    <param name="threshold" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-min-width']
+                                             [@severity = 'warning']/@value"/>
+  </pattern>
+  
+  <pattern id="image-too-tall-error" is-a="image-dims">
+    <param name="severity" value="error"/>
+    <param name="width-or-height" value="'height'"/>
+    <param name="min-or-max" value="'max'"/>
+    <param name="threshold" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-max-height']
+                                             [@severity = 'error' or empty(@severity)]/@value"/>
+  </pattern>
+  
+  <pattern id="image-too-tall-warning" is-a="image-dims">
+    <param name="severity" value="warning"/>
+    <param name="width-or-height" value="'height'"/>
+    <param name="min-or-max" value="'max'"/>
+    <param name="threshold" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-max-height']
+                                             [@severity = 'warning']/@value"/>
+  </pattern>
+  
+  <pattern id="image-too-small-error" is-a="image-dims">
+    <param name="severity" value="error"/>
+    <param name="width-or-height" value="'height'"/>
+    <param name="min-or-max" value="'min'"/>
+    <param name="threshold"
+      value="/c:wrap/epub-config/checks/check[@param = 'image-min-height']
+                                             [@severity = 'error' or empty(@severity)]/@value"/>
+  </pattern>
+  
+  <pattern id="image-too-small-warning" is-a="image-dims">
+    <param name="severity" value="warning"/>
+    <param name="width-or-height" value="'height'"/>
+    <param name="min-or-max" value="'min'"/>
+    <param name="threshold" 
+      value="/c:wrap/epub-config/checks/check[@param = 'image-min-height']
+                                             [@severity = 'warning']/@value"/>
+  </pattern>
+  
+  
 
   <pattern id="file-size" abstract="true">
     <rule context="opf:item[matches(@media-type, '^image/(jpeg|png|gif)')]">
@@ -657,6 +763,11 @@
   </pattern>
 
   <diagnostics>
+    <diagnostic id="image-dimensions_de" xml:lang="de">Pixel-<value-of select="if ($_width-or-height = 'height') then
+      'Höhe' else 'Breite'"/> von Bild '<value-of select="@href"/>' zu <value-of 
+          select="if ($_min-or-max = 'min') then 'klein' else 'groß'"/>. ´Wert: <value-of select="$width"/>. Schwellwert: <value-of 
+          select="$_threshold"/>.
+</diagnostic>
     <diagnostic id="custom-epub-type_de" xml:lang="de">epub:type in Namespace (Nicht-Standard-Wert): <xsl:value-of 
       select="$namespaced-type-string"/>.</diagnostic>
     <diagnostic id="version_de" xml:lang="de">content.opf: /package/@version muss 2.0 oder 3.0 sein. Gefunden: <value-of

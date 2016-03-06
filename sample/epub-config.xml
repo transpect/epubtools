@@ -102,14 +102,22 @@
     <check param="result-max-mb" value="12" severity="warning"/>
     <!-- result-max-mb: Max total EPUB file size --> 
     <check param="result-max-mb" value="500" severity="error"/>
+    
     <check param="html-max-kb" value="300" severity="warning"/>
+    
     <check param="image-max-mb" value="1.5" severity="warning"/>
+    
     <!-- 1 Mpx = 1e6 px -->
     <check param="image-max-mpx" value="3.2" severity="warning"/>
+    
     <!-- image-dpi: Will require all images that have density information to report this as XXXdpi,
     otherwise unchecked. Desirable: calculation depending on CSS settings, typical screen sizes, pixel count. -->
     <check param="image-min-dpi" value="300" severity="warning"/>
     <check param="image-max-dpi" value="300" severity="warning"/>
+    
+    <!-- all combinations of min/max, height/width, error/warning are supported: -->
+    <check param="image-max-height" value="750" severity="warning"/>
+    
     <check param="cover-min-width-px" value="800" severity="warning"/>
     <check param="cover-max-width-px" value="1440" severity="warning"/>
     <!-- Custom Schematron. See the debug-dir/epubtools/input-for-schematron.xml (after running 
