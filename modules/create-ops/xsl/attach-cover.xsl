@@ -81,7 +81,7 @@
             </a> (Status: <xsl:value-of select="collection()/c:result/@error-status"/>)</p>
           </xsl:when>
           <xsl:otherwise>
-            <div class="cover" srcpath="epub-cover">
+            <div class="cover" srcpath="epub-cover" epub:type="cover">
               <xsl:if test="collection()/epub-config/types/type[@name = 'cover']/@heading">
                 <xsl:attribute name="title" select="collection()/epub-config/types/type[@name = 'cover']/@heading"/>
               </xsl:if>
