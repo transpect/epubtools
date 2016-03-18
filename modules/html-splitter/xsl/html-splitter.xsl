@@ -245,18 +245,6 @@
     <xsl:if test="($epub-config/@page-map-xml, 'true')[1] ne 'false' and $final-pub-type ne 'EPUB3'">
       <xsl:apply-templates select="$pgl" mode="page-map"/>
     </xsl:if>
-    <!-- write page-list nav
-         currently turned off (and write to nav.xhtml): 
-         epubcheck4 warns, when a[@epub:type eq 'pagebreak'] and nav[@epub:type eq 'page-list'] co-exists
-         though www.idpf.org/accessibility/guidelines/content/xhtml/pagenum.php declares both as necessary -->
-    <!--
-    <xsl:if test="$final-pub-type eq 'EPUB3' and 
-                  (some $a in $chunks//html:a satisfies (starts-with($a/@id, 'page_'))) and
-                  not($chunks//*[tr:contains-token(@epub:type, 'page-list')])">
-      <xsl:result-document href="{$datadir}/chunks/nav_page-list.xhtml" format="export">
-        <xsl:call-template name="page-list-nav"/>
-      </xsl:result-document>
-    </xsl:if>-->
 
     <xsl:variable name="toc-ncx" as="element(ncx:ncx)">
       <xsl:call-template name="ncx">
@@ -924,27 +912,50 @@
   <!-- Page list: -->
 
   <xsl:variable name="pgl" as="element(html:pgl)?">
-    <xsl:if test="some $a in $chunks//html:a satisfies (starts-with($a/@id, 'page_'))">
+    <xsl:variable name="pagenum-elts" as="element(*)*" select="tr:pagenums($chunks/html:chunks)"/>
+    <xsl:if test="exists($pagenum-elts)">
       <pgl>
         <xsl:for-each select="$chunks/html:chunks/html:chunk">
           <xsl:variable name="filename" select="replace(@file, '^.+/', '')" as="xs:string"/>
-          <xsl:for-each select=".//html:a[starts-with(@id, 'page_')]">
-            <page name="{replace(@id, '^page_?', '')}" href="{$filename}{concat('#', @id)}"
-              playOrder="{replace(generate-id($root//html:a[@id eq current()/@id]), '^.+?(\d+)$', '$1')}">
+          <xsl:variable name="chunk-pagenum-elts" as="element(*)*" select="tr:pagenums(.)"/>
+          <xsl:for-each select="$chunk-pagenum-elts">
+            <page name="{(self::*[@epub-type = 'pagebreak']/@title, 
+                          self::*[@epub-type = 'pagebreak'][normalize-space()], 
+                          replace(@id, '^page_?', '')
+                         )[1]}" href="{$filename}{concat('#', @id)}"
+              playOrder="{replace(generate-id(($root//*[@id eq current()/@id])[1]), '^.+?(\d+)$', '$1')}">
               <xsl:if test="position() eq 1">
                 <xsl:attribute name="page-map-href" select="$filename"/>
               </xsl:if>
             </page>
           </xsl:for-each>
           <!-- fix for Sony reader bug (not able to flip back a page if a split file is not mentioned in page-map.xml) -->
-          <xsl:if
-            test="not(.//html:a[starts-with(@id, 'page_')]) and preceding-sibling::html:chunk//html:a[starts-with(@id, 'page_')]">
+          <xsl:if test="not($pagenum-elts/@epub:type = 'pagebreak')
+                        and 
+                        not(.//html:a[starts-with(@id, 'page_')]) 
+                        and 
+                        preceding-sibling::html:chunk//html:a[starts-with(@id, 'page_')]">
             <page name="" page-map-href="{$filename}"/>
           </xsl:if>
         </xsl:for-each>
       </pgl>
     </xsl:if>
   </xsl:variable>
+
+  <xsl:function name="tr:pagenums" as="element(*)*">
+    <xsl:param name="elts" as="element(*)"/><!-- a, span, … -->
+    <xsl:variable name="a_page_" select="$elts//html:a[starts-with(@id, 'page_')]" as="element(html:a)*"/>
+    <xsl:variable name="epub-typed" select="$elts//*[@epub:type = 'pagebreak']
+                                                    [exists(@title) or normalize-space()]" as="element(*)*"/>
+    <xsl:choose>
+      <xsl:when test="exists($epub-typed)">
+        <xsl:sequence select="$epub-typed"/>
+      </xsl:when>
+      <xsl:when test="exists($a_page_)">
+        <xsl:sequence select="$a_page_"/>
+      </xsl:when>
+    </xsl:choose>
+  </xsl:function>
 
   <xsl:function name="tr:sort" as="item()*">
     <xsl:param name="sequence" as="item()*"/>
@@ -1146,12 +1157,16 @@
             <xsl:apply-templates select="$toc-ncx/ncx:navMap" mode="nav-xhtml"/>
           </ol>
         </nav>
+        <xsl:if test="$pgl">
+          <xsl:call-template name="page-list-nav-inner"/>
+        </xsl:if>
       </body>
     </html>
   </xsl:template>
 
   <xsl:variable name="toc-nav-id" select="'toc-navigation'" as="xs:string"/>
 
+  <!-- only page-list-nav-inner seems to be used -->
   <xsl:template name="page-list-nav">
     <xsl:param name="toc-ncx" as="element(ncx:ncx)"/>
     <xsl:param name="landmarks" as="element(*)*"/>
@@ -1161,17 +1176,23 @@
         <title>EPUB Navigation: Page list</title>
       </head>
       <body class="nav-body">
-        <nav epub:type="page-list" id="page-list-navigation">
-          <ol>
-            <xsl:for-each select="$pgl/html:page">
-              <li>
-                <a href="{@href}" srcpath="pgl_{generate-id()}"><xsl:value-of select="@name"/></a>
-              </li>
-            </xsl:for-each>
-          </ol>
-        </nav>
+        <xsl:call-template name="page-list-nav-inner"/>
       </body>
     </html>
+  </xsl:template>
+  
+  <xsl:template name="page-list-nav-inner">
+    <nav epub:type="page-list" id="page-list-navigation" hidden="hidden">
+      <ol>
+        <xsl:for-each select="$pgl/html:page[normalize-space(@name)]">
+          <li>
+            <a href="{@href}" srcpath="pgl_{generate-id()}">
+              <xsl:value-of select="@name"/>
+            </a>
+          </li>
+        </xsl:for-each>
+      </ol>
+    </nav>
   </xsl:template>
 
   <xsl:template name="landmarks">
@@ -1267,6 +1288,9 @@
       <xsl:with-param name="landmarks" select="$landmarks"/>
     </xsl:call-template>
     <xsl:next-match/>
+    <xsl:if test="$pgl">
+      <xsl:call-template name="page-list-nav-inner"/>
+    </xsl:if>
   </xsl:template>
   
 
