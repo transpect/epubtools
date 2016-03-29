@@ -49,7 +49,7 @@
                 <!-- This is a workaround for ADE 4. SVG covers are displayed too small in EPUB3. 
                      Thanks, @tobias_fischer! https://twitter.com/tobias_fischer/status/679029226419462144 -->
                 <ruleset origin="epubtools/modules/html-splitter/xsl/per-spli-css.xsl">
-                  <raw-css>div.cover svg { max-height:100%; height:99vh; margin:0; }</raw-css>
+                  <raw-css>div.cover svg { max-height:97%; height:97vh; margin:0; }</raw-css>
                 </ruleset>
                 <comment xmlns="http://www.w3.org/1996/css">
                   <xsl:text>/* Original location: diverse (specifically extracted for </xsl:text>
