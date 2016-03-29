@@ -328,7 +328,8 @@
   
   <p:xslt name="filter-default-schematron">
     <p:documentation>Remove pattern with IDs that match pattern IDs in the custom-schematron documents.
-    The purpose is to be able to disable default checks.</p:documentation>
+    The purpose is to be able to disable default checks.
+    The most specific patterns will win. Input custom schematron in ascending specificity.</p:documentation>
     <p:input port="source">
       <p:pipe port="schematron" step="epub-convert"/>
       <p:pipe port="custom-schematron" step="epub-convert"/>
@@ -344,24 +345,39 @@
               <xsl:apply-templates select="@*, node()"/>
             </xsl:copy>
           </xsl:template>
-          <xsl:variable name="custom-ids" as="xs:string*" select="collection()[position() gt 1]//*:pattern/@id"/>
-          <xsl:template match="*:pattern[(@id, @is-a) = $custom-ids]"/>
+
+          <xsl:template match="/">
+            <xsl:for-each select="collection()">
+              <xsl:variable name="pos" select="position()" as="xs:integer"/>
+              <xsl:result-document href="{base-uri()}.new">
+                <xsl:apply-templates>
+                  <xsl:with-param name="more-specific-patterns" as="xs:string*" tunnel="yes"
+                    select="collection()[position() gt $pos]//*:pattern/@id"/>
+                </xsl:apply-templates>
+              </xsl:result-document>
+            </xsl:for-each>
+            <noout/>
+          </xsl:template>
+
+          <xsl:template match="*:pattern">
+            <xsl:param name="more-specific-patterns" as="xs:string*" tunnel="yes"/>
+            <xsl:choose>
+              <xsl:when test="$more-specific-patterns = (@id, @is-a)"/>
+              <xsl:otherwise>
+                <xsl:next-match/>
+              </xsl:otherwise>
+            </xsl:choose>
+          </xsl:template>
         </xsl:stylesheet>
       </p:inline>
     </p:input>
   </p:xslt>
   
-  <tr:store-debug pipeline-step="epubtools/filter-default-schematron">
-    <p:with-option name="active" select="$debug"/>
-    <p:with-option name="base-uri" select="$debug-dir-uri"/>
-  </tr:store-debug>
-  
   <p:sink/>
 
   <p:for-each name="schematrons">
     <p:iteration-source>
-      <p:pipe port="result" step="filter-default-schematron"/>
-      <p:pipe port="custom-schematron" step="epub-convert"/>
+      <p:pipe port="secondary" step="filter-default-schematron"/>
     </p:iteration-source>
     <p:output port="report" primary="true"/>
     
