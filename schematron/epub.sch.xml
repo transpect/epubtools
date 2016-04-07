@@ -573,6 +573,24 @@
         Language: <value-of select="distinct-values(@xml:lang | @lang)"/>
       </report>
     </rule>
+       <rule context="/c:wrap/epub-config[1]/metadata[1]/dc:language">
+      <report test="true()" role="info" id="doc_language">
+      <span class="srcpath"><xsl:value-of select="'BC_orphans'"/></span>
+        Document Language: <xsl:value-of select="."/> 
+      </report>
+    </rule>
+    <rule context="/c:wrap">
+      <report test="html:html[1]//*[@lang | @xml:lang]" role="info" id="other_languages">
+      <span class="srcpath"><xsl:value-of select="'BC_orphans'"/></span>
+        Other Language codes an their occurance: 
+        <xsl:variable name="occ" select="html:html[1]//*[@xml:lang]"/>
+        <ul xmlns="http://www.w3.org/1999/xhtml">
+           <xsl:for-each select="distinct-values(html:html[1]//*[@xml:lang]/@xml:lang)">
+             <li><xsl:value-of select="current()"/> :  <xsl:value-of select="count($occ[@xml:lang=current()])"/></li>
+           </xsl:for-each> 
+        </ul>
+      </report>
+    </rule>
   </pattern>
 
   <pattern id="splits">
