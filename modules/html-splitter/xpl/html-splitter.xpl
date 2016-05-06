@@ -7,7 +7,7 @@
     <p>Sample invocation (for debugging purposes):</p>
     <pre>calabash/calabash.sh 
     -i source=file:/$(cygpath -ma ../content/output/debug/epubtools/create-ops/pre-split.html) 
-    -i conf=file:/$(cygpath -ma adaptions/publisher/series/epubtools/heading-conf.xml) 
+    -i conf=file:/$(cygpath -ma a9s/publisher/series/epubtools/heading-conf.xml) 
     -o result=tmp.html -o report=report.xml -o files=files.xml  
     file:/$(cygpath -ma epubtools/modules/html-splitter/xpl/html-splitter.xpl) 
     base-uri=file:/$(cygpath -ma ../content/output/debug/epubtools/create-ops/pre-split.html)
@@ -21,7 +21,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
     debug-dir-uri=file:/$(cygpath -ma debug) \
     debug=yes \
     final-pub-type=EPUB2 \
-    heading-conf-uri=file:/$(cygpath -ma adaptions/common/epubtools/heading-conf.xml) \
+    heading-conf-uri=file:/$(cygpath -ma a9s/common/epubtools/heading-conf.xml) \
     meta-uri=file:/$(cygpath -ma ../content/le-tex/whitepaper/de/output/output/debug/epubtools/epub-config.xml) \
     datadir=file:/$(cygpath -ma debug/datadir)</pre>
   </p:documentation>
