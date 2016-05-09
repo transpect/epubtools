@@ -570,6 +570,7 @@
       </report>
       <report test="true()" role="info" id="lang">
         <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
+        <span class="category"><xsl:value-of select="string-join(('epubtools_lang', distinct-values(@xml:lang | @lang)), '-')"/></span>
         Language: <value-of select="distinct-values(@xml:lang | @lang)"/>
       </report>
     </rule>
