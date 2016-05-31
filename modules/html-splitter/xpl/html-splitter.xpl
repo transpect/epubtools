@@ -57,10 +57,11 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
   <p:option name="debug" select="'no'" cx:type="xsd:string"/>
   <p:option name="debug-dir-uri" select="'debug'" cx:type="xsd:string"/>
 
+  <p:import href="split-css.xpl"/>
+
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
   <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl"/>
   <p:import href="http://transpect.io/xproc-util/simple-progress-msg/xpl/simple-progress-msg.xpl"/>
-  <p:import href="http://transpect.io/css-tools/xpl/css-generate.xpl"/>
 
   <p:variable name="css-handling" select="(/epub-config/@css-handling, 'regenerated-per-split')[1]">
     <p:pipe port="meta" step="html-splitter"/>
@@ -160,154 +161,25 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
       </p:identity>
 
       <p:sink/>
-
-      <p:choose name="per-split-css" cx:depends-on="store-debug-try">
-        <p:when test="contains($css-handling, 'regenerated-per-split')">
-          <p:output port="result" primary="true" sequence="true">
-            <p:documentation>Each split HTML file, with an additional link to the individual CSS file if there are
-              per-split CSS rules. Also, all of the newly generated CSS, with a base URI that matches the corresponding
-              HTML file’s, except for the file extension.</p:documentation>
-            <p:pipe port="result" step="generate-css"/>
-            <p:pipe port="secondary" step="insert-individual-css-link"/>
-          </p:output>
-          <p:output port="unused-css-resources">
-            <p:documentation>A css:css document containing XML representations of unused @font-face at
-              rules.</p:documentation>
-            <p:pipe port="result" step="unused-css-resources"/>
-          </p:output>
-          
-          <p:xslt name="per-split-css-xml-representations">
-            <p:documentation>Primary output: the new, reduced common CSS. Secondary port: individual CSS files if
-              applicable. Also on secondary port: A file named 'unused-css-resources.xml'</p:documentation>
-            <p:input port="parameters">
-              <p:empty/>
-            </p:input>
-            <p:input port="stylesheet">
-              <p:document href="../xsl/per-split-css.xsl"/>
-            </p:input>
-            <p:input port="source">
-              <p:pipe port="css-xml" step="html-splitter"/>
-              <p:pipe port="secondary" step="split"/>
-            </p:input>
-            <p:with-param name="common-source-dir-elimination-regex" select="/*/@common-dir-elimination-regex">
-              <p:pipe port="result" step="split"/>
-            </p:with-param>
-            <p:with-param name="html-subdir-name" select="$html-subdir-name"/>
-            <p:with-param name="debug" select="$debug"/>
-            <p:with-param name="final-pub-type" select="$target"/>
-          </p:xslt>
-          
-          <p:sink/>
-          
-          <p:identity name="unused-css-resources">
-            <p:input port="source" select="/*[ends-with(base-uri(/), 'unused-css-resources.xml')]">
-              <p:pipe port="secondary" step="per-split-css-xml-representations"/>
-            </p:input>
-          </p:identity>
-          
-          <tr:store-debug>
-            <p:with-option name="pipeline-step"
-              select="concat('epubtools/html-splitter/', $basename, '/unused-css-resources')"/>
-            <p:with-option name="active" select="$debug"/>
-            <p:with-option name="base-uri" select="$debug-dir-uri"/>
-          </tr:store-debug>
-          
-          <p:sink/>
-          
-          <p:identity name="individual-css-representations">
-            <p:input port="source" select="/*[not(ends-with(base-uri(/), 'unused-css-resources.xml'))]">
-              <p:pipe port="secondary" step="per-split-css-xml-representations"/>
-            </p:input>
-          </p:identity>
-          
-          <p:sink/>
-          
-          <p:xslt name="insert-individual-css-link" template-name="main">
-            <p:documentation>Will insert links for per-split css. Has side effect: svg namespace
-              fixup.</p:documentation>
-            <p:input port="parameters">
-              <p:empty/>
-            </p:input>
-            <p:input port="stylesheet">
-              <p:document href="../xsl/insert-individual-css-link.xsl"/>
-            </p:input>
-            <p:input port="source">
-              <p:pipe port="secondary" step="split"/>
-              <p:pipe port="result" step="individual-css-representations"/>
-            </p:input>
-            <p:with-param name="html-subdir-name" select="$html-subdir-name"/>
-            <p:with-param name="target" select="$target"/>
-          </p:xslt>
-          
-          <p:for-each>
-            <p:iteration-source>
-              <p:pipe port="result" step="insert-individual-css-link"/>
-              <p:pipe port="secondary" step="insert-individual-css-link"/>
-            </p:iteration-source>
-            <tr:store-debug>
-              <p:with-option name="pipeline-step"
-                select="concat('epubtools/html-splitter/', $basename, '/individual-css-links/', replace(base-uri(), '^.+/', ''))"/>
-              <p:with-option name="active" select="$debug"/>
-              <p:with-option name="base-uri" select="$debug-dir-uri"/>
-            </tr:store-debug>
-          </p:for-each>
-          
-          <p:for-each name="generate-css">
-            <p:iteration-source>
-              <p:pipe port="result" step="per-split-css-xml-representations"/>
-              <p:pipe port="result" step="individual-css-representations"/>
-            </p:iteration-source>
-            <p:output port="result" primary="true"/>
-            <css:generate name="gen" prepend-resource-path="../">
-              <p:with-option name="strip-comments"
-                select="if (contains($css-handling, 'remove-comments'))
-                        then 'true' else 'false'"
-              />
-            </css:generate>
-            
-            <tr:store-debug>
-              <p:with-option name="pipeline-step"
-                select="concat('epubtools/html-splitter/', $basename, '/per-split-css/', replace(base-uri(), '^.+/', ''))"/>
-              <p:with-option name="active" select="$debug"/>
-              <p:with-option name="base-uri" select="$debug-dir-uri"/>
-            </tr:store-debug>
-            
-          </p:for-each>
-          
-          <p:sink/>
-          
-        </p:when>
-        <p:when test="$css-handling = 'unchanged'">
-          <p:output port="result" primary="true"/>
-          <p:output port="unused-css-resources">
-            <p:empty/>
-          </p:output>
-          <p:identity>
-            <p:input port="source">
-              <p:pipe port="secondary" step="split"/>
-            </p:input>
-          </p:identity>
-        </p:when>
-        <p:otherwise>
-          <p:documentation>regenerated</p:documentation>
-          <p:output port="result" primary="true"/>
-          <p:output port="unused-css-resources">
-            <p:empty/>
-          </p:output>
-          <css:generate name="gen" prepend-resource-path="../">
-            <p:input port="source">
-              <p:pipe port="css-xml" step="html-splitter"/>
-            </p:input>
-          </css:generate>
-          <p:sink/>
-          <p:identity>
-            <p:input port="source">
-              <p:pipe port="secondary" step="split"/>
-              <p:pipe port="result" step="gen"/>
-            </p:input>
-          </p:identity>
-        </p:otherwise>
-      </p:choose>
+      
+      <epub:split-css name="per-split-css" cx:depends-on="store-debug-try">
+        <p:input port="source">
+          <p:pipe port="secondary" step="split"/>
+        </p:input>
+        <p:input port="css-xml">
+          <p:pipe port="css-xml" step="html-splitter"/>
+        </p:input>
+        <p:with-option name="target" select="$target"/>
+        <p:with-option name="css-handling" select="$css-handling"/>
+        <p:with-option name="basename" select="$basename"/>
+        <p:with-option name="html-subdir-name" select="$html-subdir-name"/>
+        <p:with-option name="common-source-dir-elimination-regex" select="/*/@common-dir-elimination-regex">
+          <p:pipe port="result" step="split"/>
+        </p:with-option>
+        <p:with-option name="debug" select="$debug"/>
+        <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+      </epub:split-css>
+      
       <!--  *
             * the store-chunks step iterates over the file-uris and store them
             * regarding their file extension and the output target
