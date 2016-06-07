@@ -28,7 +28,7 @@
     </p:documentation>
   </p:output>
   
-  <p:output port="unused-css-resources" primary="false">
+  <p:output port="unused-css-resources" primary="false" sequence="true">
     <p:documentation>
       A css:css document containing XML representations of unused @font-face at rules.
     </p:documentation>
@@ -55,7 +55,7 @@
         <p:pipe port="result" step="generate-css"/>
         <p:pipe port="secondary" step="insert-individual-css-link"/>
       </p:output>
-      <p:output port="unused-css-resources">
+      <p:output port="unused-css-resources" sequence="true">
         <p:pipe port="result" step="unused-css-resources"/>
       </p:output>
       
@@ -165,7 +165,7 @@
     
     <p:when test="$css-handling = 'unchanged'">
       <p:output port="result" primary="true"/>
-      <p:output port="unused-css-resources">
+      <p:output port="unused-css-resources" sequence="true">
         <p:empty/>
       </p:output>
       
@@ -180,7 +180,7 @@
     <p:otherwise>
       <p:documentation>regenerated</p:documentation>
       <p:output port="result" primary="true"/>
-      <p:output port="unused-css-resources">
+      <p:output port="unused-css-resources" sequence="true">
         <p:empty/>
       </p:output>
       
