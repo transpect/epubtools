@@ -385,7 +385,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
       <p:output port="report">
         <p:pipe port="result" step="errors"/>
       </p:output>
-      <p:output port="unused-css-resources">
+      <p:output port="unused-css-resources" sequence="true">
         <p:empty/>
       </p:output>
       <p:output port="splitting-report" sequence="true">
