@@ -1,7 +1,14 @@
-<p:declare-step xmlns:p="http://www.w3.org/ns/xproc" xmlns:c="http://www.w3.org/ns/xproc-step"
-  xmlns:cx="http://xmlcalabash.com/ns/extensions" xmlns:epub="http://transpect.io/epubtools"
-  xmlns:tr="http://transpect.io" xmlns:css="http://www.w3.org/1996/css" xmlns:html="http://www.w3.org/1999/xhtml"
-  xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="epub:html-splitter" name="html-splitter" version="1.0">
+<p:declare-step xmlns:p="http://www.w3.org/ns/xproc" 
+  xmlns:c="http://www.w3.org/ns/xproc-step"
+  xmlns:cx="http://xmlcalabash.com/ns/extensions" 
+  xmlns:epub="http://transpect.io/epubtools"
+  xmlns:tr="http://transpect.io" 
+  xmlns:css="http://www.w3.org/1996/css" 
+  xmlns:html="http://www.w3.org/1999/xhtml"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+  type="epub:html-splitter" 
+  name="html-splitter" 
+  version="1.0">
 
   <p:documentation xmlns="http://www.w3.org/1999/xhtml">
     <p>Sample invocation (for debugging purposes):</p>
@@ -58,6 +65,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
   <p:option name="debug-dir-uri" select="'debug'" cx:type="xsd:string"/>
 
   <p:import href="split-css.xpl"/>
+  <p:import href="insert-amzn-region-magnification.xpl"/>
 
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
   <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl"/>
@@ -68,6 +76,10 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
   </p:variable>
 
   <p:variable name="html-subdir-name" select="(/epub-config/@html-subdir-name, '')[1]">
+    <p:pipe port="meta" step="html-splitter"/>
+  </p:variable>
+  
+  <p:variable name="amzn-region-magnification" select="(/epub-config/@amzn-region-magnification, '')[1]">
     <p:pipe port="meta" step="html-splitter"/>
   </p:variable>
 
@@ -180,11 +192,22 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
         <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
       </epub:split-css>
       
+      <p:sink/>
+      
+      <epub:insert-amzn-region-magnification name="insert-amzn-region-magnification" cx:depends-on="per-split-css">
+        <p:input port="source">
+          <p:pipe port="result" step="per-split-css"/>
+        </p:input>
+        <p:with-option name="amzn-region-magnification" select="$amzn-region-magnification"/>
+        <p:with-option name="debug" select="$debug"/>
+        <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+      </epub:insert-amzn-region-magnification>
+      
       <!--  *
             * the store-chunks step iterates over the file-uris and store them
             * regarding their file extension and the output target
             * -->
-      <p:for-each name="store-chunks">
+      <p:for-each name="store-chunks" cx:depends-on="insert-amzn-region-magnification">
         <p:output port="files">
           <p:pipe port="result" step="collect-file-uri"/>
         </p:output>
@@ -193,7 +216,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
         </p:output>
 
         <p:iteration-source>
-          <p:pipe port="result" step="per-split-css"/>
+          <p:pipe port="result" step="insert-amzn-region-magnification"/>
         </p:iteration-source>
 
         <p:variable name="chunk-file-uri" select="replace(base-uri(/*), 'chunks/', 'epub/OEBPS/')">
@@ -247,8 +270,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
               <p:with-option name="href" select="$chunk-file-uri"/>
             </p:store>
           </p:when>
-          <p:when
-            test="$target = 'EPUB3' and matches(base-uri(), 'nav\.xhtml$') and (normalize-space($html-subdir-name))">
+          <p:when test="$target = 'EPUB3' and matches(base-uri(), 'nav\.xhtml$') and (normalize-space($html-subdir-name))">
             <p:store include-content-type="false" name="store-chunk" omit-xml-declaration="false" method="xhtml">
               <p:with-option name="indent" select="if ($indent = 'true') then 'true' else 'false'"/>
               <p:with-option name="href" select="$chunk-file-uri"/>
@@ -259,10 +281,12 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
                 * -->
           <p:when test="$target eq 'EPUB3'">
             <p:delete match="html:meta[@name = 'sequence']"/>
-            <p:store include-content-type="false" name="store-chunk" omit-xml-declaration="false" method="xhtml">
-              <p:with-option name="indent" select="if ($indent = 'true') then 'true' else 'false'"/>
-              <p:with-option name="href" select="$chunk-file-uri"/>
-            </p:store>
+            
+              <p:store include-content-type="false" name="store-chunk" omit-xml-declaration="false" method="xhtml">
+                <p:with-option name="indent" select="if ($indent = 'true') then 'true' else 'false'"/>
+                <p:with-option name="href" select="$chunk-file-uri"/>
+              </p:store>            
+            
           </p:when>
           <p:when test="$target = ('EPUB2', 'KF8') and matches(base-uri(), 'nav\.xhtml$')">
             <p:documentation>drop nav.xhtml for EPUB2</p:documentation>
@@ -272,13 +296,17 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
                 * store as XHTML 1.1 files for EPUB2 format
                 * -->
           <p:otherwise>
+            
             <p:delete match="html:meta[@name = 'sequence'] | @epub:type | html:nav[@epub:type = 'landmarks']"/>
+            
             <p:rename match="html:nav" new-name="div" new-namespace="http://www.w3.org/1999/xhtml"/>
+            
             <p:store include-content-type="true" name="store-chunk" omit-xml-declaration="false" method="xhtml"
               doctype-public="-//W3C//DTD XHTML 1.1//EN" doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
               <p:with-option name="indent" select="if ($indent = 'true') then 'true' else 'false'"/>
               <p:with-option name="href" select="$chunk-file-uri"/>
             </p:store>
+            
           </p:otherwise>
         </p:choose>
 
