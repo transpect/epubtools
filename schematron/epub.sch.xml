@@ -570,20 +570,20 @@
       </report>
       <report test="true()" role="info" id="lang">
         <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
-        <span class="category"><xsl:value-of select="string-join(('epubtools_lang', distinct-values(@xml:lang | @lang)), '-')"/></span>
-        Language: <value-of select="distinct-values(@xml:lang | @lang)"/>
+        <span class="corrected-id"><xsl:value-of select="string-join(('lang', distinct-values(@xml:lang | @lang)), '-')"/></span>
+        HTML element '<name/>' with lang attribute '<value-of select="distinct-values(@xml:lang | @lang)"/>'
       </report>
     </rule>
        <rule context="/c:wrap/epub-config[1]/metadata[1]/dc:language">
       <report test="true()" role="info" id="doc_language">
       <span class="srcpath"><xsl:value-of select="'BC_orphans'"/></span>
-        Document Language: <xsl:value-of select="."/> 
+        Document language accodding to dc:language: <xsl:value-of select="."/> 
       </report>
     </rule>
     <rule context="/c:wrap">
       <report test="html:html[1]//*[@lang | @xml:lang]" role="info" id="other_languages">
       <span class="srcpath"><xsl:value-of select="'BC_orphans'"/></span>
-        Other Language codes an their occurance: 
+        Other Language codes an their occurrences: 
         <xsl:variable name="occ" select="html:html[1]//*[@xml:lang]"/>
         <ul xmlns="http://www.w3.org/1999/xhtml">
            <xsl:for-each select="distinct-values(html:html[1]//*[@xml:lang]/@xml:lang)">
