@@ -14,6 +14,7 @@ include "heading-conf.rnc" {
       indent?,
       variant?,
       css-handling?,
+      amzn-region-magnification?,
       page-map-xml?,
       html-subdir-name?,
       out-file-basename?,
@@ -49,7 +50,14 @@ css-handling =
   attribute css-handling {
     "unchanged" | "regenerated" | "regenerated-per-split"
   }
-page-map-xml = attribute page-map-xml { "true" | "false" }
+
+## If the attribute has the value 'true', markup to support
+##       Amazon's Kindle Region Magnification feature is automatically inserted in each 
+##       HTML file.
+##     
+amzn-region-magnification =
+  attribute amzn-region-magnification { xsd:boolean }
+page-map-xml = attribute page-map-xml { xsd:boolean }
 html-subdir-name =
   
   ## Whether the HTML files (except for a generated nav.xhtml) should be put in a subdirectory
@@ -96,6 +104,7 @@ landmark-types =
   | "loi"
   | "lot"
   | "lov"
+  | "notice"
   | "other-credits"
   | "part"
   | "preamble"
@@ -138,6 +147,18 @@ toc-type-element =
   element type {
     attribute name { "toc" },
     attribute heading { text }?,
+    attribute fallback-id-for-landmark {
+      xsd:NCName
+      >> a:documentation [
+           "This attribute may contain the ID of a rendered toc (a div, for example) that does *not* have the\x{a}" ~
+           '          epub:type="toc" attribute. If the epub:type-toc is not included in the spine, this may be used to indicate which \x{a}' ~
+           "          alternative rendered piece of content the toc landmark entry should point to. If there is no element with that\x{a}" ~
+           "          ID (and no epub:type toc), there will be no toc landmark element. If, on the other hand, there is an epub:type toc\x{a}" ~
+           "          and if it is a nav element, the toc landmark will point to this epub:type toc. (If there is an epub:type toc but\x{a}" ~
+           "          it is not a nav element, there will probably no toc landmark. We should check epub:type on non-nav elements in \x{a}" ~
+           "          Schematron unlesss epubcheck does already warn about it.)"
+         ]
+    }?,
     hidden-attribute,
     # This is not configurable (yet). It is fixed to nav.xhtml. <ref name="file-attribute"/>
     global-atts
@@ -210,7 +231,15 @@ meta =
      & element dc:publisher { text }?
      & element dc:rights { text }?
      & element dc:date { text }?
-     & element dc:language { text }?)
+     & element dc:language { text }?
+     & element dc:description { text }?
+     & element dc:subject { text }*
+     & element meta {
+         (attribute property { text },
+          text)
+         | (attribute name { text }
+            & attribute content { text })
+       }*)
   }
 [
   s:pattern [
