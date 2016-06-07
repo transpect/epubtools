@@ -438,6 +438,26 @@
             <text/>
           </element>
         </zeroOrMore>
+        <zeroOrMore>
+          <element name="meta">
+            <choice>
+              <group>
+                <attribute name="property">
+                  <text/>
+                </attribute>
+                <text/>
+              </group>
+              <interleave>
+                <attribute name="name">
+                  <text/>
+                </attribute>
+                <attribute name="content">
+                  <text/>
+                </attribute>
+              </interleave>
+            </choice>
+          </element>
+        </zeroOrMore>
       </interleave>
     </element>
   </define>
