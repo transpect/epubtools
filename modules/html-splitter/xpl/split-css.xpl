@@ -8,15 +8,23 @@
   name="split-css"
   type="epub:split-css">
   
+  <p:documentation xmlns="http://www.w3.org/1999/xhtml">
+    This pipeline is used to split the CSS based on the submitted value of the option <code>css-handling</code>.
+    With the value <code>regenerated-per-split</code>, the CSS is analyzed and splitted for each HTML chunk. Commonly 
+    used CSS properties are stored to a global CSS stylesheet, whereas unused CSS properties are filtered.
+    With the value <code>unchanged</code> CSS and HTML remain unchanged.
+    Per default, a new CSS stylesheet is generated from the CSS XML representation.
+  </p:documentation>
+  
   <p:input port="source" sequence="true" primary="true">
-    <p:documentation>
-      Sequence of HTML chunks
+    <p:documentation xmlns="http://www.w3.org/1999/xhtml">
+      Sequence of HTML chunks, e.g. output from <code>html-splitter.xsl</code>
     </p:documentation>
   </p:input>
   
   <p:input port="css-xml" primary="false">
-    <p:documentation>
-      CSS XML representation
+    <p:documentation xmlns="http://www.w3.org/1999/xhtml">
+      XML representation of the parsed CSS derived from <code>css:expand</code>.
     </p:documentation>
   </p:input>
   
