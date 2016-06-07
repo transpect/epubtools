@@ -26,6 +26,9 @@
           <ref name="css-handling"/>
         </optional>
         <optional>
+          <ref name="amzn-region-magnification"/>
+        </optional>
+        <optional>
           <ref name="page-map-xml"/>
         </optional>
         <optional>
@@ -126,13 +129,20 @@
       </choice>
     </attribute>
   </define>
+  
+  <define name="amzn-region-magnification">
+    <a:documentation>If the attribute has the value 'true', markup to support
+      Amazon's Kindle Region Magnification feature is automatically inserted in each 
+      HTML file.
+    </a:documentation>
+    <attribute name="amzn-region-magnification">
+      <data type="boolean"/>
+    </attribute>
+  </define>
 
   <define name="page-map-xml">
     <attribute name="page-map-xml">
-      <choice>
-        <value>true</value>
-        <value>false</value>
-      </choice>
+      <data type="boolean"/>
     </attribute>
   </define>
 
@@ -188,6 +198,7 @@
       <value>loi</value>
       <value>lot</value>
       <value>lov</value>
+      <value>notice</value>
       <value>other-credits</value>
       <value>part</value>
       <value>preamble</value>
