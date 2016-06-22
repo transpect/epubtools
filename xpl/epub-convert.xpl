@@ -92,6 +92,9 @@
   <p:option name="use-svg" select="''" cx:type="xs:string" required="false"/>
   <p:option name="debug-dir-uri" select="'debug'" cx:type="xs:string"/>
   <p:option name="status-dir-uri" select="'status'" cx:type="xs:string"/>
+  <p:option name="id-in-report-heading" select="'false'">
+    <p:documentation>Whether to adorn the reports’ tr:rule-family with the first dc:identifier found in the OPF.</p:documentation>
+  </p:option>
   
   <!-- URIs are resolved by XML catalogs, which are located as default in xmlcatalog/catalog.xml -->
   
@@ -380,6 +383,9 @@
       <p:pipe port="secondary" step="filter-default-schematron"/>
     </p:iteration-source>
     <p:output port="report" primary="true"/>
+    <p:variable name="identifier" select="/opf:package/opf:metadata/dc:identifier[1]">
+      <p:pipe port="result" step="create-opf"/>
+    </p:variable>
     
     <tr:oxy-validate-with-schematron name="sch0">
       <p:input port="source">
@@ -404,7 +410,7 @@
         <p:pipe port="report" step="sch0"/>
       </p:input>
     </p:add-attribute>
-    <p:add-attribute name="sch" match="/*" attribute-name="tr:step-name">
+    <p:add-attribute name="sch1" match="/*" attribute-name="tr:step-name">
       <p:with-option name="attribute-value" 
         select="string-join(
                   (
@@ -420,6 +426,23 @@
         <p:pipe port="result" step="create-opf"/>
       </p:with-option>
     </p:add-attribute>
+    <p:choose>
+      <p:when test="$id-in-report-heading = 'true'">
+        <p:add-attribute name="sch" match="/*" attribute-name="tr:rule-family">
+          <p:with-option name="attribute-value" 
+            select="string-join(
+                      (
+                        /*/@tr:rule-family,
+                        $identifier
+                      ),
+                      '-'
+                    )"/>
+        </p:add-attribute>    
+      </p:when>
+      <p:otherwise>
+        <p:identity/>
+      </p:otherwise>
+    </p:choose>
   </p:for-each>
 
   <p:sink/>
