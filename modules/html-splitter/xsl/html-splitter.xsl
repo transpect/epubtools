@@ -1157,7 +1157,7 @@
             <xsl:apply-templates select="$toc-ncx/ncx:navMap" mode="nav-xhtml"/>
           </ol>
         </nav>
-        <xsl:if test="$pgl">
+        <xsl:if test="$pgl and not($final-pub-type = ('EPUB2'))">
           <xsl:call-template name="page-list-nav-inner"/>
         </xsl:if>
       </body>
@@ -1288,7 +1288,7 @@
       <xsl:with-param name="landmarks" select="$landmarks"/>
     </xsl:call-template>
     <xsl:next-match/>
-    <xsl:if test="$pgl">
+    <xsl:if test="$pgl and not($final-pub-type = ('EPUB2'))">
       <xsl:call-template name="page-list-nav-inner"/>
     </xsl:if>
   </xsl:template>
