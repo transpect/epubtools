@@ -15,15 +15,18 @@
   <xsl:import href="http://transpect.io/xslt-util/mime-type/xsl/mime-type.xsl"/>
 
   <xsl:param name="stored-file"/>
+  <xsl:param name="debug-dir-uri"/>
 
   <xsl:variable name="html-form-elements" select="('form', 'input', 'button', 'option', 'select', 'textarea')" as="xs:string+"/>
 
   <xsl:template match="/">
     <xsl:variable name="file-extension" select="replace($stored-file , '.*\.(.*)$', '$1')"/>
     <xsl:variable name="media-type" select="tr:fileext-to-mime-type($file-extension)"/>
-    <xsl:if test="not(contains($stored-file, '/debug/')) or contains($stored-file, 'epub/OEBPS')">
-      <xsl:if test="contains($stored-file, '/debug/') and contains($stored-file, 'epub/OEBPS')">
-        <xsl:message select="'WARNING: adding the following debug and output file to epub container:', $stored-file"/>
+    <!-- exclude debug files from html-splitter.xsl which are 
+         submitted over the same output port as regular html files -->
+    <xsl:if test="not(contains($stored-file, $debug-dir-uri)) or contains($stored-file, 'epub/OEBPS')">
+      <xsl:if test="contains($stored-file, $debug-dir-uri) and contains($stored-file, 'epub/OEBPS')">
+        <xsl:message select="'[WARNING]: adding the following debug and output file to epub container:', $stored-file"/>
       </xsl:if>
       <c:file target-filename="{$stored-file}"
               oebps-name="{replace($stored-file, '.*epub/(OEBPS/.*)$', '$1')}" 

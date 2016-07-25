@@ -203,6 +203,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
         <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
       </epub:insert-amzn-region-magnification>
       
+      
       <!--  *
             * the store-chunks step iterates over the file-uris and store them
             * regarding their file extension and the output target
@@ -312,6 +313,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
 
         <p:xslt name="collect-file-uri">
           <p:with-param name="stored-file" select="$chunk-file-uri"/>
+          <p:with-param name="debug-dir-uri" select="$debug-dir-uri"/>
           <p:input port="source">
             <p:pipe port="current" step="store-chunks"/>
           </p:input>
@@ -401,6 +403,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
         <p:with-option name="active" select="$debug"/>
         <p:with-option name="base-uri" select="$debug-dir-uri"/>
       </tr:store-debug>
+      
     </p:group>
 
     <p:catch name="split-failed">
