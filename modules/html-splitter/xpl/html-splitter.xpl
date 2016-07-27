@@ -79,7 +79,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
     <p:pipe port="meta" step="html-splitter"/>
   </p:variable>
   
-  <p:variable name="amzn-region-magnification" select="(/epub-config/@amzn-region-magnification, '')[1]">
+  <p:variable name="amzn-region-magnification" select="(/epub-config/metadata/meta[@name eq 'RegionMagnification']/@content, '')[1]">
     <p:pipe port="meta" step="html-splitter"/>
   </p:variable>
 
@@ -202,7 +202,6 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
         <p:with-option name="debug" select="$debug"/>
         <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
       </epub:insert-amzn-region-magnification>
-      
       
       <!--  *
             * the store-chunks step iterates over the file-uris and store them
