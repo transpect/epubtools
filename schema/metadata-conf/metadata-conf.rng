@@ -26,9 +26,6 @@
           <ref name="css-handling"/>
         </optional>
         <optional>
-          <ref name="amzn-region-magnification"/>
-        </optional>
-        <optional>
           <ref name="page-map-xml"/>
         </optional>
         <optional>
@@ -127,16 +124,6 @@
         <value>regenerated</value>
         <value>regenerated-per-split</value>
       </choice>
-    </attribute>
-  </define>
-  
-  <define name="amzn-region-magnification">
-    <a:documentation>If the attribute has the value 'true', markup to support
-      Amazon's Kindle Region Magnification feature is automatically inserted in each 
-      HTML file.
-    </a:documentation>
-    <attribute name="amzn-region-magnification">
-      <data type="boolean"/>
     </attribute>
   </define>
 
