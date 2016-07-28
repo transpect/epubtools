@@ -166,7 +166,7 @@
     <xsl:param name="origin" as="attribute(origin)"/>
     <xsl:param name="common-path" as="xs:string"/>
     <xsl:variable name="prelim" as="xs:string" 
-      select="if ($origin = 'internal')
+      select="if (matches($origin, '^(file://)internal$'))
               then concat('styles/internal-', $origin/../css:selector/@position ,'.css')
               else replace($origin, $common-path, '')"/>
     <!-- This is not tested for production where the common path (the epub packing directory)
