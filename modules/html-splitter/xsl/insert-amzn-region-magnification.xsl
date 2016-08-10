@@ -26,7 +26,7 @@
   
   <xsl:template match="div[@class eq 'magnification']">
     <xsl:variable name="index" select="index-of($magnification-divs, .)" as="xs:integer"/>
-    <xsl:variable name="id-base" select="concat('amzn-id-', $basename, '-', $index)" as="xs:string"/>
+    <xsl:variable name="id-base" select="(p[@id][1]/@id, concat('amzn-id-', $basename, '-', $index))[1]" as="xs:string"/>
     <div id="{concat($id-base, '-txt')}" class="source-mag">
       <a class="app-amzn-magnify" data-app-amzn-magnify="{concat('{&quot;targetId&quot;:&quot;', $id-base, '-magTarget&quot;,',
                                                                  '&quot;sourceId&quot;:&quot;' , $id-base, '-txt&quot;,',
