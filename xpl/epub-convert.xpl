@@ -271,7 +271,7 @@
   		<p:pipe port="result" step="base-uri"/>
   	</p:with-option>
     <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
-    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"><p:empty/></p:with-option>
+    <p:with-option name="debug-dir-uri" select="replace($debug-dir-uri, '^(.+)\?.*$', '$1')"><p:empty/></p:with-option>
   </epub:zip-package>
   
   <cxf:info name="zip-info">

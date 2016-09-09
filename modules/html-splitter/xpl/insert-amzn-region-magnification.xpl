@@ -50,7 +50,7 @@
     </p:iteration-source>
 
     <p:choose name="choose">
-      <p:when test="$amzn-region-magnification eq 'true' and not(contains(base-uri(), $debug-dir-uri))">
+      <p:when test="$amzn-region-magnification eq 'true' and not(contains(base-uri(), replace($debug-dir-uri, '^(.+)\?.*$', '$1')))">
         <p:output port="result" sequence="true" primary="true">
           <p:pipe port="result" step="xslt"/>
           <p:pipe port="secondary" step="xslt"/>

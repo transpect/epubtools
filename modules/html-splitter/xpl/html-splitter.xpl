@@ -140,7 +140,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
           <p:pipe port="meta" step="html-splitter"/>
         </p:input>
         <p:with-param name="debug" select="$debug"/>
-        <p:with-param name="debug-dir-uri" select="$debug-dir-uri"/>
+        <p:with-param name="debug-dir-uri" select="replace($debug-dir-uri, '^(.+)\?.*$', '$1')"/>
         <p:with-param name="final-pub-type" select="$target"/>
         <p:with-param name="indent" select="$indent"/>
         <p:with-param name="datadir" select="$workdir"/>
@@ -312,7 +312,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
 
         <p:xslt name="collect-file-uri">
           <p:with-param name="stored-file" select="$chunk-file-uri"/>
-          <p:with-param name="debug-dir-uri" select="$debug-dir-uri"/>
+          <p:with-param name="debug-dir-uri" select="replace($debug-dir-uri, '^(.+)\?.*$', '$1')"/>
           <p:input port="source">
             <p:pipe port="current" step="store-chunks"/>
           </p:input>
@@ -427,7 +427,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
       </p:variable>
       
       <tr:propagate-caught-error name="propagate" msg-file="splitter-error.txt" code="epub:SPLT01">
-        <p:with-option name="status-dir-uri" select="concat($debug-dir-uri, '/status')"/>
+        <p:with-option name="status-dir-uri" select="concat(replace($debug-dir-uri, '^(.+)\?.*$', '$1'), '/status')"/>
         <p:input port="source">
           <p:pipe port="error" step="split-failed"/>
         </p:input>
