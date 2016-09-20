@@ -104,7 +104,6 @@
   <p:import href="../modules/zip-package/xpl/zip-package.xpl"/>
   
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
-  <p:import href="http://transpect.io/calabash-extensions/transpect-lib.xpl"/>
   <p:import href="http://transpect.io/schematron/xpl/oxy-schematron.xpl"/>
   <p:import href="http://transpect.io/xproc-util/simple-progress-msg/xpl/simple-progress-msg.xpl"/>
 	<p:import href="http://transpect.io/xproc-util/file-uri/xpl/file-uri.xpl"/>
