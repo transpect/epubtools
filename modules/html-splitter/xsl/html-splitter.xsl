@@ -1586,9 +1586,11 @@
     </xsl:choose>
   </xsl:template>
 
+  <xsl:param name="newline-regex" select="'(&#x85;|&#x2028;|&#x2029;|&#xd;&#xa;|\n)'" as="xs:string"/>
+
   <!-- remove line breaks in input -->
-  <xsl:template match="html:body//html:*[not(local-name() = ('pre', 'script'))]/text()[matches(., '\n')]" mode="remove-surrounding-text remove-other-pub-type-content">
-    <xsl:value-of select="replace(., '\s*\n\s*', '&#x20;')"/>
+  <xsl:template match="html:body//html:*[not(local-name() = ('pre', 'script'))]/text()[matches(., $newline-regex)]" mode="remove-surrounding-text remove-other-pub-type-content">
+    <xsl:value-of select="replace(., concat('\s*', $newline-regex, '\s*'), '&#x20;')"/>
   </xsl:template>
 
   <xsl:template match="html:body//html:*[matches(local-name(), '^(h\d|p|div|section|aside|nav|figure|img|footer|blockquote|header|ol|ul|li|dd|dt|dl|td|th|table|tfoot|hr)$')][$indent = 'selective']" 
