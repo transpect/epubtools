@@ -1586,7 +1586,7 @@
     </xsl:choose>
   </xsl:template>
 
-  <xsl:param name="newline-regex" select="'(&#x85;|&#x2028;|&#x2029;|&#xd;&#xa;|\n)'" as="xs:string"/>
+  <xsl:param name="newline-regex" select="'(&#x85;|&#x2028;|&#x2029;|&#xd;&#xa;|&#x10fb;|\n)'" as="xs:string"/>
 
   <!-- remove line breaks in input -->
   <xsl:template match="html:body//html:*[not(local-name() = ('pre', 'script'))]/text()[matches(., $newline-regex)]" mode="remove-surrounding-text remove-other-pub-type-content">
