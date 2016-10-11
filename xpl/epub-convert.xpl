@@ -38,6 +38,7 @@
     <p:documentation>/hierarchy, config file for HTML splitter (see sample/hierarchy.xml).
       May be included in meta port doc as /epub-config/hierarchy so
       you don’t have to submit an extra document to this port</p:documentation>
+    <p:empty/>
   </p:input>
   <p:input port="meta" primary="false">
     <p:documentation>/epub-config – an EPUB file’s metadata and other configuration settings (see sample/epub-config.xml for an example).
