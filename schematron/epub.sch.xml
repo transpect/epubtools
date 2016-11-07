@@ -161,6 +161,14 @@
         <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
         HTML file '<value-of select="@href"/>' is too large for some reading systems: <value-of 
           select="format-number($size-in-kb, '#0')"/>&#xa0;kB
+      	If possible insert some breaking points or decrease the number of characters that are included per file.
+      	<br xmlns="http://www.w3.org/1999/xhtml"/>
+      	<br xmlns="http://www.w3.org/1999/xhtml"/>
+      	To better estimate how long the file is, here is the last text of the file:
+      	<br xmlns="http://www.w3.org/1999/xhtml"/>
+      	<blockquote xmlns="http://www.w3.org/1999/xhtml">
+      		<xsl:value-of select="$element-in-split/(descendant-or-self::*[self::html:p][normalize-space()])[last()]"/>
+      	</blockquote>
       </report>
     </rule>
   </pattern>
@@ -845,7 +853,15 @@
     <diagnostic id="cmyk-image_de" xml:lang="de">Bilddatei '<value-of select="@href"/>' ist CMYK. Nicht alle Lesegeräte stellen diese Bilder dar.</diagnostic>
     <diagnostic id="large-html-file_de" xml:lang="de">HTML-Datei '<value-of select="@href"/>' ist zu groß für manche Lesegeräte: <value-of 
           select="format-number($size-in-kb, '#0')"/>&#xa0;kB. Grenze: <value-of 
-          select="format-number($max, '#0')"/>&#xa0;kB</diagnostic>
+          select="format-number($max, '#0')"/>&#xa0;kB<br xmlns="http://www.w3.org/1999/xhtml"/>
+     Fügen Sie, wenn möglich, in diese Datei Umbruch-Anweisungen ein oder veranlassen Sie, dass die Zahl der verwendeten Zeichen, die in einer HTML-Datei vorkommen dürfen, verringert wird.
+     <br xmlns="http://www.w3.org/1999/xhtml"/><br xmlns="http://www.w3.org/1999/xhtml"/>
+     Damit Sie besser abschätzen können, bis wohin die Datei geht, steht hier der Inhalt des letzten Absatzes:
+     <br xmlns="http://www.w3.org/1999/xhtml"/>
+    	<blockquote xmlns="http://www.w3.org/1999/xhtml">
+     		<xsl:value-of select="$element-in-split/(descendant-or-self::*[self::html:p][normalize-space()])[last()]"/>
+    	</blockquote>
+    </diagnostic>
     <diagnostic id="large-image-file_de" xml:lang="de">Bilddatei '<value-of select="@href"/>' ist recht groß: <value-of 
           select="format-number($size-in-mb, '#0.00')"/>&#xa0;MB</diagnostic>
     <diagnostic id="large-image_de" xml:lang="de">Bild '<value-of select="@href"/>' ist recht groß: <value-of 
