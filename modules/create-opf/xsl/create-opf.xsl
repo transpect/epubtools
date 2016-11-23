@@ -65,6 +65,10 @@
               </xsl:for-each>
               <xsl:if test="name() eq 'dc:identifier'">
                 <xsl:choose>
+                   <xsl:when test="@opf:scheme eq 'ORDER-NUMBER'">
+                    <xsl:attribute name="id" select="'bookid'"/>
+                    <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
+                  </xsl:when>
                   <xsl:when test="@opf:scheme ne 'ISBN'">
                     <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
                   </xsl:when>
