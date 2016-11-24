@@ -6,9 +6,16 @@
 	version="2.0"
 	exclude-result-prefixes="xs">
 	
-	<!-- SMIL PROCESSING: if a raw SMIL file is present, relate its chunks’ text links to the HTML file they point to. -->
+	<!--   *
+	       * SMIL PROCESSING: if a raw SMIL file is present, relate its chunks’ text links to the HTML file they point to.
+	       * 
+	       * This template expects HTML elements with ids such as "au-1", "au-2". Each id must match an id in the SMIL file  
+	       * 
+	       * -->
 	
 	<xsl:template name="smil">
+	  <xsl:param name="html-subdir-name" as="xs:string"/>
+	  <xsl:param name="datadir" as="xs:string"/>
 		<xsl:param name="smil" as="element(smil:smil)"/>
 		<xsl:param name="text" as="document-node(element(html:chunks))"/>
 		
@@ -48,7 +55,7 @@
 										test="string-length($idref-to-html) gt 0
 										and not(*[1]/@id = $idref-to-html)
 										and $html-anchored-groups/*/@id = $idref-to-html">
-										<xsl:message terminate="yes">Misalignment? Some other html anchor group than group #<xsl:value-of
+										<xsl:message terminate="yes">[ERROR] Misalignment? Some other html anchor group than group #<xsl:value-of
 											select="$group-number"/> (namely, #<xsl:value-of
 												select="$html-anchored-groups[*/@id = $idref-to-html]/position()"/>) matches the SMIL file's idref
 											<xsl:value-of select="$idref-to-html"/>
@@ -65,7 +72,7 @@
 								</xsl:choose>
 							</xsl:when>
 							<xsl:otherwise>
-								<xsl:message terminate="yes">Item counts in group <xsl:value-of select="$group-number"/> (starting with
+							  <xsl:message terminate="yes">[ERROR] Item counts in group <xsl:value-of select="$group-number"/> (starting with
 									<xsl:value-of select="*[1]/@id"/>) differ. Text: <xsl:value-of select="count(*)"/>, SMIL: <xsl:value-of
 										select="count($raw-smil-items)"/>. First text item: <xsl:copy-of select="*[1]"/>, first SMIL item:
 									<xsl:copy-of select="$raw-smil-items[1]"/>
@@ -75,14 +82,15 @@
 					</xsl:for-each>
 				</xsl:when>
 				<xsl:otherwise>
-					<xsl:message terminate="yes">Group counts differ. Text: <xsl:value-of select="count($html-anchored-groups)"/>, SMIL:
+					<xsl:message terminate="yes">[ERROR] Group counts differ. Text: <xsl:value-of select="count($html-anchored-groups)"/>, SMIL:
 						<xsl:value-of select="count($smil-anchored-groups)"/>. </xsl:message>
 				</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		
 		<xsl:for-each-group select="$patched-smil-pars" group-by="replace(smil:text/@src, '[^.]+$', '')">
-			<xsl:result-document href="{$datadir}/{current-grouping-key()}smil" format="xml">
+		  <xsl:variable name="path" select="replace(concat($datadir, '/chunks/', $html-subdir-name, '/', current-grouping-key(), 'smil'), '/+', '/')" as="xs:string"/>
+			<xsl:result-document href="{$path}" format="xml">
 				<smil xmlns="http://www.w3.org/ns/SMIL">
 					<body xmlns="http://www.w3.org/ns/SMIL">
 						<xsl:sequence select="current-group()"/>

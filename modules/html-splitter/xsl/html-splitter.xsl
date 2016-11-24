@@ -301,6 +301,8 @@
       <xsl:call-template name="smil">
         <xsl:with-param name="smil" select="document($raw-smil-filename)/smil:smil"/>
         <xsl:with-param name="text" select="$chunks"/>
+        <xsl:with-param name="datadir" select="$datadir"/>
+        <xsl:with-param name="html-subdir-name" select="$html-subdir-name"/>
       </xsl:call-template>
     </xsl:if>
 

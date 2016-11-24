@@ -270,6 +270,18 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
               <p:with-option name="href" select="$chunk-file-uri"/>
             </p:store>
           </p:when>
+          <!--  *
+                * XML
+                * -->
+          <p:when test="matches($chunk-file-uri, '\.(xml|smil)$')">
+            <p:store name="store-chunk" omit-xml-declaration="false" method="xml">
+              <p:with-option name="indent" select="if ($indent = 'true') then 'true' else 'false'"/>
+              <p:with-option name="href" select="$chunk-file-uri"/>
+            </p:store>
+          </p:when>
+          <!--  *
+                * nav document
+                * -->
           <p:when test="$target = 'EPUB3' and matches(base-uri(), 'nav\.xhtml$') and (normalize-space($html-subdir-name))">
             <p:store include-content-type="false" name="store-chunk" omit-xml-declaration="false" method="xhtml">
               <p:with-option name="indent" select="if ($indent = 'true') then 'true' else 'false'"/>
