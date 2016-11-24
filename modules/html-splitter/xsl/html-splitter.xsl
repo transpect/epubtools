@@ -16,7 +16,7 @@
   exclude-result-prefixes="html opf xs ncx tr smil dc epub svg dtb">
 
 	<!-- create references between smil and html chunks -->
-	<xsl:import href="media-overlay.xsl"/>
+	<xsl:include href="media-overlay.xsl"/>
 
   <xsl:output method="text" />
 
