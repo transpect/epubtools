@@ -296,7 +296,7 @@
         </xsl:apply-templates>
       </xsl:result-document>
     </xsl:for-each>
-
+    
     <xsl:if test="doc-available($raw-smil-filename)">
       <xsl:call-template name="smil">
         <xsl:with-param name="smil" select="document($raw-smil-filename)/smil:smil"/>
@@ -1470,12 +1470,11 @@
         </xsl:if>
       </xsl:when>
       <xsl:when test="count($chunk) gt 1">
-        <xsl:message>!!!!!!!!!!!!!!!!!!!!!!!! Error in source data: More than one element with id <xsl:value-of select="."/>.
-          Only considering the first one. !!!!!!!!!!!!!!!!!!!!!!!!!!</xsl:message>
+        <xsl:message>[ERROR] Error in source data: More than one element with id <xsl:value-of select="."/>.
+          Only considering the first one.</xsl:message>
       </xsl:when>
       <xsl:when test="count($chunk) eq 0 and count($elt) ge 1 and count($id) = 0">
-        <xsl:message>!!!!!!!!!!!!!!!!!!!!!!!! Error in intermediate data: Element with generated id <xsl:value-of select="."/> does not have a proper ID.
-          !!!!!!!!!!!!!!!!!!!!!!!!!!</xsl:message>
+        <xsl:message>[ERROR] Error in intermediate data: Element with generated id <xsl:value-of select="."/> does not have a proper ID.</xsl:message>
       </xsl:when>
       <xsl:when test="count($chunk) eq 0 and count($elt) ge 1">
         <xsl:attribute name="src" select="concat(
@@ -1485,8 +1484,7 @@
                                           )"/>
       </xsl:when>
       <xsl:when test="count($chunk) eq 0">
-        <xsl:message>!!!!!!!!!!!!!!!!!!!!!!!! Error in source data: There is no element with id <xsl:value-of select="."/>.
-          !!!!!!!!!!!!!!!!!!!!!!!!!!</xsl:message>
+        <xsl:message>[ERROR] Error in source data: There is no element with id <xsl:value-of select="."/>.</xsl:message>
         <xsl:message select="../.."></xsl:message>
       </xsl:when>
       <xsl:otherwise>
