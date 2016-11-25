@@ -35,11 +35,9 @@
         
         <xsl:if test="not(/epub-config/metadata/dc:identifier)">
           <xsl:message terminate="{$terminate-on-error}"
-            select="'
-&#xa;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&#xa;
- ERROR: NO dc:identifier FOUND IN METADATA FILE.
-&#xa;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'"
-          />
+            select="concat('&#xa;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&#xa;',
+                           'ERROR: NO dc:identifier FOUND IN METADATA FILE.',
+                           '&#xa;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&#xa;')"/>
         </xsl:if>
         
         <xsl:for-each
@@ -145,6 +143,9 @@
 
           <xsl:variable name="strip-path" select="opf:strip-path(@name)"/>
           <xsl:variable name="id" select="opf:id-from-filename(@name)"/>
+          <xsl:variable name="matching-media-overlay-id" 
+            select="for $i in collection()//c:file[replace(@name, '\.smil$', '') = replace($strip-path, '\.x?html$', '')]
+                    return opf:id-from-filename($i/@name)" as="xs:string?"/>
 
           <item href="{$strip-path}" media-type="{@media-type}" id="{opf:normalize-id($id)}">
 
@@ -172,11 +173,15 @@
             <xsl:if test="$target eq 'EPUB3' and matches($strip-path, '\.xpgt$')">
               <xsl:attribute name="fallback" select="'stylesheetcss'"/>
             </xsl:if>
+            
+            <xsl:if test="matches($strip-path, '\.x?html$') and exists($matching-media-overlay-id)">
+              <xsl:attribute name="media-overlay" select="$matching-media-overlay-id"/>
+            </xsl:if>
 
             <xsl:variable name="cover-nondir" as="xs:string?"
               select="if (collection()/epub-config/cover/@href) 
-                              then replace(collection()/epub-config/cover/@href, '^.+/', '')
-                              else ()"/>
+                      then replace(collection()/epub-config/cover/@href, '^.+/', '')
+                      else ()"/>
             <xsl:if test="replace($strip-path, '^.+/', '') eq $cover-nondir">
               <!-- rewrite id attribute: same as in metadata/meta[@name eq 'cover']/@content-->
               <xsl:attribute name="id"
