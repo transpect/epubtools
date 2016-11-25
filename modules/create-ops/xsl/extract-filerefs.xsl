@@ -10,6 +10,7 @@
   xmlns:xlink="http://www.w3.org/1999/xlink" 
   xmlns:tr="http://transpect.io" 
   xmlns:svg="http://www.w3.org/2000/svg" 
+  xmlns:smil="http://www.w3.org/ns/SMIL"
   version="2.0">
   
   <xsl:import href="functions.xsl"/>
@@ -40,7 +41,8 @@
       <xsl:variable name="fileref-elements"
         select="  collection()//html:*[local-name() = ('img', 'video', 'audio', 'source', 'script', 'object')]
                 | collection()/html:html/html:head/html:link[@href][$css-handling = 'unchanged' or not(@type eq 'text/css')]
-                | collection()/html:html/html:body//svg:svg//svg:image"
+                | collection()/html:html/html:body//svg:svg//svg:image
+                | document(replace(html:html/base-uri(), '\.x?html$', '.smil', 'i'))/smil:smil/smil:body//smil:par/smil:audio"
         as="element(*)*"/>
       <xsl:variable name="uri-atts" select="for $i in $fileref-elements return $i/@xlink:href|$i/@src|$i/@data|$i/@poster|$i/@href " as="attribute(*)*"/>
       <xsl:for-each select="$uri-atts[not(normalize-space())]">
