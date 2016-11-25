@@ -117,5 +117,9 @@
 		<xsl:param name="corresponding-text" as="element(*)" tunnel="yes"/>
 		<xsl:attribute name="id" select="$corresponding-text/@id"/>
 	</xsl:template>
+  
+  <xsl:template match="smil:audio/@src" mode="link-smil">
+    <xsl:attribute name="src" select="concat(if(matches(., concat('^', $html-subdir-name))) then '' else '../', .)"/>
+  </xsl:template>
 	
 </xsl:stylesheet>
