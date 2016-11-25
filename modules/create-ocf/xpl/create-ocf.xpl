@@ -40,7 +40,8 @@
       <p:pipe port="result" step="which-files"/>
     </p:output>
     <p:choose name="which-files">
-      <p:when test="not(tokenize($variant, '\s+') = ('FIXED-Apple', 'ORIGINAL-CSS'))">
+      <p:when test="not(tokenize($variant, '\s+') = ('FIXED-Apple', 'ORIGINAL-CSS')
+                        or $layout = 'fixed')">
         <p:output port="result" primary="true"/>
         <p:identity name="basic-files-1">
           <p:input port="source">
