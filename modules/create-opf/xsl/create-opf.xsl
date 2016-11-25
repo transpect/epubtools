@@ -10,7 +10,7 @@
   xmlns:cx="http://xmlcalabash.com/ns/extensions" 
   xmlns:c="http://www.w3.org/ns/xproc-step"
   xmlns="http://www.idpf.org/2007/opf" 
-  version="2.0">
+  version="2.0" exclude-result-prefixes="c cx html xsi xs ncx">
 
   <xsl:param name="target" select="'EPUB2'"/>
   <xsl:param name="layout" select="'reflowable'"/>
