@@ -788,6 +788,17 @@
       </report>
     </rule>
   </pattern>
+  
+  <pattern id="para-checks">
+    <rule context="/c:wrap/html:html[1]/html:body//html:p">
+      <let name="srcpath" value="tokenize(descendant-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
+      <report diagnostics="paragraph-very-long_de" role="error" id="paragraph-very-long"
+        test="string-length(normalize-space(string-join(descendant::text(), ''))) gt 10000">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        This paragraph consists of more than 10.000 characters and may affect performance of the e-reader or even cause it to crash. 
+      </report>
+    </rule>
+  </pattern>
 
   <diagnostics>
     <diagnostic id="image-dimensions_de" xml:lang="de">Pixel-<value-of select="if ($_width-or-height = 'height') then
@@ -880,6 +891,11 @@
       select="$normalized"/>' existiert nicht.</diagnostic>
     <diagnostic id="empty-img-alt_de" xml:lang="de">Das alt-Attribute bei Bild '<value-of select="replace(@src, '^.+/', '')"/>' 
       sollte nicht leer sein.</diagnostic>
+    <diagnostic id="paragraph-very-long_de" xml:lang="de">
+      <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+      Dieser Absatz beinhaltet mehr als 10000 Zeichen. 
+      Dieser Umstand kann auf manchen Lesegeräten zu längeren Ladezeiten oder zum Absturz führen.
+    </diagnostic>
   </diagnostics>
   
 </schema>
