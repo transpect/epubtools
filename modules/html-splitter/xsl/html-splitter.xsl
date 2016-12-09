@@ -341,13 +341,11 @@
 
   <!-- MODE: SEMIFLATTEN
        Dissolve divs which contain more than a single heading (important for later grouping) -->
-  <xsl:function name="tr:dissolvable-for-semiflatten" as="xs:boolean">
-    <xsl:param name="elt" as="element()"/>
-    <xsl:sequence select="exists($elt/self::html:*[local-name() = ('aside', 'div', 'nav', 'section', 'table', 'tbody', 'tr', 'td', 'th')])"/>
-  </xsl:function>
+  <xsl:variable name="tr:dissolvable-for-semiflatten" as="element(*)*"
+    select="//*[local-name() = ('aside', 'div', 'nav', 'section', 'table', 'tbody', 'tr', 'td', 'th')]"/>
 
   <xsl:template
-    match="*[tr:dissolvable-for-semiflatten(.)][
+    match="*[exists(. intersect $tr:dissolvable-for-semiflatten)][
                          (count(.//* intersect $candidates) gt 1)
                          and not(
                            generate-id(.) = $candidate-ids
@@ -358,11 +356,10 @@
     <xsl:processing-instruction name="origin" select="'A'"/>
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
-
+  
   <!-- match a no split element (i.e. cover div) before very first split candidate -->
   <xsl:template
-    match="*[tr:dissolvable-for-semiflatten(.)]
-            [. is (ancestor::html:body//*[tr:dissolvable-for-semiflatten(.)])[1]]
+    match="*[. is $tr:dissolvable-for-semiflatten[1]]
             [
               count(.//* intersect $candidates) eq 0
               and not(
@@ -383,8 +380,8 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="*[tr:dissolvable-for-semiflatten(.)][count(.//* intersect $candidates) eq 1]
-                        [not(ancestor::*[tr:dissolvable-for-semiflatten(.)][count(.//* intersect $candidates) eq 1])]" mode="semiflatten"
+  <xsl:template match="*[exists(. intersect $tr:dissolvable-for-semiflatten)][count(.//* intersect $candidates) eq 1]
+                        [not(ancestor::*[exists(. intersect $tr:dissolvable-for-semiflatten)][count(.//* intersect $candidates) eq 1])]" mode="semiflatten"
     priority="2">
     <xsl:param name="split-for" as="xs:string?"/>
     <xsl:variable name="contained-candidate" select=".//* intersect $candidates" as="element(*)"/>
