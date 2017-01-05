@@ -692,6 +692,15 @@
         <span class="srcpath">BC_orphans</span> content.opf: For best reading system support, there should be an 
         element opf:metadata/opf:meta[@name = 'cover'].
       </assert>-->
+    	<report test="*[starts-with(name(), 'dc:')]" role="info" id="meta-tags" diagnostics="meta-tags_de">
+    		 <span class="srcpath">BC_orphans</span>
+    			EPUB meta tags:<br xmlns="http://www.w3.org/1999/xhtml"/><br xmlns="http://www.w3.org/1999/xhtml"/>
+    			<ul xmlns="http://www.w3.org/1999/xhtml">
+    				<xsl:for-each select="*[starts-with(name(), 'dc:')]">
+    					<li><b><xsl:value-of select="local-name()"/>: </b><xsl:value-of select="."/></li>
+    				</xsl:for-each>
+    			</ul>
+    	</report>
     </rule>
 
     <rule context="opf:package/opf:metadata/opf:meta[@name = 'cover']">
@@ -816,6 +825,13 @@
           xmlns="http://www.w3.org/1999/xhtml" 
           href="http://www.idpf.org/epub/vocab/structure/">EPUB 3 Structural Semantics Vocabulary</a> (Stand 2015-08-26): 
       <xsl:value-of select="$allowed-type-string"/>.</diagnostic>
+  	<diagnostic id="meta-tags_de" xml:lang="de">EPUB Metadaten:<br xmlns="http://www.w3.org/1999/xhtml"/><br xmlns="http://www.w3.org/1999/xhtml"/>
+    			<ul xmlns="http://www.w3.org/1999/xhtml">
+    				<xsl:for-each select="*[starts-with(name(), 'dc:')]">
+    					<li><b><xsl:value-of select="local-name()"/>: </b><xsl:value-of select="."/></li>
+    				</xsl:for-each>
+    			</ul>
+  	</diagnostic>
     <diagnostic id="meta-cover_de" xml:lang="de">content.opf: Für optimale Lesesystem-Unterstützung muss ein
         Element opf:metadata/opf:meta[@name = 'cover'] in EPUB2-Publikationen angegeben werden.</diagnostic>
     <diagnostic id="mandatory-metadata_de" xml:lang="de">content.opf: Die folgenden erforderlichen Metadaten-Elemente fehlen: 
