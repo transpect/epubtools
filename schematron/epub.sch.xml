@@ -568,7 +568,7 @@
                                  else 
                                     for $s in (tokenize(@srcpath, '\s+')) 
                                     return concat($source-dir-uri, $s)"/>
-      <report test="not(@lang)" role="warning" id="xml-lang">
+      <report test="not(@lang)" role="warning" id="xml-lang" diagnostics="xml-lang_de">
         <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
         You should also set @lang in addition to @xml:lang
       </report>
@@ -576,22 +576,22 @@
         <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
          @lang '<value-of select="@lang"/>' and @xml:lang '<value-of select="@xml:lang"/>' differ
       </report>
-      <report test="true()" role="info" id="lang">
+      <report test="true()" role="info" id="lang" diagnostics="lang_de">
         <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
         <span class="corrected-id"><xsl:value-of select="string-join(('lang', distinct-values(@xml:lang | @lang)), '-')"/></span>
         HTML element '<name/>' with lang attribute '<value-of select="distinct-values(@xml:lang | @lang)"/>'
       </report>
     </rule>
        <rule context="/c:wrap/epub-config[1]/metadata[1]/dc:language">
-      <report test="true()" role="info" id="doc_language">
+      <report test="true()" role="info" id="doc_language" diagnostics="doc_language_de">
       <span class="srcpath"><xsl:value-of select="'BC_orphans'"/></span>
         Document language according to dc:language: <xsl:value-of select="."/> 
       </report>
     </rule>
     <rule context="/c:wrap">
-      <report test="html:html[1]//*[@lang | @xml:lang]" role="info" id="other_languages">
+      <report test="html:html[1]//*[@lang | @xml:lang]" role="info" id="other_languages" diagnostics="other_languages_de">
       <span class="srcpath"><xsl:value-of select="'BC_orphans'"/></span>
-        Other Language codes an their occurrences: 
+        Other Language codes and their occurrences: 
         <xsl:variable name="occ" select="html:html[1]//*[@xml:lang]"/>
         <ul xmlns="http://www.w3.org/1999/xhtml">
            <xsl:for-each select="distinct-values(html:html[1]//*[@xml:lang]/@xml:lang)">
@@ -810,11 +810,23 @@
   </pattern>
 
   <diagnostics>
+    <diagnostic id="other_languages_de" xml:lang="de">Weitere Sprachangaben und der Ort ihrer Verwendung: 
+      <xsl:variable name="occ" select="html:html[1]//*[@xml:lang]"/>
+      <ul xmlns="http://www.w3.org/1999/xhtml">
+        <xsl:for-each select="distinct-values(html:html[1]//*[@xml:lang]/@xml:lang)">
+          <li><xsl:value-of select="current()"/> :  <xsl:value-of select="count($occ[@xml:lang=current()])"/></li>
+        </xsl:for-each> 
+      </ul></diagnostic>
+    <diagnostic id="xml-lang_de" xml:lang="de">Es sollte auch dasn Attribut @lang zusätzlich zu @xml:lang gesetzt werden!</diagnostic>
+    <diagnostic id="lang_de" xml:lang="de"> HTML-Element '<name/>' mit lang-Attribut '<value-of select="distinct-values(@xml:lang | @lang)"/>'
+    </diagnostic>
+    <diagnostic id="doc_language_de" xml:lang="de">Sprache des Dokumentes laut Metadatenelement (dc:language): <xsl:value-of select="."/> 
+    </diagnostic>
     <diagnostic id="image-dimensions_de" xml:lang="de">Pixel-<value-of select="if ($_width-or-height = 'height') then
       'Höhe' else 'Breite'"/> von Bild '<value-of select="@href"/>' zu <value-of 
-          select="if ($_min-or-max = 'min') then 'klein' else 'groß'"/>. ´Wert: <value-of select="$width"/>. Schwellwert: <value-of 
+        select="if ($_min-or-max = 'min') then 'klein' else 'groß'"/>. ´Wert: <value-of select="$width"/>. Schwellwert: <value-of 
           select="$_threshold"/>.
-</diagnostic>
+    </diagnostic>
     <diagnostic id="custom-epub-type_de" xml:lang="de">epub:type in Namespace (Nicht-Standard-Wert): <xsl:value-of 
       select="$namespaced-type-string"/>.</diagnostic>
     <diagnostic id="version_de" xml:lang="de">content.opf: /package/@version muss 2.0 oder 3.0 sein. Gefunden: <value-of
