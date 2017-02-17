@@ -15,7 +15,7 @@
       <xsl:sequence select="tr:generate-manifest-entry(c:file[not(@error)][@oebps-name eq 'mimetype'], $epubdir)"/>
       <xsl:sequence select="tr:generate-manifest-entry(c:file[not(@error)][@oebps-name eq 'META-INF/container.xml'], $epubdir)"/>
       <!-- order other entries by oebps-name -->
-      <xsl:for-each select="c:file[not(@error)][not(@oebps-name = ('mimetype', 'META-INF/container.xml'))]">
+      <xsl:for-each select="c:file[not(@error)][normalize-space(@oebps-name)][not(@oebps-name = ('mimetype', 'META-INF/container.xml'))]">
         <xsl:sort select="upper-case(@oebps-name)" order="ascending"/>
         <xsl:sequence select="tr:generate-manifest-entry(., $epubdir)"/>
       </xsl:for-each>
