@@ -1384,6 +1384,10 @@
               <xsl:variable name="next-level" select="(current-group() except .)/@tr-heading-level" as="xs:integer*"/>
               <!--<xsl:message select="'nl1 ', $next-level"></xsl:message>-->
               <xsl:if test="min($next-level) = $level">
+                <!-- GI 2017-02-25: I’ve seen this message raised when processing the interview in the backmatter of
+                  unionsverlag/legacy/00399. It was a conditional split with level=102 (corresponds to p.emptyline
+                  in the UV splitting conf). The result looks ok. Haven’t investigated whether the message is 
+                  rightfully raised or whether it can be suppressed. -->
                 <xsl:message>Something's wrong (msg a): same level <xsl:value-of select="$level"/> in <xsl:sequence
                     select="(current-group() except .)[position() = (1 to 3)]"/> … <xsl:sequence
                     select="(current-group() except .)[last()]"/>
