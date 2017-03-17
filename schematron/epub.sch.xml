@@ -28,6 +28,7 @@
   may be used.</p>
 
   <xsl:include href="http://transpect.io/xslt-util/resolve-uri/xsl/resolve-uri.xsl"/>
+  <xsl:include href="isbncheck.xsl"/>
 
   <let name="oebps-paths" value="/c:wrap/cx:document[@name = 'wrap-file-uris']/c:file/@oebps-name"/>
 
@@ -582,7 +583,7 @@
         HTML element '<name/>' with lang attribute '<value-of select="distinct-values(@xml:lang | @lang)"/>'
       </report>
     </rule>
-       <rule context="/c:wrap/epub-config[1]/metadata[1]/dc:language">
+     <rule context="/c:wrap/epub-config[1]/metadata[1]/dc:language">
       <report test="true()" role="info" id="doc_language" diagnostics="doc_language_de">
       <span class="srcpath"><xsl:value-of select="'BC_orphans'"/></span>
         Document language according to dc:language: <xsl:value-of select="."/> 
@@ -629,6 +630,17 @@
         <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
         Empty split chunk. <xsl:value-of select="if (*) then $elements else 'Doesn’t contain any tagging at all.'"/>
       </assert>
+    </rule>
+  </pattern>
+
+  <pattern id="newline-in-chunks">
+    <rule context="/c:wrap/cx:document[@name = 'wrap-chunks']/html:html/html:body[not(@epub:type = 'cover')]">
+      <let name="srcpath" value="tokenize(descendant-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
+      <let name="newline-regex" value="'(&#x85;|&#x2028;|&#x2029;|&#xd;&#xa;|&#x10fb;)'"/>
+      <report test="matches(string-join(descendant::text(),''),$newline-regex)" role="warning" id="newline-in-chunk" diagnostics="newline-in-chunk_de">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+       Inapropriate newline character used: <xsl:value-of select="descendant::*[matches(string-join(text(),''),$newline-regex)]/text()"/>
+      </report>
     </rule>
   </pattern>
 
@@ -808,6 +820,35 @@
       </report>
     </rule>
   </pattern>
+  
+   <pattern id="isbn-checks">
+    <rule context="/c:wrap/html:html[1]/html:head/html:meta[@name= 'DC.identifier']">
+      <let name="length" value="string-length(@content)"/>
+      <let name="check_digit" value="substring(@content, $length, 1)"/>
+      <assert  diagnostics="wrong_isbn_length_de" role="error" id="wrong_isbn_length"
+        test="($length = 10) or ($length = 13)">
+        <span class="srcpath">BC_orphans</span>
+        Wrong ISBN length used. ISBN: <value-of select="@content"/> must have 10 or 13 digits. Current length:
+        <value-of select="string-length(@content)"/>
+      </assert>
+      <assert diagnostics="wrong_isbn_check_de" role="error" id="wrong_isbn_check"
+              test="if (($length = 10) or ($length = 13)) 
+                    then tr:check-isbn(@content,$length) = $check_digit 
+                    else true()">
+        <span class="srcpath">BC_orphans</span>
+        The ISBN check digit doesn't match. ISBN: <value-of select="@content"/>, calculated digit:  <value-of select="tr:check-isbn(@content,$length)"/>,
+        used digit: <value-of select="substring(@content, $length, 1)"/>
+      </assert>
+      <let name="prefix" value="if($length = 13) then '978' else ''"/>
+      <assert diagnostics="wrong_isbn_country_de" role="error" id="wrong_isbn_country"
+              test="matches(@content, 
+                            concat('^', $prefix,  '([0-578]\d{4}|9[0-35-7]\d{3}|98[0-57]\d{2}|995[2-9]\d|996[0-8]\d|99[78]\d{2}|9990[13489]|999[12]\d|9993[0-7])\d{5}$'))">
+        <span class="srcpath">BC_orphans</span>
+        Wrong ISBN country identifier. ISBN: <value-of select="@content"/>. Country: 
+        <value-of select="substring((if($length = 13) then replace(@content,'978','') else @content),1,5)"/>
+      </assert>
+    </rule>
+  </pattern>
 
   <diagnostics>
     <diagnostic id="other_languages_de" xml:lang="de">Weitere Sprachangaben und der Ort ihrer Verwendung: 
@@ -817,8 +858,8 @@
           <li><xsl:value-of select="current()"/> :  <xsl:value-of select="count($occ[@xml:lang=current()])"/></li>
         </xsl:for-each> 
       </ul></diagnostic>
-    <diagnostic id="xml-lang_de" xml:lang="de">Es sollte auch dasn Attribut @lang zusätzlich zu @xml:lang gesetzt werden!</diagnostic>
-    <diagnostic id="lang_de" xml:lang="de"> HTML-Element '<name/>' mit lang-Attribut '<value-of select="distinct-values(@xml:lang | @lang)"/>'
+    <diagnostic id="xml-lang_de" xml:lang="de">Es sollte auch das Attribut @lang zusätzlich zu @xml:lang gesetzt werden!</diagnostic>
+    <diagnostic id="lang_de" xml:lang="de"> HTML-Element '&lt;name/&gt;' mit lang-Attribut '<value-of select="distinct-values(@xml:lang | @lang)"/>'
     </diagnostic>
     <diagnostic id="doc_language_de" xml:lang="de">Sprache des Dokumentes laut Metadatenelement (dc:language): <xsl:value-of select="."/> 
     </diagnostic>
@@ -859,8 +900,8 @@
       opf:metadata/opf:meta[@name = 'cover']/@content = '<value-of select="@content"/>'.</diagnostic>
     <diagnostic id="empty-title_de" xml:lang="de">content.opf: metadata/dc:title darf nicht leer sein</diagnostic>
     <diagnostic id="conditional_split_de" xml:lang="de">Bedingter Split vor '<value-of select="substring(normalize-space($doc-elt), 1, 30)"/>…'.</diagnostic>
-    <diagnostic id="no-text-in-chunk_de" xml:lang="de">Split-Datei enthält keinen Text. <xsl:value-of 
-      select="if (*) then $elements else 'Enthält nich einmal Tags.'"/></diagnostic>
+    <diagnostic id="no-text-in-chunk_de" xml:lang="de">Split-Datei enthält keinen Text. <!--<xsl:value-of 
+      select="if (*) then $elements else 'Enthält nich einmal Tags.'"/>--></diagnostic>
     <diagnostic id="resource-unavailable_de" xml:lang="de">Ressource nicht verfügbar: <a xmlns="http://www.w3.org/1999/xhtml" 
       href="{@checked-href}"><xsl:value-of select="@checked-href"/></a>. 
       Status: <value-of select="@error-status"/></diagnostic>
@@ -923,6 +964,21 @@
       <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
       Dieser Absatz beinhaltet mehr als 10000 Zeichen. 
       Dieser Umstand kann auf manchen Lesegeräten zu längeren Ladezeiten oder zum Absturz führen.
+    </diagnostic>
+    <diagnostic id="wrong_isbn_check_de" xml:lang="de">
+        ISBN ist nicht korrekt, die Prüfsumme stimmt nicht überein. ISBN: <value-of select="@content"/>, korrekte Prüfziffer:  <value-of select="tr:check-isbn(@content, string-length(@content))"/>,
+        verwendete Prüfziffer: <value-of select="substring(@content, 13, 1)"/>
+    </diagnostic>
+    <diagnostic id="wrong_isbn_length_de" xml:lang="de">
+          Falsche Angabe der ISBN. Die ISBN <value-of select="@content"/> muss 10 oder 13 Ziffern besitzen. Verwendete Länge:
+        <value-of select="string-length(@content)"/>
+    </diagnostic>
+    <diagnostic id="wrong_isbn_country_de" xml:lang="de">
+       Falsche ISBN Ländernummer. ISBN: <value-of select="@content"/>. Ländernummer: 
+        <value-of select="substring((if($length = 13) then replace(@content,'978','') else @content),1,5)"/>
+    </diagnostic>
+     <diagnostic id="newline-in-chunk_de" xml:lang="de">
+      Hier wurde ein unpassender Umbruch verwendet: <xsl:value-of select="descendant::*[matches(string-join(text(),''),$newline-regex)]/text()"/>
     </diagnostic>
   </diagnostics>
   
