@@ -813,10 +813,11 @@
   <pattern id="para-checks">
     <rule context="/c:wrap/html:html[1]/html:body//html:p">
       <let name="srcpath" value="tokenize(descendant-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
+      <let name="para-max-string-length" value="10000"/>
       <report diagnostics="paragraph-very-long_de" role="error" id="paragraph-very-long"
-        test="string-length(normalize-space(string-join(descendant::text(), ''))) gt 10000">
+        test="string-length(normalize-space(string-join(descendant::text(), ''))) gt $para-max-string-length">
         <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
-        This paragraph consists of more than 10.000 characters and may affect performance of the e-reader or even cause it to crash. 
+        This paragraph consists of more than <value-of select="$para-max-string-length"/> characters and may affect performance of the e-reader or even cause it to crash. 
       </report>
     </rule>
   </pattern>
@@ -962,7 +963,7 @@
       sollte nicht leer sein.</diagnostic>
     <diagnostic id="paragraph-very-long_de" xml:lang="de">
       <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
-      Dieser Absatz beinhaltet mehr als 10000 Zeichen. 
+      Dieser Absatz beinhaltet mehr als <value-of select="$para-max-string-length"/> Zeichen. 
       Dieser Umstand kann auf manchen Lesegeräten zu längeren Ladezeiten oder zum Absturz führen.
     </diagnostic>
     <diagnostic id="wrong_isbn_check_de" xml:lang="de">
