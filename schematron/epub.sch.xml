@@ -815,7 +815,7 @@
       <let name="srcpath" value="tokenize(descendant-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
       <let name="para-max-string-length" value="/c:wrap/epub-config/checks/check[@param = 'para-max-string-length']/@value"/>
       <report diagnostics="paragraph-very-long_de" role="error" id="paragraph-very-long"
-              test="string-length(normalize-space(string-join(descendant::text(), ''))) gt $para-max-string-length">
+              test="string-length(normalize-space(string-join(descendant::text(), ''))) &gt; $para-max-string-length">
         <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
         This paragraph consists of more than <value-of select="$para-max-string-length"/> characters and may affect performance of the e-reader or even cause it to crash. 
       </report>
