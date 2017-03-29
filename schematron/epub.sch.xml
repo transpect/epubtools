@@ -28,7 +28,6 @@
   may be used.</p>
 
   <xsl:include href="http://transpect.io/xslt-util/resolve-uri/xsl/resolve-uri.xsl"/>
-  <xsl:include href="isbncheck.xsl"/>
 
   <let name="oebps-paths" value="/c:wrap/cx:document[@name = 'wrap-file-uris']/c:file/@oebps-name"/>
 
@@ -822,34 +821,7 @@
     </rule>
   </pattern>
   
-   <pattern id="isbn-checks">
-    <rule context="/c:wrap/html:html[1]/html:head/html:meta[@name= 'DC.identifier']">
-      <let name="length" value="string-length(@content)"/>
-      <let name="check_digit" value="substring(@content, $length, 1)"/>
-      <assert  diagnostics="wrong_isbn_length_de" role="error" id="wrong_isbn_length"
-        test="($length = 10) or ($length = 13)">
-        <span class="srcpath">BC_orphans</span>
-        Wrong ISBN length used. ISBN: <value-of select="@content"/> must have 10 or 13 digits. Current length:
-        <value-of select="string-length(@content)"/>
-      </assert>
-      <assert diagnostics="wrong_isbn_check_de" role="error" id="wrong_isbn_check"
-              test="if (($length = 10) or ($length = 13)) 
-                    then tr:check-isbn(@content,$length) = $check_digit 
-                    else true()">
-        <span class="srcpath">BC_orphans</span>
-        The ISBN check digit doesn't match. ISBN: <value-of select="@content"/>, calculated digit:  <value-of select="tr:check-isbn(@content,$length)"/>,
-        used digit: <value-of select="substring(@content, $length, 1)"/>
-      </assert>
-      <let name="prefix" value="if($length = 13) then '978' else ''"/>
-      <assert diagnostics="wrong_isbn_country_de" role="error" id="wrong_isbn_country"
-              test="matches(@content, 
-                            concat('^', $prefix,  '([0-578]\d{4}|9[0-35-7]\d{3}|98[0-57]\d{2}|995[2-9]\d|996[0-8]\d|99[78]\d{2}|9990[13489]|999[12]\d|9993[0-7])\d{5}$'))">
-        <span class="srcpath">BC_orphans</span>
-        Wrong ISBN country identifier. ISBN: <value-of select="@content"/>. Country: 
-        <value-of select="substring((if($length = 13) then replace(@content,'978','') else @content),1,5)"/>
-      </assert>
-    </rule>
-  </pattern>
+   
 
   <diagnostics>
     <diagnostic id="other_languages_de" xml:lang="de">Weitere Sprachangaben und der Ort ihrer Verwendung: 
@@ -965,18 +937,6 @@
       <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
       Dieser Absatz beinhaltet mehr als <value-of select="$para-max-string-length"/> Zeichen. 
       Dieser Umstand kann auf manchen Lesegeräten zu längeren Ladezeiten oder zum Absturz führen.
-    </diagnostic>
-    <diagnostic id="wrong_isbn_check_de" xml:lang="de">
-        ISBN ist nicht korrekt, die Prüfsumme stimmt nicht überein. ISBN: <value-of select="@content"/>, korrekte Prüfziffer:  <value-of select="tr:check-isbn(@content, string-length(@content))"/>,
-        verwendete Prüfziffer: <value-of select="substring(@content, 13, 1)"/>
-    </diagnostic>
-    <diagnostic id="wrong_isbn_length_de" xml:lang="de">
-          Falsche Angabe der ISBN. Die ISBN <value-of select="@content"/> muss 10 oder 13 Ziffern besitzen. Verwendete Länge:
-        <value-of select="string-length(@content)"/>
-    </diagnostic>
-    <diagnostic id="wrong_isbn_country_de" xml:lang="de">
-       Falsche ISBN Ländernummer. ISBN: <value-of select="@content"/>. Ländernummer: 
-        <value-of select="substring((if($length = 13) then replace(@content,'978','') else @content),1,5)"/>
     </diagnostic>
      <diagnostic id="newline-in-chunk_de" xml:lang="de">
       Hier wurde ein unpassender Umbruch verwendet: <xsl:value-of select="descendant::*[matches(string-join(text(),''),$newline-regex)]/text()"/>
