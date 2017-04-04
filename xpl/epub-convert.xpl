@@ -96,6 +96,9 @@
   <p:option name="id-in-report-heading" select="'false'">
     <p:documentation>Whether to adorn the reports’ tr:rule-family with the first dc:identifier found in the OPF.</p:documentation>
   </p:option>
+   <p:option name="create-font-subset" select="'false'" cx:type="xs:string" required="false">
+    <p:documentation>Whether to create a subset of used fonts</p:documentation>
+  </p:option>
   
   <!-- URIs are resolved by XML catalogs, which are located as default in xmlcatalog/catalog.xml -->
   
@@ -103,6 +106,7 @@
   <p:import href="../modules/create-ops/xpl/create-ops.xpl"/>
   <p:import href="../modules/create-opf/xpl/create-opf.xpl"/>
   <p:import href="../modules/zip-package/xpl/zip-package.xpl"/>
+  <p:import href="../modules/fontsubsetter/xpl/fontsubsetter.xpl"/>
   
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
   <p:import href="http://transpect.io/schematron/xpl/oxy-schematron.xpl"/>
@@ -172,7 +176,7 @@
     <p:with-option name="active" select="$debug"/>
     <p:with-option name="base-uri" select="$debug-dir-uri"/>
   </tr:store-debug>  
-
+  
   <epub:create-ops name="create-ops">
     <p:input port="conf">
       <p:pipe port="conf" step="epub-convert"/>
@@ -188,6 +192,7 @@
     <p:with-option name="terminate-on-error" select="$terminate-on-error"/>
     <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"><p:empty/></p:with-option>
+    <p:with-option name="create-font-subset" select="$create-font-subset" />
   </epub:create-ops>
 
   <epub:create-opf name="create-opf">
