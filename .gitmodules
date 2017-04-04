@@ -1,0 +1,3 @@
+[submodule "font-tools"]
+	path = font-tools
+	url = https://github.com/fonttools/fonttools
