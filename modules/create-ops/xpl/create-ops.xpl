@@ -44,6 +44,7 @@
   <p:option name="terminate-on-error" required="false" select="'yes'"/>
   <p:option name="debug" required="false" select="'no'"/>
   <p:option name="debug-dir-uri" required="false" select="'debug'"/>
+  <p:option name="create-font-subset" select="'false'"  cx:type="xs:string" required="false"/>
   
   <p:import href="../../html-splitter/xpl/html-splitter.xpl"/>
   
@@ -283,6 +284,30 @@
     </tr:store-debug>
 
     <p:sink name="sink3"/>
+    
+     <p:choose name="conditionally-create-fontsubset">
+      <p:when test="$create-font-subset = 'true'">
+        <tr:create-font-subset name="subset">
+          <p:input port="source">
+            <p:pipe port="source" step="create-ops"/>
+          </p:input>
+          <p:input port="expand-css">
+            <p:pipe port="result" step="resolve-resource-uris"/>
+          </p:input>
+          <p:with-option name="debug" select="$debug"/>
+          <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+        </tr:create-font-subset>
+      </p:when>
+      <p:otherwise>
+        <p:identity>
+          <p:input port="source">
+            <p:pipe port="source" step="create-ops"/>
+          </p:input>
+        </p:identity>
+      </p:otherwise>
+    </p:choose>
+    
+    <p:sink/>
 
     <!-- extract file list from html @src and @poster attributes (and from @xlink:href in case of SVG) 
           Unless the procedures have changed in ../xsl/functions.xsl, catalog-based resolution takes
@@ -300,6 +325,17 @@
       </p:input>
     </p:xslt>
     
+    <p:choose name="conditionally-change-font-subset-name">
+      <p:when test="$create-font-subset = 'true'">
+          <p:output port="result" primary="true"/>
+        <p:string-replace match="/cx:document/c:file[matches(@name,'^fonts/')]/@local-href" replace="concat(.,'.subset')"/>
+      </p:when>
+     <p:otherwise>
+         <p:output port="result" primary="true"/>
+       <p:identity/>
+     </p:otherwise>
+    </p:choose>
+    
     <tr:store-debug pipeline-step="epubtools/create-ops/filelist">
       <p:with-option name="active" select="$debug" />
       <p:with-option name="base-uri" select="$debug-dir-uri" />
@@ -310,7 +346,7 @@
     <p:xslt name="css-parse">
       <p:input port="source">
         <p:pipe port="result" step="resolve-resource-uris"/>
-        <p:pipe port="result" step="generate-filelist"/>
+        <p:pipe port="result" step="conditionally-change-font-subset-name"/>
       </p:input>
       <p:input port="parameters"><p:empty/></p:input>
       <p:input port="stylesheet">
@@ -328,7 +364,7 @@
     <!-- copy resources -->
     <p:viewport match="c:file" name="file-iteration">
       <p:viewport-source>
-        <p:pipe port="result" step="generate-filelist"/>
+        <p:pipe port="result" step="conditionally-change-font-subset-name"/>
       </p:viewport-source>
       <p:output port="result" primary="true">
         <p:pipe port="result" step="http-or-file"/>
