@@ -204,11 +204,14 @@
   <!-- Caution: the opf:scheme attribute is not allowed in EPUB3.0, if you want to check the ISBN for this
   version you have to activate it using <check param="isbn-checks" value="true"/> in your config file -->
    <pattern id="isbn-checks">
-    <rule context="if (/c:wrap/opf:package/@version ne '3.0') 
-                   then /c:wrap/epub-config/metadata/dc:identifier[@opf:scheme='ISBN']
-                   else  /c:wrap/epub-config/metadata/dc:identifier">
+    <rule context="/c:wrap/epub-config/metadata">
       <let name="active" value="/c:wrap/epub-config/checks/check[@param = 'isbn-checks']/@value"/>
-      <let name="isbn" value="replace(., '-','')"/>
+      <let name="isbn" value="replace(if ($epub-version ne '3.0') 
+                                      then dc:identifier[@opf:scheme='ISBN']
+                                      else dc:identifier, 
+                                      '-',
+                                      ''
+                                     )"/>
       <extends rule="isbn-check-abstract-rule"/>
     </rule>
    </pattern>
