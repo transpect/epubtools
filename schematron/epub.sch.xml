@@ -28,7 +28,10 @@
   may be used.</p>
 
   <xsl:include href="http://transpect.io/xslt-util/resolve-uri/xsl/resolve-uri.xsl"/>
-
+  <xsl:include href="http://transpect.io/xslt-util/isbn/xsl/isbncheck.xsl"/>
+  
+  <include href="http://transpect.io/xslt-util/isbn/sch/check-isbn.sch.xml"/>
+  
   <let name="oebps-paths" value="/c:wrap/cx:document[@name = 'wrap-file-uris']/c:file/@oebps-name"/>
 
   <let name="source-dir-uri" value="/c:wrap/html:html[1]/html:head/html:meta[@name = 'source-dir-uri']/@content"/>
@@ -196,6 +199,16 @@
       value="/c:wrap/epub-config/checks/check[@param = 'html-max-kb']
                                               [@severity = 'error' or empty(@severity)]/@value"/>
   </pattern>
+  
+  
+   <pattern id="isbn-checks">
+    <rule context="/c:wrap/epub-config/metadata/dc:identifier[@opf:scheme='ISBN']">
+      <let name="active" value="/c:wrap/epub-config/checks/check[@param = 'isbn-checks']/@value"/>
+      <let name="isbn" value="replace(., '-','')"/>
+      <extends rule="isbn-check-abstract-rule"/>
+    </rule>
+   </pattern>
+  
 
   <pattern id="cover-image" abstract="true">
     <rule context="opf:item[matches(@media-type, '^image/(jpeg|png)')]
@@ -821,8 +834,8 @@
     </rule>
   </pattern>
   
-   
-
+  
+  
   <diagnostics>
     <diagnostic id="other_languages_de" xml:lang="de">Weitere Sprachangaben und der Ort ihrer Verwendung: 
       <xsl:variable name="occ" select="html:html[1]//*[@xml:lang]"/>
@@ -942,5 +955,7 @@
       Hier wurde ein unpassender Umbruch verwendet: <xsl:value-of select="descendant::*[matches(string-join(text(),''),$newline-regex)]/text()"/>
     </diagnostic>
   </diagnostics>
+  
+  <include href="http://transpect.io/xslt-util/isbn/sch/check-isbn_diagnostics.sch.xml"/>
   
 </schema>
