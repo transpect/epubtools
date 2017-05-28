@@ -30,8 +30,9 @@
   <p:output port="files" primary="false">
     <p:pipe port="result" step="wrap-file-uris"/>
   </p:output>
-  <p:output port="report" primary="false">
+  <p:output port="report" primary="false" sequence="true">
     <p:pipe port="report" step="html-splitter"/>
+    <p:pipe port="report" step="copy-resources"/>
   </p:output>
   <p:output port="splitting-report" sequence="true">
     <p:pipe port="splitting-report" step="html-splitter"/>
@@ -61,6 +62,9 @@
     </p:output>
     <p:output port="html" primary="false">
       <p:pipe port="result" step="attach-cover"/>
+    </p:output>
+    <p:output port="report" primary="false" sequence="true">
+      <p:pipe port="report" step="css-parse0"/>
     </p:output>
     <p:output port="meta-with-uri-resolved-cover-href">
       <p:pipe port="meta-with-uri-resolved-cover-href" step="image-info"/>
