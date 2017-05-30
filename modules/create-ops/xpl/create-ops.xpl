@@ -64,7 +64,13 @@
       <p:pipe port="result" step="attach-cover"/>
     </p:output>
     <p:output port="report" primary="false" sequence="true">
-      <p:pipe port="report" step="css-parse0"/>
+      <p:documentation>Usually the CSS parser report should go here. Unfortunately, due to
+      an apparent Calabash bug related to dynamic evaluation or p:for-each iterations, other errors
+      than the parser errors (in particular, Saxon warnings from other XSLT steps) end up in the report
+      when epub creation is embedded in larger transpect pipelines. Therefore, we’ll disable returning
+      this report for the time being. No issue has been filed yet with Calabash.</p:documentation>
+      <p:empty/>
+      <!--<p:pipe port="report" step="css-parse0"/>-->
     </p:output>
     <p:output port="meta-with-uri-resolved-cover-href">
       <p:pipe port="meta-with-uri-resolved-cover-href" step="image-info"/>
