@@ -307,7 +307,7 @@ dc-identifier-mandatory-scheme =
     attribute opf:scheme { text },
     text
   }
-checks = element checks { (check | schematron)* }
+checks = element checks {   attribute xml:base { xsd:anyURI }?, (check | schematron)* }
 check =
   element check {
     attribute param { text },
