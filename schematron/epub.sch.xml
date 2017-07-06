@@ -318,7 +318,7 @@
                       else false()" id="image-dimensions" role="$severity" diagnostics="image-dimensions_de">
         <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
         Pixel <value-of select="$_width-or-height"/> of image '<value-of select="@href"/>' too <value-of 
-          select="if ($_min-or-max = 'min') then 'small' else 'large'"/>. Value: <value-of select="$width"/>. Threshold: <value-of 
+          select="if ($_min-or-max = 'min') then 'small' else 'large'"/>. Value: <value-of select="$actual-dim"/>. Threshold: <value-of 
           select="$_threshold"/>.
       </report>
     </rule>
@@ -723,15 +723,15 @@
         <span class="srcpath">BC_orphans</span> content.opf: For best reading system support, there should be an 
         element opf:metadata/opf:meta[@name = 'cover'].
       </assert>-->
-    	<report test="*[starts-with(name(), 'dc:')]" role="info" id="meta-tags" diagnostics="meta-tags_de">
-    		 <span class="srcpath">BC_orphans</span>
-    			EPUB meta tags:<br xmlns="http://www.w3.org/1999/xhtml"/><br xmlns="http://www.w3.org/1999/xhtml"/>
-    			<ul xmlns="http://www.w3.org/1999/xhtml">
-    				<xsl:for-each select="*[starts-with(name(), 'dc:')]">
-    					<li><b><xsl:value-of select="local-name()"/>: </b><xsl:value-of select="."/></li>
-    				</xsl:for-each>
-    			</ul>
-    	</report>
+      <report test="*[starts-with(name(), 'dc:')]" role="info" id="meta-tags" diagnostics="meta-tags_de">
+        <span class="srcpath">BC_orphans</span>
+        EPUB meta tags:<br xmlns="http://www.w3.org/1999/xhtml"/><br xmlns="http://www.w3.org/1999/xhtml"/>
+        <ul xmlns="http://www.w3.org/1999/xhtml">
+          <xsl:for-each select="*[starts-with(name(), 'dc:')]">
+            <li><b><xsl:value-of select="local-name()"/>: </b><xsl:value-of select="."/></li>
+          </xsl:for-each>
+        </ul>
+      </report>
     </rule>
 
     <rule context="opf:package/opf:metadata/opf:meta[@name = 'cover']">
@@ -858,7 +858,7 @@
     </diagnostic>
     <diagnostic id="image-dimensions_de" xml:lang="de">Pixel-<value-of select="if ($_width-or-height = 'height') then
       'Höhe' else 'Breite'"/> von Bild '<value-of select="@href"/>' zu <value-of 
-        select="if ($_min-or-max = 'min') then 'klein' else 'groß'"/>. ´Wert: <value-of select="$width"/>. Schwellwert: <value-of 
+        select="if ($_min-or-max = 'min') then 'klein' else 'groß'"/>. Wert: <value-of select="$actual-dim"/>. Schwellwert: <value-of 
           select="$_threshold"/>.
     </diagnostic>
     <diagnostic id="custom-epub-type_de" xml:lang="de">epub:type in Namespace (Nicht-Standard-Wert): <xsl:value-of 
