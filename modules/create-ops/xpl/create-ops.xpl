@@ -182,7 +182,7 @@
       </p:xpath-context>
       <p:when test="/epub-config/checks/check[@param = 'epub-check-http-resources']/@value = 'true'">
         <p:output port="result" primary="true"/>
-        <p:viewport match="*[@src | @href | @xlink:href | @poster][matches(., '^https?:')]" name="check-hrefs">
+        <p:viewport match="*[@src | @href | @xlink:href | @poster][some $att in @*[local-name() = ('src', 'href', 'poster')] satisfies $att[matches(., '^https?:')]]" name="check-hrefs">
           <tr:file-uri fetch-http="false" check-http="true" name="fu2" make-unique="false">
             <p:with-option name="filename" select="for $u in /*/(@src | @href | @xlink:href | @poster)
                                                    return resolve-uri(escape-html-uri($u), base-uri())">
