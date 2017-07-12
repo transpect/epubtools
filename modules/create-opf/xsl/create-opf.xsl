@@ -39,7 +39,7 @@
                            'ERROR: NO dc:identifier FOUND IN METADATA FILE.',
                            '&#xa;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&#xa;')"/>
         </xsl:if>
-        
+        <xsl:variable name="identifiers" as="element(dc:identifier)*" select="/epub-config/metadata/dc:identifier"/>
         <xsl:for-each
           select="/epub-config/metadata/*[
                                 not(
@@ -68,6 +68,9 @@
                     <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
                   </xsl:when>
                   <xsl:when test="@opf:scheme ne 'ISBN'">
+                    <xsl:if test="count($identifiers) eq 1">
+                      <xsl:attribute name="id" select="'bookid'"/>
+                    </xsl:if>
                     <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
                   </xsl:when>
                   <xsl:otherwise>
