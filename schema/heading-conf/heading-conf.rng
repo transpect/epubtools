@@ -149,7 +149,11 @@
     <a:documentation>Currently only epub:type, class, and id will be regarded as specializations
     of a generic element when it comes to comparing whether a given element matches the selector.</a:documentation>
     <attribute name="attr">
-      <data type="NMTOKEN"/>
+      <choice>
+        <value>epub:type</value>
+        <value>class</value>
+        <value>id</value>
+      </choice>
     </attribute>
     <attribute name="attval">
       <data type="NMTOKEN"/>
