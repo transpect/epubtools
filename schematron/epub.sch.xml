@@ -158,7 +158,7 @@
       <let name="max" value="$html-max-kb"/>
       <let name="element-in-split"
         value="/c:wrap/cx:document[@name = 'wrap-chunks']/html:html[ends-with(@xml:base, current()/@href)]/html:body"/>
-      <let name="srcpath" value="for $s in ($element-in-split/descendant::*[@srcpath])[1]/@srcpath return tokenize($s, '\s+')"/>
+      <let name="srcpath" value="for $s in ($element-in-split/descendant::*[not(self::*:div)][@srcpath])[1]/@srcpath return tokenize($s, '\s+')"/>
       <report test="$size-in-kb &gt; $html-max-kb" id="large-html-file" 
         diagnostics="large-html-file_de" role="$severity">
         <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
