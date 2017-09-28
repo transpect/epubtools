@@ -82,6 +82,9 @@
     <p:variable name="css-handling" select="(/epub-config/@css-handling, 'regenerated-per-split')[1]">
       <p:pipe port="meta" step="create-ops"/>
     </p:variable>
+    <p:variable name="css-remove-comments" select="if (contains($css-handling, 'remove-comments')) then 'yes' else 'no'">
+      <p:pipe port="meta" step="create-ops"/>
+    </p:variable>
 
     <tr:store-debug pipeline-step="epubtools/hierarchy">
       <p:with-option name="active" select="$debug" />
@@ -261,6 +264,7 @@
       </p:input>
       <p:with-option name="debug" select="$debug"/>
       <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+      <p:with-option name="remove-comments" select="$css-remove-comments"/>
     </css:parse>
     
     <p:add-attribute match="/*" attribute-name="xml:base" name="css-parse1">
