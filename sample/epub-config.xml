@@ -4,7 +4,7 @@
 <epub-config xmlns:tr="http://transpect.io" 
   format="EPUB3" 
   layout="reflowable" 
-  css-handling="regenerated-per-split"
+  css-handling="regenerated-per-split remove-comments"
   html-subdir-name="text" 
   indent="selective">
 	<!-- layout: reflowable|fixed

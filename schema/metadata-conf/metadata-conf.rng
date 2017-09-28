@@ -119,14 +119,24 @@
       in these unused rules.
      </a:documentation>
     <attribute name="css-handling">
-      <choice>
-        <value>unchanged</value>
-        <value>regenerated</value>
-        <value>regenerated-per-split</value>
-      </choice>
+      <list>
+        <choice>
+          <value>unchanged</value>
+          <value>regenerated</value>
+          <value>regenerated-per-split</value>
+        </choice>
+        <optional>
+          <value>remove-comments</value>
+          <a:documentation>Our new grammar-based CSS parser has some problems with comments in the
+            middle of properties. If it is unable to parse a CSS file, it will try parsing it again
+            after stripping all comments. This is handled by an XProc try/catch. Unfortunately, in
+            some cases, the XProc processor does not handle try/catch correctly and crashes with a
+            null pointer exception. Therefore we introduce this token that, if present, will
+            tell the CSS parser to unconditionally strip the comments first.</a:documentation>
+        </optional>
+      </list>
     </attribute>
   </define>
-
   <define name="page-map-xml">
     <attribute name="page-map-xml">
       <data type="boolean"/>
