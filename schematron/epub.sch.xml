@@ -206,12 +206,14 @@
    <pattern id="isbn-checks">
     <rule context="/c:wrap/epub-config/metadata">
       <let name="active" value="/c:wrap/epub-config/checks/check[@param = 'isbn-checks']/@value"/>
-      <let name="isbn" value="replace(if ($epub-version ne '3.0') 
-                                      then dc:identifier[@opf:scheme='ISBN']
-                                      else dc:identifier, 
-                                      '-',
-                                      ''
-                                     )"/>
+      <let name="isbn" value="replace(
+                                      replace(if ($epub-version ne '3.0') 
+                                                then dc:identifier[@opf:scheme='ISBN']
+                                                else dc:identifier, 
+                                       '-',
+                                       ''),
+                                       '\s?(Leseprobe|sample)',
+                                       '')"/>
       <extends rule="isbn-check-abstract-rule"/>
     </rule>
    </pattern>
