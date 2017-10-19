@@ -601,7 +601,7 @@
       <report test="true()" role="info" id="lang" diagnostics="lang_de">
         <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
         <span class="corrected-id"><xsl:value-of select="string-join(('lang', distinct-values(@xml:lang | @lang)), '-')"/></span>
-        HTML element '<name/>' with lang attribute '<value-of select="distinct-values(@xml:lang | @lang)"/>'
+        HTML element '<value-of select="name()"/>' with lang attribute '<value-of select="distinct-values(@xml:lang | @lang)"/>'
       </report>
     </rule>
      <rule context="/c:wrap/epub-config[1]/metadata[1]/dc:language">
