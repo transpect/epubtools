@@ -627,7 +627,7 @@
   <pattern id="splits">
     <rule context="/c:wrap/html:body//html:tr-conditional-split[not(@tr-dont-split-at-genid)]">
       <let name="doc-elt" value="/c:wrap/cx:document[@name = 'wrap-chunks']//*[@id = current()/@tr-generated-id]"/>
-      <let name="srcpath" value="$doc-elt/descendant-or-self::*[@srcpath][1]/@srcpath"/>
+      <let name="srcpath" value="$doc-elt/descendant-or-self::*[@srcpath][not(self::html:div)][1]/@srcpath"/>
       <report test="true()" role="info" id="conditional_split" diagnostics="conditional_split_de">
         <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
         Conditional split before '<value-of select="substring(normalize-space($doc-elt), 1, 30)"/>…'.
@@ -894,7 +894,8 @@
     <diagnostic id="meta-cover-points-nowhere-in-manifest_de" xml:lang="de">Es gibt keinen Manifest-Eintrag für 
       opf:metadata/opf:meta[@name = 'cover']/@content = '<value-of select="@content"/>'.</diagnostic>
     <diagnostic id="empty-title_de" xml:lang="de">content.opf: metadata/dc:title darf nicht leer sein</diagnostic>
-    <diagnostic id="conditional_split_de" xml:lang="de">Bedingter Split vor '<value-of select="substring(normalize-space($doc-elt), 1, 30)"/>…'.</diagnostic>
+    <diagnostic id="conditional_split_de" xml:lang="de">Bedingter Split vor '<value-of select="substring(normalize-space($doc-elt), 1, 30)"/>…'. (Da das Dokument sonst zu groß werden würde, wurde hier automatisch
+     ein Seitenumbruch eingefügt. Falls er an dieser Stelle stört, fügen Sie vorher eine Anweisung zum Splitten ein oder ändern Sie die Einstellungen der Elemente, an denen immer umbrochen wird.)</diagnostic>
     <diagnostic id="no-text-in-chunk_de" xml:lang="de">Split-Datei enthält keinen Text. <!--<xsl:value-of 
       select="if (*) then $elements else 'Enthält nich einmal Tags.'"/>--></diagnostic>
     <diagnostic id="resource-unavailable_de" xml:lang="de">Ressource nicht verfügbar: <a xmlns="http://www.w3.org/1999/xhtml" 
