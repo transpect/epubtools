@@ -209,7 +209,7 @@
       <let name="isbn" value="replace(
                                       replace(if ($epub-version ne '3.0') 
                                                 then dc:identifier[@opf:scheme='ISBN']
-                                                else dc:identifier, 
+                                                else dc:identifier[1], 
                                        '-',
                                        ''),
                                        '\s?(Leseprobe|sample)',

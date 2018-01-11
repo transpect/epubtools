@@ -108,7 +108,9 @@
                           concat('$1', if (normalize-space(/epub-config/@out-file-basename)) then /epub-config/@out-file-basename else '$2', '.epub'))">
       <p:pipe port="meta" step="zip-package"/>
     </p:variable>
-
+<cx:message>
+  <p:with-option name="message" select="$base-uri, '########', $zip-file-uri"/>
+</cx:message>
     <cx:zip command="create" name="zip">
       <p:with-option name="href" select="$zip-file-uri"/>
       <p:input port="source">
