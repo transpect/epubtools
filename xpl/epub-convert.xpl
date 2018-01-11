@@ -76,8 +76,8 @@
     <p:pipe port="html" step="create-ops"/>
   </p:output>
   <p:output port="baseuri" primary="false">
-		<p:pipe port="result" step="base-uri"/>
-	</p:output>
+    <p:pipe port="result" step="base-uri"/>
+  </p:output>
   <p:output port="input-for-schematron" primary="false">
     <p:pipe port="result" step="wrap-for-schematron"/>
   </p:output>
@@ -111,7 +111,7 @@
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
   <p:import href="http://transpect.io/schematron/xpl/oxy-schematron.xpl"/>
   <p:import href="http://transpect.io/xproc-util/simple-progress-msg/xpl/simple-progress-msg.xpl"/>
-	<p:import href="http://transpect.io/xproc-util/file-uri/xpl/file-uri.xpl"/>
+  <p:import href="http://transpect.io/xproc-util/file-uri/xpl/file-uri.xpl"/>
   <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl"/>
   
   
@@ -134,16 +134,16 @@
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
   </tr:simple-progress-msg>
 	
-	<tr:file-uri name="base-uri">
-		<p:documentation>
-			The output files are stored relative to the base-uri of the document on the primary input port.
-		</p:documentation>
-		<p:with-option name="filename" select="(base-uri(/*), static-base-uri())[1]"/>
-	</tr:file-uri>	
+  <tr:file-uri name="base-uri">
+    <p:documentation>
+      The output files are stored relative to the base-uri of the document on the primary input port.
+    </p:documentation>
+    <p:with-option name="filename" select="(base-uri(/*), static-base-uri())[1]"/>
+  </tr:file-uri>	
 
   <epub:create-ocf name="create-ocf">
-  	<p:with-option name="base-uri" select="/c:result/@local-href">
-    	<p:pipe port="result" step="base-uri"/>
+    <p:with-option name="base-uri" select="/c:result/@local-href">
+      <p:pipe port="result" step="base-uri"/>
     </p:with-option>
     <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"><p:empty/></p:with-option>
@@ -184,9 +184,9 @@
     <p:input port="meta">
       <p:pipe port="meta" step="epub-convert"/>
     </p:input>
-  	<p:with-option name="base-uri" select="/c:result/@local-href">
-  		<p:pipe port="result" step="base-uri"/>
-  	</p:with-option>
+    <p:with-option name="base-uri" select="/c:result/@local-href">
+      <p:pipe port="result" step="base-uri"/>
+    </p:with-option>
     <p:with-option name="target" select="$target-format"/>
     <p:with-option name="use-svg" select="$wrap-cover-in-svg"/>
     <p:with-option name="terminate-on-error" select="$terminate-on-error"/>
@@ -203,9 +203,9 @@
     <p:input port="meta">
       <p:pipe port="meta" step="epub-convert"/>
     </p:input>
-  	<p:with-option name="base-uri" select="/c:result/@local-href">
-  		<p:pipe port="result" step="base-uri"/>
-  	</p:with-option>
+    <p:with-option name="base-uri" select="/c:result/@local-href">
+      <p:pipe port="result" step="base-uri"/>
+    </p:with-option>
     <p:with-option name="target" select="$target-format"/>
     <p:with-option name="terminate-on-error" select="$terminate-on-error"/>
     <p:with-option name="use-svg" select="$wrap-cover-in-svg"/>
@@ -272,9 +272,9 @@
     <p:input port="meta">
       <p:pipe port="meta" step="epub-convert"/>
     </p:input>
-  	<p:with-option name="base-uri" select="/c:result/@local-href">
-  		<p:pipe port="result" step="base-uri"/>
-  	</p:with-option>
+    <p:with-option name="base-uri" select="/c:result/@local-href">
+      <p:pipe port="result" step="base-uri"/>
+    </p:with-option>
     <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
     <p:with-option name="debug-dir-uri" select="replace($debug-dir-uri, '^(.+)\?.*$', '$1')"><p:empty/></p:with-option>
   </epub:zip-package>
