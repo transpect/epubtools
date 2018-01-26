@@ -563,7 +563,7 @@
         then concat('(', string-join(for $a in $atts return concat($a/name(), '=', $a), ', '), ') ')
         else ''"/>
       <let name="occurrences" value="string-join(for $t in text()[normalize-space()] return concat('''', $t, ''''), ', ')"/>
-      <report test="text()[normalize-space()]" role="error" id="bare-text" diagnostics="bare-text_de">
+      <report test="text()[normalize-space()]" role="warning" id="bare-text" diagnostics="bare-text_de">
         <span class="srcpath"><xsl:value-of select="for $s in tokenize(descendant-or-self::*[@srcpath][1]/@srcpath, '\s+') 
                                                     return concat($source-dir-uri, $s)"/></span>
         The container element '<name/>' <xsl:value-of select="$atts-string"/> contains untagged text: <value-of select="$occurrences"/>.
