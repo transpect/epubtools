@@ -732,6 +732,7 @@
           <xsl:for-each select="*[starts-with(name(), 'dc:')]">
             <li><b><xsl:value-of select="local-name()"/>: </b><xsl:value-of select="."/></li>
           </xsl:for-each>
+          <li><b><xsl:value-of select="'EPUB version'"/>: </b><xsl:value-of select="../@version"/></li>
         </ul>
       </report>
     </rule>
@@ -878,6 +879,7 @@
     				<xsl:for-each select="*[starts-with(name(), 'dc:')]">
     					<li><b><xsl:value-of select="local-name()"/>: </b><xsl:value-of select="."/></li>
     				</xsl:for-each>
+            <li><b><xsl:value-of select="'EPUB version'"/>: </b><xsl:value-of select="../@version"/></li>
     			</ul>
   	</diagnostic>
     <diagnostic id="meta-cover_de" xml:lang="de">content.opf: Für optimale Lesesystem-Unterstützung muss ein
