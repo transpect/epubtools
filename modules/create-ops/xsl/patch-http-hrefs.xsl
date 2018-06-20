@@ -20,7 +20,7 @@
   <xsl:key name="file-entry-by-href" match="c:file" use="(@base-url, @href)[1]"/>
   
   <xsl:template match="html:img[key('file-entry-by-href', @src, collection()[2])/@error]">
-    <xsl:element name="{if (ancestor::html:p) then 'span' else 'p'}" xmlns="http://www.w3.org/1999/xhtml">
+    <xsl:element name="{if (ancestor::*[self::html:p or local-name() = ('h1', 'h2', 'h3', 'h4', 'h5', 'h6')]) then 'span' else 'p'}" xmlns="http://www.w3.org/1999/xhtml">
       <xsl:attribute name="style" select="'display:inline-block; background-color:red; color:white; font-weight:bold;
         font-size:large padding:1em'"/>
       <xsl:attribute name="class" select="'error'"/>
