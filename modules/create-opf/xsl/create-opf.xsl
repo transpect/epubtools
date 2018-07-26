@@ -112,7 +112,7 @@
                                                                     else 'auto'"/></meta>
           </xsl:if>
           <xsl:if test="not(/epub-config/metadata/meta/@property = 'rendition:orientation')">
-            <meta property="rendition:spread">auto</meta>
+            <meta property="rendition:orientation">auto</meta>
           </xsl:if>
           <xsl:if test="not(/epub-config/metadata/meta/@property = 'ibooks:specified-fonts')">
             <meta property="ibooks:specified-fonts">true</meta>
