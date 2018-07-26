@@ -32,7 +32,6 @@
       </xsl:if>
       
       <metadata>
-        
         <xsl:if test="not(/epub-config/metadata/dc:identifier)">
           <xsl:message terminate="{$terminate-on-error}"
             select="concat('&#xa;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&#xa;',
@@ -92,40 +91,30 @@
             />
           </dc:date>
         </xsl:if>
-        <xsl:if test="$target eq 'EPUB3' and not(epub-config/metadata/meta[@property eq 'dcterms:modified'])">
-          <meta property="dcterms:modified">
-            <!-- e.g. 2011-01-01T12:00:00Z -->
-            <!-- was something like: 2014-05-13T19:47:52.81+02:00 with this version
+        <xsl:if test="$target eq 'EPUB3'">
+          <xsl:if test="not(/epub-config/metadata/meta/@property = 'dcterms:modified')">
+            <meta property="dcterms:modified">
+              <!-- e.g. 2011-01-01T12:00:00Z -->
+              <!-- was something like: 2014-05-13T19:47:52.81+02:00 with this version
                       <xsl:value-of select="replace($current-date-string, '(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(\.\d{3}\+\d{2}:\d{2})', '$1Z')"/>
                        -->
-            <xsl:value-of select="replace($current-date-string, '^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).*$', '$1Z')"/>
-          </meta>
+              <xsl:value-of select="replace($current-date-string, '^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).*$', '$1Z')"/>
+            </meta>
+          </xsl:if>
+          <xsl:if test="not(/epub-config/metadata/meta/@property = 'rendition:layout')">
+            <meta property="rendition:layout"><xsl:value-of select="if($layout eq 'fixed') 
+                                                                    then 'pre-paginated' 
+                                                                    else 'reflowable'"/></meta>
+          </xsl:if>
+          <xsl:if test="not(/epub-config/metadata/meta/@property = 'rendition:spread')">
+            <meta property="rendition:spread"><xsl:value-of select="if($layout eq 'fixed') 
+                                                                    then 'none' 
+                                                                    else 'auto'"/></meta>
+          </xsl:if>
+          <xsl:if test="not(/epub-config/metadata/meta/@property = 'rendition:orientation')">
+            <meta property="rendition:spread">auto</meta>
+          </xsl:if>
         </xsl:if>
-        <xsl:choose>
-          <xsl:when test="$layout eq 'fixed' and $target eq 'EPUB3'">
-            <xsl:if test="not(/epub-config/metadata/meta[@property eq 'rendition:layout'])">
-              <meta property="rendition:layout">pre-paginated</meta>
-            </xsl:if>
-            <xsl:if test="not(/epub-config/metadata/meta[@property eq 'rendition:spread'])">
-              <meta property="rendition:spread">none</meta>
-            </xsl:if>
-            <xsl:if test="not(/epub-config/metadata/meta[@property eq 'rendition:orientation'])">
-              <meta property="rendition:orientation">auto</meta>
-            </xsl:if>
-          </xsl:when>
-          <xsl:when test="$layout eq 'reflowable' and $target eq 'EPUB3'">
-            <xsl:if test="not(/epub-config/metadata/meta[@property eq 'rendition:layout'])">
-              <meta property="rendition:layout">reflowable</meta>
-            </xsl:if>
-            <xsl:if test="not(/epub-config/metadata/meta[@property eq 'rendition:spread'])">
-              <meta property="rendition:spread">auto</meta>
-            </xsl:if>
-            <xsl:if test="not(/epub-config/metadata/meta[@property eq 'rendition:orientation'])">
-              <meta property="rendition:orientation">auto</meta>
-            </xsl:if>
-          </xsl:when>
-          <xsl:otherwise/>
-        </xsl:choose>
         <xsl:if test="collection()/epub-config/cover/@href ne ''">
           <!-- This fails to match the cover file id. Exclude it for EPUB3 since there are other mechanisms?
                Or fix it? -->
