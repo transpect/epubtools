@@ -114,6 +114,9 @@
           <xsl:if test="not(/epub-config/metadata/meta/@property = 'rendition:orientation')">
             <meta property="rendition:spread">auto</meta>
           </xsl:if>
+          <xsl:if test="not(/epub-config/metadata/meta/@property = 'ibooks:specified-fonts')">
+            <meta property="ibooks:specified-fonts">true</meta>
+          </xsl:if>
         </xsl:if>
         <xsl:if test="collection()/epub-config/cover/@href ne ''">
           <!-- This fails to match the cover file id. Exclude it for EPUB3 since there are other mechanisms?
