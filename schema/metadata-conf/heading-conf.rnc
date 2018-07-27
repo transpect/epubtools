@@ -52,5 +52,5 @@ elt = attribute elt { xsd:NMTOKEN }
 ## Currently only epub:type, class, and id will be regarded as specializations
 ##     of a generic element when it comes to comparing whether a given element matches the selector.
 attr =
-  attribute attr { xsd:NMTOKEN },
+  attribute attr { "epub:type" | "class" | "id" },
   attribute attval { xsd:NMTOKEN }

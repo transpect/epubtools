@@ -10,30 +10,7 @@
   <include href="../heading-conf/heading-conf.rng">
     <start>
       <element name="epub-config">
-        <optional>
-          <ref name="format"/>
-        </optional>
-        <optional>
-          <ref name="layout"/>
-        </optional>
-        <optional>
-          <ref name="indent"/>
-        </optional>
-        <optional>
-          <ref name="variant"/>
-        </optional>
-        <optional>
-          <ref name="css-handling"/>
-        </optional>
-        <optional>
-          <ref name="page-map-xml"/>
-        </optional>
-        <optional>
-          <ref name="html-subdir-name"/>
-        </optional>
-        <optional>
-          <ref name="out-file-basename"/>
-        </optional>
+        <ref name="epub-config-attributes"/>
         <interleave>
           <optional>
             <ref name="cover"/>
@@ -52,6 +29,38 @@
       </element>
     </start>
   </include>
+  
+  <define name="epub-config-attributes">
+    <interleave>
+      <optional>
+        <ref name="global-atts"/>
+      </optional>
+      <optional>
+        <ref name="format"/>
+      </optional>
+      <optional>
+        <ref name="layout"/>
+      </optional>
+      <optional>
+        <ref name="indent"/>
+      </optional>
+      <optional>
+        <ref name="variant"/>
+      </optional>
+      <optional>
+        <ref name="css-handling"/>
+      </optional>
+      <optional>
+        <ref name="page-map-xml"/>
+      </optional>
+      <optional>
+        <ref name="html-subdir-name"/>
+      </optional>
+      <optional>
+        <ref name="out-file-basename"/>
+      </optional>
+    </interleave>
+  </define>
   
   <define name="global-atts">
     <optional>
