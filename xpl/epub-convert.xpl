@@ -49,11 +49,19 @@
     <p:documentation>You can disable checks by supplying empty Schematron patterns with the same IDs on the custom-schematron 
       port.</p:documentation>
   </p:input>
+  <p:input port="attach-cover-xsl">
+    <p:document href="../modules/create-ops/xsl/attach-cover.xsl"/>
+    <p:documentation>specific stylesheet for attaching cover</p:documentation>
+  </p:input>
   <p:input port="custom-schematron" sequence="true">
     <p:empty/>
     <p:documentation>Additional Schematron checks. See debug/epubtools/input-for-schematron.xml for an example of 
       the input format (after running this once with debug=yes). The Schematron files should have a /*/@tr:rule-family
     attribute that identifies the schema’s rule set for the purpose of report generation.</p:documentation>
+  </p:input>
+  <p:input port="cover-svg">
+    <p:documentation>svg template for dynamic cover creation</p:documentation>
+    <p:empty/>
   </p:input>
   
   <p:output port="result" primary="true">
@@ -183,6 +191,12 @@
     </p:input>
     <p:input port="meta">
       <p:pipe port="meta" step="epub-convert"/>
+    </p:input>
+   <p:input port="attach-cover-xsl">
+      <p:pipe port="attach-cover-xsl" step="epub-convert"/>
+    </p:input>
+   <p:input port="cover-svg">
+      <p:pipe port="cover-svg" step="epub-convert"/>
     </p:input>
     <p:with-option name="base-uri" select="/c:result/@local-href">
       <p:pipe port="result" step="base-uri"/>

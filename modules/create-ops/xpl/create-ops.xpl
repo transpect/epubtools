@@ -22,6 +22,12 @@
   <p:input port="meta" primary="false">
     <p:documentation>/epub-config</p:documentation>
   </p:input>
+  <p:input port="attach-cover-xsl" primary="false">
+    <p:documentation>stylesheet for attaching cover</p:documentation>
+  </p:input>
+  <p:input port="cover-svg" primary="false">
+    <p:documentation>svg template for dynamic cover creation</p:documentation>
+  </p:input>
   <p:output port="result" primary="true">
     <p:pipe port="result" step="html-splitter"/>
   </p:output>
@@ -109,6 +115,9 @@
         <p:output port="meta-with-uri-resolved-cover-href">
           <p:pipe port="result" step="replace-with-local"/>
         </p:output>
+        <p:output port="cover">
+          <p:empty/>
+        </p:output>
         <p:variable name="href" select="/epub-config/cover/@href">
           <p:pipe port="meta" step="create-ops"/>
         </p:variable>
@@ -145,6 +154,38 @@
         <p:output port="meta-with-uri-resolved-cover-href">
           <p:pipe port="meta" step="create-ops"/>
         </p:output>
+        <p:output port="cover">
+          <p:pipe step="svg-cover" port="result"/>
+        </p:output>
+        <p:count name="user-svg">
+          <p:input port="source">
+            <p:pipe port="cover-svg" step="create-ops"/>
+          </p:input>
+        </p:count>
+        <p:choose name="svg-cover">
+          <p:when test="/c:result=1">
+            <p:output port="result"/>
+            <p:identity name="svg">
+              <p:input port="source">
+                <p:pipe port="cover-svg" step="create-ops"/>
+              </p:input>
+            </p:identity>
+          </p:when>
+          <p:otherwise>
+            <p:output port="result"/>
+            <p:identity name="svg">
+              <p:input port="source">
+                <p:inline>
+                  <svg version="1.1" id="fallback" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                    width="800px" height="600px" viewBox="0 0 800 600" enable-background="new 0 0 800 600" xml:space="preserve">
+                    <rect x="115.593" y="146.717" fill="none" width="307.08" height="138.938"/>
+                    <text transform="matrix(1 0 0 1 115.5928 155.2368)" id="title" font-size="12"></text>
+                  </svg>
+                </p:inline>
+              </p:input>
+            </p:identity>
+          </p:otherwise>
+        </p:choose>
         <p:identity name="i">
           <p:input port="source">
             <p:inline>
@@ -246,9 +287,10 @@
         <p:pipe port="meta-with-uri-resolved-cover-href" step="image-info"/>
         <p:pipe port="diagnostics" step="image-info"/>
         <p:pipe port="file-uri" step="image-info"/>
+        <p:pipe port="cover" step="image-info"/>
       </p:input>
       <p:input port="stylesheet">
-        <p:document href="../xsl/attach-cover.xsl"/>
+        <p:pipe port="attach-cover-xsl" step="create-ops"/>
       </p:input>
     </p:xslt>
     
