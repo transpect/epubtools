@@ -134,14 +134,14 @@
 
       <manifest xmlns:opf="http://www.idpf.org/2007/opf">
         <xsl:for-each-group select="collection()//c:file[not($target = ('EPUB2', 'KF8') and matches(@name, 'nav\.xhtml'))]"
-          group-by="@name">
+                            group-by="@name">
 
           <xsl:variable name="strip-path" select="opf:strip-path(@name)"/>
           <xsl:variable name="id" select="opf:id-from-filename(@name)"/>
           <xsl:variable name="matching-media-overlay-id" 
-            select="for $i in collection()//c:file[matches(@name, '\.smil$')]
-                                                  [replace(@name, '\.smil$', '') = replace($strip-path, '\.x?html$', '')]
-                    return opf:id-from-filename($i/@name)" as="xs:string*"/>
+                        select="for $i in collection()//c:file[matches(@name, '\.smil$')]
+                                                              [replace(@name, '\.smil$', '') = replace($strip-path, '\.x?html$', '')]
+                                return opf:id-from-filename($i/@name)" as="xs:string*"/>
 
           <item href="{$strip-path}" media-type="{@media-type}" id="{opf:normalize-id($id)}">
 

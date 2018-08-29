@@ -701,12 +701,15 @@
       <p:pipe port="files" step="html-splitter"/>
     </p:viewport-source>
     <p:output port="result" primary="true"/>
+    
     <cxf:info fail-on-error="false" name="html-file-info">
       <p:with-option name="href" select="/*/@target-filename">
         <p:pipe port="current" step="html-file-size"/>
       </p:with-option>
     </cxf:info>
+    
     <p:sink/>
+    
     <p:set-attributes match="/*">
       <p:input port="source">
         <p:pipe port="current" step="html-file-size"/>
@@ -715,6 +718,7 @@
         <p:pipe port="result" step="html-file-info"/>
       </p:input>
     </p:set-attributes>
+    
   </p:viewport>
   
   <p:sink/>

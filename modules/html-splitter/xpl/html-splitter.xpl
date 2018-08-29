@@ -225,8 +225,9 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
         </p:variable>
 
         <p:choose xmlns:epub="http://www.idpf.org/2007/ops">
-          <p:when
-            test="$target = 'EPUB3' and matches(base-uri(), 'nav\.xhtml$') and (normalize-space($html-subdir-name))">
+          <p:when test="$target = 'EPUB3' 
+                        and matches(base-uri(), 'nav\.xhtml$') 
+                        and (normalize-space($html-subdir-name))">
             <p:documentation>Brute force link correction for the generated landmarks nav that will be stored to OEBPS
               even when the remainder of the HTML is stored to a subdir.</p:documentation>
             <p:viewport match="html:nav[@epub:type = 'landmarks']//html:a">
@@ -282,7 +283,9 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
           <!--  *
                 * nav document
                 * -->
-          <p:when test="$target = 'EPUB3' and matches(base-uri(), 'nav\.xhtml$') and (normalize-space($html-subdir-name))">
+          <p:when test="$target = 'EPUB3' 
+                        and matches(base-uri(), 'nav\.xhtml$') 
+                        and (normalize-space($html-subdir-name))">
             <p:store include-content-type="false" name="store-chunk" omit-xml-declaration="false" method="xhtml">
               <p:with-option name="indent" select="if ($indent = 'true') then 'true' else 'false'"/>
               <p:with-option name="href" select="$chunk-file-uri"/>
@@ -300,7 +303,8 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
               </p:store>            
             
           </p:when>
-          <p:when test="$target = ('EPUB2', 'KF8') and matches(base-uri(), 'nav\.xhtml$')">
+          <p:when test="$target = ('EPUB2', 'KF8') 
+                        and matches(base-uri(), 'nav\.xhtml$')">
             <p:documentation>drop nav.xhtml for EPUB2</p:documentation>
             <p:sink/>
           </p:when>
@@ -332,6 +336,12 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
             <p:document href="../xsl/collect-file-uri.xsl"/>
           </p:input>
         </p:xslt>
+        
+        <tr:store-debug>
+          <p:with-option name="pipeline-step" select="concat('epubtools/html-splitter/', $basename, '/collect-file-uri')"/>
+          <p:with-option name="active" select="$debug"/>
+          <p:with-option name="base-uri" select="$debug-dir-uri"/>
+        </tr:store-debug>
 
         <p:sink/>
 

@@ -5,7 +5,7 @@
   xmlns:tr="http://transpect.io"
   xmlns:html="http://www.w3.org/1999/xhtml"
   xmlns:svg="http://www.w3.org/2000/svg" 
-  xmlns:m="http://www.w3.org/1998/Math/MathML/"
+  xmlns:mml="http://www.w3.org/1998/Math/MathML"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:epub="http://www.idpf.org/2007/ops"
   xmlns="http://www.w3.org/ns/xproc-step"
@@ -24,8 +24,10 @@
     <xsl:variable name="media-type" select="tr:fileext-to-mime-type($file-extension)"/>
     <!-- exclude debug files from html-splitter.xsl which are 
          submitted over the same output port as regular html files -->
-    <xsl:if test="not(contains($stored-file, $debug-dir-uri)) or contains($stored-file, 'epub/OEBPS')">
-      <xsl:if test="contains($stored-file, $debug-dir-uri) and contains($stored-file, 'epub/OEBPS')">
+    <xsl:if test="not(contains($stored-file, $debug-dir-uri))
+                  or contains($stored-file, 'epub/OEBPS')">
+      <xsl:if test="contains($stored-file, $debug-dir-uri) 
+                    and contains($stored-file, 'epub/OEBPS')">
         <xsl:message select="'[WARNING]: adding the following debug and output file to epub container:', $stored-file"/>
       </xsl:if>
       <c:file target-filename="{$stored-file}"
@@ -61,7 +63,7 @@
     <xsl:attribute name="nav" select="'true'"/>
   </xsl:template>
 
-  <xsl:template match="m:math" mode="props">
+  <xsl:template match="mml:math" mode="props">
     <xsl:attribute name="mathml" select="'true'"/>
   </xsl:template>
 
