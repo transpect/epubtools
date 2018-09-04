@@ -183,6 +183,14 @@
     </xsl:copy>
   </xsl:template>
   
+  <!-- CSS files are copied to the same directory, for example 'styles'. 
+       In case of css files with relative paths, starting with '../' we 
+       strip the full path -->
+  
+  <xsl:template match="css:atrule[@type eq 'import'][matches(css:raw-css, '@import.+?(\.\./)+.+?\.css')]/css:raw-css/text()">
+    <xsl:value-of select="replace(., '(@import\s+url\([''&quot;]?).+/', '$1')"/>
+  </xsl:template>
+  
   <xsl:template match="css:selector">
     <xsl:param name="unused-selectors" as="element(css:selector)*" tunnel="yes"/>
     <xsl:if test="not(. intersect $unused-selectors)">
