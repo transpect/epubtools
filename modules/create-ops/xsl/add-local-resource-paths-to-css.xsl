@@ -21,8 +21,6 @@
   <xsl:template match="css:resource/@src">
     <xsl:copy/>
     <xsl:if test="matches(., '^(file|https?):')">
-      <xsl:message select="'--------------------------------------------------------', ."/>
-      <xsl:message select="'--------------------------------------------------------', key('by-href', ., collection()[2])/@name"/>
       <xsl:attribute name="local-src" select="key('by-href', ., collection()[2])/@name"/>  
     </xsl:if>
   </xsl:template>
