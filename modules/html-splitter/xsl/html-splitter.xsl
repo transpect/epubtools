@@ -1119,7 +1119,7 @@
   <xsl:template name="toc-nav">
     <xsl:param name="toc-ncx" as="element(ncx:ncx)"/>
     <xsl:param name="landmarks" as="element(*)*"/>
-    <html>
+    <html epub:prefix="tr: http://transpect.io">
       <head>
         <link href="styles/stylesheet.css" type="text/css" rel="stylesheet"/>
         <title>EPUB Navigation: Toc</title>
