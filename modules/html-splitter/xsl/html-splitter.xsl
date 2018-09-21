@@ -204,8 +204,8 @@
       <xsl:apply-templates select="$root" mode="remove-other-pub-type-content"/>
     </xsl:variable>
     <xsl:variable name="chunks-text"
-      select="replace(string-join($chunks/html:chunks/html:chunk/html:html/html:body, ''), '\s+', '&#xa;')" as="xs:string"/>
-    <xsl:variable name="orig-text" select="replace($strip-other-content/html:html/html:body, '\s+', '&#xa;')" as="xs:string"/>
+        select="replace(string-join($chunks/html:chunks/html:chunk/html:html/html:body, ''), '[\s\p{Zs}]+', '&#xa;')" as="xs:string"/>
+    <xsl:variable name="orig-text" select="replace($strip-other-content/html:html/html:body, '[\s\p{Zs}]+', '&#xa;')" as="xs:string"/>
     <xsl:if test="$chunks-text ne $orig-text">
       <xsl:message>!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Chunked
         text (modulo whitespace) is not identical to original text! Please diff <xsl:value-of select="$splatter-debug-dir-uri"
@@ -221,7 +221,7 @@
           <xsl:value-of select="$chunks-text"/>
         </doc>
       </xsl:result-document>
-      <xsl:result-document href="{$splatter-debug-dir-uri}/orig.txt" format="xml">
+      <xsl:result-document href="{$splatter-debug-dir-uri}/orig.txt" format="xml" encoding="utf8">
         <doc>
           <xsl:value-of select="$orig-text"/>
         </doc>
