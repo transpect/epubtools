@@ -530,6 +530,7 @@
       <report test="exists($orig-href)" role="warning" id="dissolved-link" diagnostics="dissolved-link_de">
         <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
         The link’s @href attribute '<value-of select="$orig-href"/>' could not be resolved and it was discarded during conversion.
+        Content of the link: '<value-of select="."/>'.
       </report>
     </rule>
   </pattern>
@@ -914,7 +915,8 @@
       select="string-join(for $a in (@* except @srcpath) return concat($a/name(), '=', $a), ', ')"/>) enthält mindestens ein anderes &lt;a&gt;-Element.</diagnostic>
     <diagnostic id="image-type_de" xml:lang="de">Der Medientyp von Bild '<value-of select="@href"/>', '<value-of 
       select="@media-type"/>', entspricht nicht dem regulären Ausdruck '<value-of select="$allowed"/>'.</diagnostic>
-    <diagnostic id="dissolved-link_de" xml:lang="de">Der Link auf '<value-of select="$orig-href"/>' konnte nicht aufgelöst werden. Das @href-Attribut wurde entfernt.</diagnostic>
+    <diagnostic id="dissolved-link_de" xml:lang="de">Der Link auf '<value-of select="$orig-href"/>' konnte nicht aufgelöst werden. 
+      Das @href-Attribut wurde entfernt. Inhalt des Links: '<value-of select="."/>'.</diagnostic>
     <diagnostic id="max-dpi_de" xml:lang="de">Das Bild '<value-of select="@href"/>' hat einen dpi-Wert von <value-of select="$dpi"/>.
       Er sollte nicht größer sein als <value-of select="$max"/>.</diagnostic>
     <diagnostic id="min-dpi_de" xml:lang="de">Das Bild '<value-of select="@href"/>' hat einen dpi-Wert von <value-of select="$dpi"/>.
