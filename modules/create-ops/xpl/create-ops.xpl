@@ -385,7 +385,7 @@
     <p:choose name="conditionally-change-font-subset-name">
       <p:when test="$create-font-subset = 'true'">
           <p:output port="result" primary="true"/>
-        <p:string-replace match="/cx:document/c:file[matches(@name,'^fonts/')]/@local-href" replace="concat(.,'.subset')"/>
+        <p:string-replace match="/cx:document/c:file[matches(@media-type,'^font/')]/@local-href" replace="concat(.,'.subset')"/>
       </p:when>
      <p:otherwise>
          <p:output port="result" primary="true"/>
@@ -640,7 +640,7 @@
   <p:sink  name="sink7"/>
     
   <p:validate-with-relax-ng name="validate-metadata-conf">
-    <p:with-option name="assert-valid" select="if ($terminate-on-error = 'yes') then 'true' else 'false'"/>
+      <p:with-option name="assert-valid" select="if ($terminate-on-error = 'yes') then 'true' else 'false'"/>
     <p:input port="source">
       <p:pipe port="meta-with-uri-resolved-cover-href" step="copy-resources"/>
     </p:input>
