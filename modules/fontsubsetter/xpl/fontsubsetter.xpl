@@ -119,11 +119,11 @@
                                                                                         and matches(@css:font-style,$font-style-regex)]-->
               <tr:chars>
 <!--               resolve catalog font url-->
-                <xsl:attribute name="font-url" select="current()/*:declaration[@property='src']/*:resource[1][not(@format='woff')]/@ local-href"/>
+                <xsl:attribute name="font-url" select="current()/*:declaration[@property='src']/*:resource[1][not(@format='woff')]/@local-href"/>
                 <xsl:attribute name="font-family" select="$font-family"/>
                 <xsl:attribute name="font-weight" select="$font-weight"/>
                 <xsl:attribute name="font-style" select="$font-style"/>
-                <xsl:message select="count($elements)"/>
+                <!--<xsl:message select="count($elements), current()/*:declaration[@property='src']/*:resource[1][not(@format='woff')]/@local-href"/>-->
                 <xsl:variable name="chars"  select="distinct-values(string-to-codepoints(string-join($elements/descendant::text(),'')))"/>
                 <xsl:for-each select="$chars">
                   <xsl:sequence select="tr:int-to-hex(xs:integer(.))"/><xsl:text>,</xsl:text>
@@ -145,15 +145,20 @@
 
   <p:for-each name="chars">
     <p:iteration-source select="//tr:chars"/>
-    <p:exec command="bash" arg-separator=";" result-is-xml="false" errors-is-xml="false" cwd=".">
-      <p:with-option name="args" select="concat('scripts/pyftsubset.sh;','-g',. ,';',replace(tr:chars/@font-url,'file:/',''))"/>
+    <p:exec name="subset" command="bash" arg-separator=";" result-is-xml="false" errors-is-xml="false" cwd="." >
+      <p:with-option name="args" select="concat('scripts/pyftsubset.sh;','-g',. ,';',replace(tr:chars/@font-url,'file:///?',''))"/>
     </p:exec>
+    <cx:message>
+      <p:with-option name="message" select=".">
+        <p:pipe port="result" step="subset"/>
+      </p:with-option>
+    </cx:message>
   </p:for-each>
   
-   <tr:store-debug name="store4" pipeline-step="epubtools/fontsubset/after-fontsubset" extension="xml">
+   <!--<tr:store-debug name="store4" pipeline-step="epubtools/fontsubset/after-fontsubset" extension="xml">
    <p:with-option name="active" select="$debug"/>
    <p:with-option name="base-uri" select="$debug-dir-uri"/>
-  </tr:store-debug>
+  </tr:store-debug>-->
 
 
 </p:declare-step>
