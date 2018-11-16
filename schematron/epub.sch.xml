@@ -775,7 +775,9 @@
     <rule context="/c:wrap/cx:document[@name = 'wrap-chunks']//html:img[@alt]">
       <assert role="warning" test="normalize-space(@alt)" id="empty-img-alt" diagnostics="empty-img-alt_de">
         <span class="srcpath"><xsl:value-of select="for $s in @srcpath return concat($source-dir-uri, $s)"/></span>
-        The alt attribute on image '<value-of select="replace(@src, '^.+/', '')"/>' should not be empty.
+        The alt attribute on image '<value-of select="replace(@src, '^.+/', '')"/>' is empty. This is only
+        recommended for decorative images that don't add information to the content and can be ignored by assistive 
+        technologies, such as screen readers.
       </assert>
     </rule>
   </pattern>
