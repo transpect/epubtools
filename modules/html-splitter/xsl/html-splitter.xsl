@@ -1753,8 +1753,11 @@
   </xsl:template>
 
   <xsl:template match="html:link/@href[matches(., '^(file|https?):')]
-                       | html:img/@src[matches(., '^(file|https?):')]
-                       | svg:image/@xlink:href[matches(., '^(file|https?):')]"
+                      |html:img/@src[matches(., '^(file|https?):')]
+                      |svg:image/@xlink:href[matches(., '^(file|https?):')]
+                      |html:video/@src[matches(., '^(file|https?):')]
+                      |html:audio/@src[matches(., '^(file|https?):')]
+                      |html:source/@src[matches(., '^(file|https?):')]"
     mode="resolve-refs" priority="2">
     <xsl:variable name="hopefully-relative" as="xs:string" select="replace(., $common-dir-elimination-regex, '')"/>
     <xsl:choose>
@@ -1770,8 +1773,11 @@
 
   <!-- relative links -->
   <xsl:template match="html:link/@href[normalize-space($html-prefix)][not(matches(., '^#'))]
-                       | html:img/@src[normalize-space($html-prefix)][not(matches(., '^#'))]
-                       | svg:image/@xlink:href[normalize-space($html-prefix)][not(matches(., '^#'))]"
+                      |html:img/@src[normalize-space($html-prefix)][not(matches(., '^#'))]
+                      |svg:image/@xlink:href[normalize-space($html-prefix)][not(matches(., '^#'))]
+                      |html:video/@src[normalize-space($html-prefix)][not(matches(., '^#'))]
+                      |html:audio/@src[normalize-space($html-prefix)][not(matches(., '^#'))]
+                      |html:source/@src[normalize-space($html-prefix)][not(matches(., '^#'))]"
     mode="resolve-refs">
     <xsl:attribute name="{name()}" select="concat('../', .)"/>
   </xsl:template>
