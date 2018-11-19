@@ -1093,6 +1093,12 @@
       <xsl:apply-templates select="node()" mode="#current"/>
     </xsl:copy>
   </xsl:template>
+  
+  <!-- preserve newlines in pre tags -->
+  
+  <xsl:template match="html:pre" mode="remove-surrounding-text">
+    <xsl:copy-of select="."/>
+  </xsl:template>
 
   <xsl:template name="ncx">
     <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="en-US">
