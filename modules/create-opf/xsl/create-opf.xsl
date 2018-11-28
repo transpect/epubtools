@@ -52,24 +52,10 @@
               <xsl:attribute name="{name()}" select="."/>
             </xsl:for-each>
             <xsl:if test="name() eq 'dc:identifier'">
-              <xsl:choose>
-                 <xsl:when test="@opf:scheme eq 'ORDER-NUMBER'">
-                  <xsl:attribute name="id" select="'bookid'"/>
-                  <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
-                </xsl:when>
-                <xsl:when test="@opf:scheme ne 'ISBN'">
-                  <xsl:if test="count($identifiers) eq 1">
-                    <xsl:attribute name="id" select="'bookid'"/>
-                  </xsl:if>
-                  <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
-                </xsl:when>
-                <xsl:otherwise>
-                  <xsl:attribute name="id" select="'bookid'"/>
-                  <xsl:if test="@opf:scheme">
-                    <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
-                  </xsl:if>
-                </xsl:otherwise>
-              </xsl:choose>
+              <xsl:attribute name="id" select="'bookid'"/>
+              <xsl:if test="@opf:scheme">
+                <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
+              </xsl:if>
             </xsl:if>
             <xsl:value-of select="."/>
           </xsl:element>
