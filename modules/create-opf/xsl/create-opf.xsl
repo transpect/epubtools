@@ -39,50 +39,40 @@
                            '&#xa;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&#xa;')"/>
         </xsl:if>
         <xsl:variable name="identifiers" as="element(dc:identifier)*" select="/epub-config/metadata/dc:identifier"/>
-        <xsl:for-each
-          select="/epub-config/metadata/*[
-                                not(
-                                  self::meta[@property eq 'dcterms:modified'] or
-                                  self::meta[@name eq 'cover']
-                                )
-                              ][
-                                if (name() = 'dc:identifier')
-                                then 
-                                  if(exists(../dc:identifier/@format[. eq $target]))
-                                  then @format = $target
-                                  else not(@format)
-                                else true()
-                              ]">
-          
-          <xsl:if test="not($target eq 'EPUB3' and self::dc:date)">
-            <xsl:element name="{name()}">
-              <xsl:for-each select="@*[not(name(parent::*) eq 'dc:identifier')]">
-                <!-- add meta/@property attributes -->
-                <xsl:attribute name="{name()}" select="."/>
-              </xsl:for-each>
-              <xsl:if test="name() eq 'dc:identifier'">
-                <xsl:choose>
-                   <xsl:when test="@opf:scheme eq 'ORDER-NUMBER'">
+        <xsl:for-each select="/epub-config/metadata/*[not(self::meta[@property eq 'dcterms:modified'] 
+                                                         |self::meta[@name eq 'cover'])]
+                                                     [if (name() = 'dc:identifier')
+                                                      then (if(exists(../dc:identifier/@format[. eq $target]))
+                                                            then @format = $target
+                                                            else not(@format))
+                                                      else true()]">
+          <xsl:element name="{name()}">
+            <xsl:for-each select="@*[not(name(parent::*) eq 'dc:identifier')]">
+              <!-- add meta/@property attributes -->
+              <xsl:attribute name="{name()}" select="."/>
+            </xsl:for-each>
+            <xsl:if test="name() eq 'dc:identifier'">
+              <xsl:choose>
+                 <xsl:when test="@opf:scheme eq 'ORDER-NUMBER'">
+                  <xsl:attribute name="id" select="'bookid'"/>
+                  <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
+                </xsl:when>
+                <xsl:when test="@opf:scheme ne 'ISBN'">
+                  <xsl:if test="count($identifiers) eq 1">
                     <xsl:attribute name="id" select="'bookid'"/>
+                  </xsl:if>
+                  <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:attribute name="id" select="'bookid'"/>
+                  <xsl:if test="@opf:scheme">
                     <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
-                  </xsl:when>
-                  <xsl:when test="@opf:scheme ne 'ISBN'">
-                    <xsl:if test="count($identifiers) eq 1">
-                      <xsl:attribute name="id" select="'bookid'"/>
-                    </xsl:if>
-                    <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
-                  </xsl:when>
-                  <xsl:otherwise>
-                    <xsl:attribute name="id" select="'bookid'"/>
-                    <xsl:if test="@opf:scheme">
-                      <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
-                    </xsl:if>
-                  </xsl:otherwise>
-                </xsl:choose>
-              </xsl:if>
-              <xsl:value-of select="."/>
-            </xsl:element>
-          </xsl:if>
+                  </xsl:if>
+                </xsl:otherwise>
+              </xsl:choose>
+            </xsl:if>
+            <xsl:value-of select="."/>
+          </xsl:element>
         </xsl:for-each>
         <xsl:variable name="current-date-string" select="string(current-dateTime())" as="xs:string"/>
         <xsl:if test="$target = ('KF8', 'EPUB2')">
