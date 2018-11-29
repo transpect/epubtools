@@ -17,9 +17,9 @@
   <p:documentation>This pipeline can be used to create fontsubsets. The characters used in each font will be displayed in a character set.
   The subset is created using the pyftsubset phython script from fonttools https://github.com/fonttools</p:documentation>
   
-  <p:option name="script-path" select="'scripts/pyftsubset.sh'"/>
+  <p:option name="script-path" select="'../../../scripts/pyftsubset.sh'"/>
   <p:option name="debug" required="false" select="'yes'"/>
-  <p:option name="debug-dir-uri" select="'debug'" />
+  <p:option name="debug-dir-uri" select="'debug'"/>
   
   <!--<p:option name="font-name" required="false"/>
   <p:option name="font-style" required="false" select="'normal'"/>
@@ -46,14 +46,19 @@
   
   <pos:info name="os-info"/>
   
-  <tr:store-debug name="store" pipeline-step="epubtools/fontsubset/os-info">
+  <tr:store-debug pipeline-step="epubtools/fontsubset/os-info">
     <p:with-option name="active" select="$debug"/>
     <p:with-option name="base-uri" select="$debug-dir-uri"/>
   </tr:store-debug>
   
-  <tr:file-uri name="script-path" cx:depends-on="os-info">
-    <p:with-option name="filename" select="concat(@cwd, '/', $script-path)"/>
+  <tr:file-uri name="script-path">
+    <p:with-option name="filename" select="resolve-uri($script-path)"/>
   </tr:file-uri>
+
+  <tr:store-debug pipeline-step="epubtools/fontsubset/path-info">
+    <p:with-option name="active" select="$debug"/>
+    <p:with-option name="base-uri" select="$debug-dir-uri"/>
+  </tr:store-debug>
   
   <p:sink/>
 
@@ -159,11 +164,19 @@
    <p:with-option name="active" select="$debug"/>
    <p:with-option name="base-uri" select="$debug-dir-uri"/>
   </tr:store-debug>
-
+  
   <p:for-each name="chars">
     <p:iteration-source select="//tr:chars"/>
+    <p:variable name="script-path" select="/c:result/@os-path">
+      <p:pipe port="result" step="script-path"/>
+    </p:variable>
     <p:exec name="subset" command="bash" arg-separator=";" result-is-xml="false" errors-is-xml="false" cwd="." >
-      <p:with-option name="args" select="concat('scripts/pyftsubset.sh;','-g',. ,';',replace(tr:chars/@font-url,'file:///?',''))"/>
+      <p:with-option name="args" select="concat($script-path,
+					        ';-g',
+						.,
+						';',
+						replace(tr:chars/@font-url,'file:///?',''))">
+      </p:with-option>
     </p:exec>
     <cx:message>
       <p:with-option name="message" select=".">
