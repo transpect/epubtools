@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <p:declare-step xmlns:p="http://www.w3.org/ns/xproc" 
-  xmlns:c="http://www.w3.org/ns/xproc-step"  
+  xmlns:c="http://www.w3.org/ns/xproc-step"
+  xmlns:pos="http://exproc.org/proposed/steps/os"  
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:s="http://purl.oclc.org/dsdl/schematron"
@@ -16,6 +17,7 @@
   <p:documentation>This pipeline can be used to create fontsubsets. The characters used in each font will be displayed in a character set.
   The subset is created using the pyftsubset phython script from fonttools https://github.com/fonttools</p:documentation>
   
+  <p:option name="script-path" select="'scripts/pyftsubset.sh'"/>
   <p:option name="debug" required="false" select="'yes'"/>
   <p:option name="debug-dir-uri" select="'debug'" />
   
@@ -39,6 +41,21 @@
   <p:import href="http://transpect.io/css-tools/xpl/css.xpl"/>
   <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl"/>
   <p:import href="http://transpect.io/xproc-util/file-uri/xpl/file-uri.xpl"/>
+
+  <p:sink/>
+  
+  <pos:info name="os-info"/>
+  
+  <tr:store-debug name="store" pipeline-step="epubtools/fontsubset/os-info">
+    <p:with-option name="active" select="$debug"/>
+    <p:with-option name="base-uri" select="$debug-dir-uri"/>
+  </tr:store-debug>
+  
+  <tr:file-uri name="script-path" cx:depends-on="os-info">
+    <p:with-option name="filename" select="concat(@cwd, '/', $script-path)"/>
+  </tr:file-uri>
+  
+  <p:sink/>
 
   <css:expand name="expand">
     <p:input port="source">
