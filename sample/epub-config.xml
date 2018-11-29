@@ -6,13 +6,16 @@
   layout="reflowable" 
   css-handling="regenerated-per-split remove-comments"
   html-subdir-name="text" 
-  indent="selective">
+  indent="selective"
+  font-subset="false">
 	<!-- layout: reflowable|fixed
 	       (default: reflowable; fixed only permitted for KF8 and EPUB3 layouts)
 	     format: EPUB2|EPUB3|KF8 (default: EPUB3)
   	     Please note that specifying the format as the target option will override conf settings. 
 	     css-handling: regenerated-per-split|regenerated-per-split remove-comments|unchanged (default: regenerated-per-split)
 	       Note: 'regenerated-per-split remove-comments' is the same as 'remove-comments regenerated-per-split' 
+	     font-subset: true|false (default: false); whether a subset of the font should be created which 
+	       includes only the characters that are used in the book
 	-->
 	
 	<!-- COVER:

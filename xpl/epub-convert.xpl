@@ -104,8 +104,9 @@
   <p:option name="id-in-report-heading" select="'false'">
     <p:documentation>Whether to adorn the reports’ tr:rule-family with the first dc:identifier found in the OPF.</p:documentation>
   </p:option>
-   <p:option name="create-font-subset" select="'false'" cx:type="xs:string" required="false">
-    <p:documentation>Whether to create a subset of used fonts</p:documentation>
+  <p:option name="create-font-subset" cx:type="xs:string" required="false" select="'false'">
+    <p:documentation>Whether to create a subset of used fonts. If the attribute @font-subset
+    exists in the epub-config (see sample/epub-config.xml), it will generally override this option.</p:documentation>
   </p:option>
   
   <!-- URIs are resolved by XML catalogs, which are located as default in xmlcatalog/catalog.xml -->
@@ -206,7 +207,10 @@
     <p:with-option name="terminate-on-error" select="$terminate-on-error"/>
     <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"><p:empty/></p:with-option>
-    <p:with-option name="create-font-subset" select="$create-font-subset" />
+    <p:with-option name="create-font-subset" cx:type="xs:string" required="false"
+		   select="(/epub-config/@font-subset, 'false')[1]">
+      <p:pipe port="meta" step="epub-convert"/>
+    </p:with-option>
   </epub:create-ops>
 
   <epub:create-opf name="create-opf">
