@@ -35,7 +35,7 @@
               name="{replace($stored-file, '.*epub/OEBPS/(.*)$', '$1')}" 
               media-type="{$media-type}">
         <xsl:apply-templates select="*" mode="props"/>
-      </c:file>  
+      </c:file>
     </xsl:if>
   </xsl:template>
 
@@ -47,24 +47,29 @@
 
   <xsl:template match="html:html/html:head/html:meta[@name = ('linear', 'spine', 'sequence')]" mode="props">
     <xsl:attribute name="{@name}" select="@content"/>
+    <xsl:next-match/>
   </xsl:template>
 
   <xsl:template match="html:*[name() = $html-form-elements]" mode="props">
     <xsl:attribute name="form" select="'true'"/>
+    <xsl:next-match/>
   </xsl:template>
 
   <xsl:template match="epub:switch | svg:svg | html:script" mode="props">
     <xsl:attribute name="{local-name()}" select="'true'"/>
+    <xsl:next-match/>
   </xsl:template>
   
   <!-- normally we would only accept html:nav[@epub:type = 'toc'], but if the nav property is missing in the OPF,
     ADE 4.5 might get stuck while reading the EPUB -->
   <xsl:template match="*[@epub:type = 'toc']" mode="props">
     <xsl:attribute name="nav" select="'true'"/>
+    <xsl:next-match/>
   </xsl:template>
 
   <xsl:template match="mml:math" mode="props">
     <xsl:attribute name="mathml" select="'true'"/>
+    <xsl:next-match/>
   </xsl:template>
 
   <xsl:template match="html:*[(@epub:type, @class) = 'toc']" mode="props" priority="2">

@@ -120,7 +120,6 @@
                                 return opf:id-from-filename($i/@name)" as="xs:string*"/>
 
           <item href="{$strip-path}" media-type="{@media-type}" id="{opf:normalize-id($id)}">
-
             <xsl:variable name="properties" as="xs:string*">
               <xsl:if test="@nav eq 'true' or $strip-path eq 'nav.xhtml'">
                 <xsl:value-of select="'nav'"/>
