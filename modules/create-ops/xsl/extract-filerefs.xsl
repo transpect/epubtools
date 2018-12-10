@@ -11,6 +11,7 @@
   xmlns:tr="http://transpect.io" 
   xmlns:svg="http://www.w3.org/2000/svg" 
   xmlns:smil="http://www.w3.org/ns/SMIL"
+  xmlns:mml="http://www.w3.org/1998/Math/MathML"
   version="2.0">
   
   <xsl:import href="functions.xsl"/>
@@ -43,9 +44,18 @@
         select="  collection()//html:*[local-name() = ('img', 'video', 'audio', 'source', 'script', 'object')]
                 | collection()/html:html/html:head/html:link[@href][$css-handling = 'unchanged' or not(@type eq 'text/css')]
                 | collection()/html:html/html:body//svg:svg//svg:image
-                | (if (doc-available($smil-file-uri)) then doc($smil-file-uri)/smil:smil/smil:body//smil:par/smil:audio else ())"
+                | collection()/html:html/html:body//mml:math
+                | (if (doc-available($smil-file-uri)) 
+                   then doc($smil-file-uri)/smil:smil/smil:body//smil:par/smil:audio 
+                   else ())"
         as="element(*)*"/>
-      <xsl:variable name="uri-atts" select="for $i in $fileref-elements return $i/@xlink:href|$i/@src|$i/@data|$i/@poster|$i/@href " as="attribute(*)*"/>
+      <xsl:variable name="uri-atts" select="for $i in $fileref-elements 
+                                            return $i/@xlink:href
+                                                  |$i/@src
+                                                  |$i/@data
+                                                  |$i/@poster
+                                                  |$i/@href
+                                                  |$i/@altimg" as="attribute(*)*"/>
       <xsl:for-each select="$uri-atts[not(normalize-space())]">
         <xsl:message select="'WARNING: Empty URI in ', .."/>
       </xsl:for-each>
