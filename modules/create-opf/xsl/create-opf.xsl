@@ -28,7 +28,7 @@
       unique-identifier="bookid">
       
       <xsl:if test="$target eq 'EPUB3'">
-        <xsl:attribute name="prefix" select="'ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/'"/> 
+        <xsl:attribute name="prefix" select="'ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/ rendition: http://www.idpf.org/vocab/rendition/#'"/> 
       </xsl:if>
       
       <metadata>
