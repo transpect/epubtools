@@ -130,7 +130,11 @@
   <!-- $chunks has to be a document node because it will serve as 3rd argument to xsl:key() -->
   <xsl:variable name="chunks" as="document-node(element(html:chunks))">
     <xsl:document>
-      <xsl:sequence select="tr:chunks($output-file-names/html:html/html:body//@tr-generated-id)"/>
+      <xsl:sequence 
+        select="tr:chunks($output-file-names/html:html/html:body//@tr-generated-id[
+                            (: https://redmine.le-tex.de/issues/6590 :)
+                            not(./ancestor-or-self::*/@tr-generated-id = ../ancestor::*/@tr-dont-split-at-genid)
+                          ])"/>
     </xsl:document>
   </xsl:variable>
   <xsl:variable name="raw-ncx" as="document-node(element(ncx:navMap))">
