@@ -25,6 +25,10 @@
   <p:input port="attach-cover-xsl" primary="false">
     <p:documentation>stylesheet for attaching cover</p:documentation>
   </p:input>
+  <p:input port="create-svg-cover-xsl" primary="false">
+    <p:documentation>stylesheet for dynamic cover creation</p:documentation>
+    <p:empty/>
+  </p:input>
   <p:input port="cover-svg" primary="false">
     <p:documentation>svg template for dynamic cover creation</p:documentation>
   </p:input>
@@ -53,6 +57,8 @@
   <p:option name="debug" required="false" select="'no'"/>
   <p:option name="debug-dir-uri" required="false" select="'debug'"/>
   <p:option name="create-font-subset" select="'false'"  cx:type="xs:string" required="false"/>
+  <p:option name="create-svg-cover" select="'false'"  cx:type="xs:string" required="false"/>
+  <p:option name="convert-svg-cover" select="'false'"  cx:type="xs:string" required="false"/>
   
   <p:import href="../../html-splitter/xpl/html-splitter.xpl"/>
   
@@ -61,6 +67,7 @@
   <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl"/>
   <p:import href="http://transpect.io/css-tools/xpl/css.xpl"/>
   <p:import href="http://transpect.io/xproc-util/file-uri/xpl/file-uri.xpl"/>
+  <p:import href="http://transpect.io/xproc-util/imagemagick/xpl/imagemagick.xpl"/>
   
   <p:group name="copy-resources">
     <p:output port="result" primary="true"/>
@@ -92,6 +99,9 @@
     <p:variable name="css-remove-comments" select="if (contains($css-handling, 'remove-comments')) then 'yes' else 'no'">
       <p:pipe port="meta" step="create-ops"/>
     </p:variable>
+    <p:variable name="cover-href" select="resolve-uri(/epub-config/cover/@href, base-uri())">
+      <p:pipe port="meta" step="create-ops"/>
+    </p:variable>
 
     <tr:store-debug pipeline-step="epubtools/hierarchy">
       <p:with-option name="active" select="$debug" />
@@ -100,6 +110,69 @@
         <p:pipe port="conf" step="create-ops"/>
       </p:input>
     </tr:store-debug>
+    
+    <!-- create svg cover -->
+    <p:choose name="create-svg-cover">
+      <p:when test="$create-svg-cover='true'">
+        <cx:message>
+          <p:with-option name="message" select="'create svg cover ',$cover-href, 'out dir: ', replace($cover-href,'^(.*[/])+(.*)', '$1')">
+            <p:pipe port="meta" step="create-ops"/>
+          </p:with-option>
+        </cx:message>
+        <p:xslt name="generate-svg">
+          <p:documentation>Stylesheet to render svg cover image</p:documentation>
+          <p:input port="source">
+            <p:pipe port="cover-svg" step="create-ops"/>
+            <p:pipe port="meta-with-uri-resolved-cover-href" step="image-info"/>
+          </p:input>
+          <p:input port="stylesheet">
+            <p:pipe port="create-svg-cover-xsl" step="create-ops"/>
+          </p:input>
+          <p:input port="parameters">
+            <p:empty/>
+          </p:input>
+        </p:xslt>
+        
+        <tr:store-debug pipeline-step="epubtools/cover-creation">
+          <p:with-option name="active" select="$debug" />
+          <p:with-option name="base-uri" select="$debug-dir-uri" />
+        </tr:store-debug>
+        <p:store name="store-svg">
+          <p:with-option name="href" select="replace($cover-href,'\.[a-z]+$','.svg')">
+            <p:pipe port="source" step="create-ops"/>
+          </p:with-option>
+        </p:store>
+        
+        <p:choose name="convert-svg">
+          <p:when test="$convert-svg-cover='true'">
+            <tr:imagemagick format="png">
+              <p:with-option name="href" select="replace($cover-href,'\.[a-z]+$','.svg')"/>
+              <p:with-option name="outdir" select="replace($cover-href,'^(.*[/])+(.*)', '$1')"/>
+            </tr:imagemagick>
+          </p:when>
+          <p:otherwise>
+            <p:identity >
+              <p:input port="source">
+                <p:inline>
+                  <c:error>no SVG Cover converted</c:error>      
+                </p:inline>
+              </p:input>
+            </p:identity>
+          </p:otherwise>
+        </p:choose>
+      </p:when>
+      <p:otherwise>
+        <p:identity >
+          <p:input port="source">
+            <p:inline>
+              <c:error>no SVG Cover created</c:error>      
+            </p:inline>
+          </p:input>
+        </p:identity>
+      </p:otherwise>
+    </p:choose>
+    
+    <p:sink/>
 
     <p:choose name="image-info">
       <p:xpath-context>
@@ -114,9 +187,6 @@
         </p:output>
         <p:output port="meta-with-uri-resolved-cover-href">
           <p:pipe port="result" step="replace-with-local"/>
-        </p:output>
-        <p:output port="cover">
-          <p:empty/>
         </p:output>
         <p:variable name="href" select="/epub-config/cover/@href">
           <p:pipe port="meta" step="create-ops"/>
@@ -154,38 +224,6 @@
         <p:output port="meta-with-uri-resolved-cover-href">
           <p:pipe port="meta" step="create-ops"/>
         </p:output>
-        <p:output port="cover">
-          <p:pipe step="svg-cover" port="result"/>
-        </p:output>
-        <p:count name="user-svg">
-          <p:input port="source">
-            <p:pipe port="cover-svg" step="create-ops"/>
-          </p:input>
-        </p:count>
-        <p:choose name="svg-cover">
-          <p:when test="/c:result=1">
-            <p:output port="result"/>
-            <p:identity name="svg">
-              <p:input port="source">
-                <p:pipe port="cover-svg" step="create-ops"/>
-              </p:input>
-            </p:identity>
-          </p:when>
-          <p:otherwise>
-            <p:output port="result"/>
-            <p:identity name="svg">
-              <p:input port="source">
-                <p:inline>
-                  <svg version="1.1" id="fallback" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                    width="800px" height="600px" viewBox="0 0 800 600" enable-background="new 0 0 800 600" xml:space="preserve">
-                    <rect x="115.593" y="146.717" fill="none" width="307.08" height="138.938"/>
-                    <text transform="matrix(1 0 0 1 115.5928 155.2368)" id="title" font-size="12"></text>
-                  </svg>
-                </p:inline>
-              </p:input>
-            </p:identity>
-          </p:otherwise>
-        </p:choose>
         <p:identity name="i">
           <p:input port="source">
             <p:inline>
@@ -287,7 +325,7 @@
         <p:pipe port="meta-with-uri-resolved-cover-href" step="image-info"/>
         <p:pipe port="diagnostics" step="image-info"/>
         <p:pipe port="file-uri" step="image-info"/>
-        <p:pipe port="cover" step="image-info"/>
+<!--        <p:pipe port="cover" step="image-info"/>-->
       </p:input>
       <p:input port="stylesheet">
         <p:pipe port="attach-cover-xsl" step="create-ops"/>

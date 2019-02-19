@@ -63,6 +63,10 @@
     <p:documentation>svg template for dynamic cover creation</p:documentation>
     <p:empty/>
   </p:input>
+  <p:input port="create-svg-cover-xsl" primary="false">
+    <p:documentation>stylesheet for dynamic cover creation</p:documentation>
+    <p:empty/>
+  </p:input>
   
   <p:output port="result" primary="true">
     <p:pipe port="result" step="output-file-name"/>
@@ -108,6 +112,8 @@
     <p:documentation>Whether to create a subset of used fonts. If the attribute @font-subset
     exists in the epub-config (see sample/epub-config.xml), it will generally override this option.</p:documentation>
   </p:option>
+  <p:option name="create-svg-cover" select="'false'"  cx:type="xs:string" required="false"/>
+  <p:option name="convert-svg-cover" select="'false'"  cx:type="xs:string" required="false"/>
   
   <!-- URIs are resolved by XML catalogs, which are located as default in xmlcatalog/catalog.xml -->
   
@@ -196,6 +202,9 @@
    <p:input port="attach-cover-xsl">
       <p:pipe port="attach-cover-xsl" step="epub-convert"/>
     </p:input>
+    <p:input port="create-svg-cover-xsl">
+      <p:pipe port="create-svg-cover-xsl" step="epub-convert"/>
+    </p:input>
    <p:input port="cover-svg">
       <p:pipe port="cover-svg" step="epub-convert"/>
     </p:input>
@@ -207,10 +216,11 @@
     <p:with-option name="terminate-on-error" select="$terminate-on-error"/>
     <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"><p:empty/></p:with-option>
-    <p:with-option name="create-font-subset" cx:type="xs:string" required="false"
-		   select="(/epub-config/@font-subset, 'false')[1]">
+    <p:with-option name="create-font-subset" select="(/epub-config/@font-subset, 'false')[1]">
       <p:pipe port="meta" step="epub-convert"/>
     </p:with-option>
+    <p:with-option name="create-svg-cover" select="$create-svg-cover"/>
+    <p:with-option name="convert-svg-cover" select="$convert-svg-cover"/>
   </epub:create-ops>
 
   <epub:create-opf name="create-opf">
