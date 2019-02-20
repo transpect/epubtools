@@ -83,8 +83,8 @@
       than the parser errors (in particular, Saxon warnings from other XSLT steps) end up in the report
       when epub creation is embedded in larger transpect pipelines. Therefore, we’ll disable returning
       this report for the time being. No issue has been filed yet with Calabash.</p:documentation>
-      <p:empty/>
-      <!--<p:pipe port="report" step="css-parse0"/>-->
+<!--      <p:empty/>-->
+      <p:pipe port="report" step="create-svg-cover"/>
     </p:output>
     <p:output port="meta-with-uri-resolved-cover-href">
       <p:pipe port="meta-with-uri-resolved-cover-href" step="image-info"/>
@@ -114,6 +114,12 @@
     <!-- create svg cover -->
     <p:choose name="create-svg-cover">
       <p:when test="$create-svg-cover='true'">
+        <p:output port="result">
+          <p:pipe port="result" step="store-svg"/>
+        </p:output>
+        <p:output port="report">
+          <p:pipe port="report" step="convert-svg"/>
+        </p:output>
         <cx:message>
           <p:with-option name="message" select="'create svg cover ',$cover-href, 'out dir: ', replace($cover-href,'^(.*[/])+(.*)', '$1')">
             <p:pipe port="meta" step="create-ops"/>
@@ -145,13 +151,25 @@
         
         <p:choose name="convert-svg">
           <p:when test="$convert-svg-cover='true'">
-            <tr:imagemagick format="png">
+            <p:output port="result">
+              <p:pipe port="result" step="convert-cover"/>
+            </p:output>
+            <p:output port="report">
+              <p:pipe port="report" step="convert-cover"></p:pipe>
+            </p:output>
+            <tr:imagemagick format="png" name="convert-cover">
               <p:with-option name="href" select="replace($cover-href,'\.[a-z]+$','.svg')"/>
               <p:with-option name="outdir" select="replace($cover-href,'^(.*[/])+(.*)', '$1')"/>
             </tr:imagemagick>
           </p:when>
           <p:otherwise>
-            <p:identity >
+            <p:output port="result">
+              <p:pipe port="result" step="ident"></p:pipe>
+            </p:output>
+            <p:output port="report">
+              <p:empty/>
+            </p:output>
+            <p:identity name="ident" >
               <p:input port="source">
                 <p:inline>
                   <c:error>no SVG Cover converted</c:error>      
@@ -162,7 +180,13 @@
         </p:choose>
       </p:when>
       <p:otherwise>
-        <p:identity >
+         <p:output port="result">
+          <p:pipe port="result" step="ident"></p:pipe>
+        </p:output>
+        <p:output port="report">
+          <p:empty/>
+        </p:output>
+        <p:identity name="ident"  >
           <p:input port="source">
             <p:inline>
               <c:error>no SVG Cover created</c:error>      
@@ -171,8 +195,7 @@
         </p:identity>
       </p:otherwise>
     </p:choose>
-    
-    <p:sink/>
+
 
     <p:choose name="image-info">
       <p:xpath-context>
