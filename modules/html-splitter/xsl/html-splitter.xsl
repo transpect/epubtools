@@ -11,9 +11,10 @@
   xmlns:xlink="http://www.w3.org/1999/xlink" 
   xmlns:dtb="http://www.daisy.org/z3986/2005/dtb/"
   xmlns:smil="http://www.w3.org/ns/SMIL"
+  xmlns:mml="http://www.w3.org/1998/Math/MathML"
   xmlns="http://www.w3.org/1999/xhtml"
   version="2.0"
-  exclude-result-prefixes="html opf xs ncx tr smil dc epub svg dtb">
+  exclude-result-prefixes="html opf xs ncx tr smil dc epub svg dtb mml">
 
 	<!-- create references between smil and html chunks -->
 	<xsl:include href="media-overlay.xsl"/>
@@ -1767,7 +1768,8 @@
                       |svg:image/@xlink:href[matches(., '^(file|https?):')]
                       |html:video/@src[matches(., '^(file|https?):')]
                       |html:audio/@src[matches(., '^(file|https?):')]
-                      |html:source/@src[matches(., '^(file|https?):')]"
+                      |html:source/@src[matches(., '^(file|https?):')]
+                      |mml:math/@altimg[matches(., '^(file|https?):')]"
     mode="resolve-refs" priority="2">
     <xsl:variable name="hopefully-relative" as="xs:string" select="replace(., $common-dir-elimination-regex, '')"/>
     <xsl:choose>
@@ -1787,7 +1789,8 @@
                       |svg:image/@xlink:href[normalize-space($html-prefix)][not(matches(., '^#'))]
                       |html:video/@src[normalize-space($html-prefix)][not(matches(., '^#'))]
                       |html:audio/@src[normalize-space($html-prefix)][not(matches(., '^#'))]
-                      |html:source/@src[normalize-space($html-prefix)][not(matches(., '^#'))]"
+                      |html:source/@src[normalize-space($html-prefix)][not(matches(., '^#'))]
+                      |mml:math/@altimg[normalize-space($html-prefix)][not(matches(., '^#'))]"
     mode="resolve-refs">
     <xsl:attribute name="{name()}" select="concat('../', .)"/>
   </xsl:template>
