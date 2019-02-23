@@ -133,8 +133,8 @@
     <xsl:document>
       <xsl:sequence 
         select="tr:chunks($output-file-names/html:html/html:body//@tr-generated-id[
-                            (: https://redmine.le-tex.de/issues/6590 :)
-                            not(./ancestor-or-self::*/@tr-generated-id = ../ancestor::*/@tr-dont-split-at-genid)
+                            (: https://redmine.le-tex.de/issues/6590 also 6624 :)
+                            not(./ancestor-or-self::*/@tr-generated-id = ../ancestor::*/(@tr-dont-split-at-genid | @tr-generated-id))
                           ])"/>
     </xsl:document>
   </xsl:variable>
@@ -1839,7 +1839,7 @@
 
   <xsl:function name="tr:export-filename" as="xs:string">
     <xsl:param name="split-genid" as="xs:string?"/>
-    <xsl:if test="not($split-genid)">
+    <xsl:if test="empty($split-genid)">
       <xsl:message terminate="no"> Something’s wrong: should have a generated ID in every chunk </xsl:message>
     </xsl:if>
     <xsl:sequence select="key('by-tr-genid', $split-genid, $output-file-names)/@tr-output-name"/>
