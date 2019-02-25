@@ -21,7 +21,7 @@
 
   <xsl:template match="/">
     <xsl:variable name="file-extension" select="replace($stored-file , '.*\.(.*)$', '$1')"/>
-    <xsl:variable name="media-type" select="tr:fileext-to-mime-type($file-extension)"/>
+    <xsl:variable name="media-type" select="tr:fileref-to-mime-type($file-extension)"/>
     <!-- exclude debug files from html-splitter.xsl which are 
          submitted over the same output port as regular html files -->
     <xsl:if test="not(contains($stored-file, $debug-dir-uri))

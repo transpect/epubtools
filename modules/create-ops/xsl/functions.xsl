@@ -59,7 +59,7 @@
                 '/+'
               )"/>
     
-    <xsl:variable name="media-type" select="tr:fileext-to-mime-type($prelim/self::attribute(base-url))" as="xs:string"/>
+    <xsl:variable name="media-type" select="tr:fileref-to-mime-type($prelim/self::attribute(base-url))" as="xs:string"/>
 
     <xsl:variable name="potentially-relative" select="replace($prelim/self::attribute(base-url), $htmlroot-uri-regex, '')" as="xs:string"/>
 
