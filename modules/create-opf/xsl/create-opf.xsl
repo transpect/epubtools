@@ -52,7 +52,9 @@
               <xsl:attribute name="{name()}" select="."/>
             </xsl:for-each>
             <xsl:if test="name() eq 'dc:identifier'">
-              <xsl:attribute name="id" select="'bookid'"/>
+              <xsl:if test=". is ../dc:identifier[1]">
+                <xsl:attribute name="id" select="'bookid'"/>  
+              </xsl:if>
               <xsl:if test="@opf:scheme">
                 <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
               </xsl:if>
