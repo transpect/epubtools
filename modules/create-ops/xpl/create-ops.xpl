@@ -160,6 +160,8 @@
             <tr:imagemagick format="png" name="convert-cover">
               <p:with-option name="href" select="replace($cover-href,'\.[a-z]+$','.svg')"/>
               <p:with-option name="outdir" select="replace($cover-href,'^(.*[/])+(.*)', '$1')"/>
+              <p:with-option name="debug" select="$debug"/>
+              <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
             </tr:imagemagick>
           </p:when>
           <p:otherwise>
