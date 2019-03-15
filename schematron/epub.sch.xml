@@ -667,12 +667,22 @@
   </pattern>
 
   <pattern id="http-resources">
+    <rule context="/c:wrap/html:html//*[@error-status = '999']">
+      <let name="srcpath" value="tokenize(ancestor-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
+      <report test="true()" role="info" id="resource-checking-failed" diagnostics="resource-unavailable_de">
+        <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
+        Resource unavailable: <a xmlns="http://www.w3.org/1999/xhtml" href="{@checked-href}"><xsl:value-of select="@checked-href"/></a>. 
+        Status: <value-of select="@error-status"/>. A status of 999
+        indicates that the HTTP client library failed to access the resource. This is an error of the HTTP client. 
+        The resource may still be available. Please check it manually in the browser.
+      </report>
+    </rule>
     <rule context="/c:wrap/html:html//*[@error-status]">
       <let name="srcpath" value="tokenize(ancestor-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
       <report test="true()" role="warning" id="resource-unavailable" diagnostics="resource-unavailable_de">
         <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
         Resource unavailable: <a xmlns="http://www.w3.org/1999/xhtml" href="{@checked-href}"><xsl:value-of select="@checked-href"/></a>. 
-        Status: <value-of select="@error-status"/> 
+        Status: <value-of select="@error-status"/>
       </report>
     </rule>
   </pattern>
@@ -905,7 +915,9 @@
       select="if (*) then $elements else 'Enthält nich einmal Tags.'"/>--></diagnostic>
     <diagnostic id="resource-unavailable_de" xml:lang="de">Ressource nicht verfügbar: <a xmlns="http://www.w3.org/1999/xhtml" 
       href="{@checked-href}"><xsl:value-of select="@checked-href"/></a>. 
-      Status: <value-of select="@error-status"/></diagnostic>
+      Status: <value-of select="@error-status"/><xsl:if test="@error-status = '999'">. Ein Status von 999
+        zeigt an, dass die HTTP-Client-Bibliothek die Ressource nicht ansprechen konnte. Das ist ein Fehler des
+      HTTP-Clients. Die Ressource könnte trotzdem erreichbar sein. Sie müssten den Link im Browser überprüfen.</xsl:if></diagnostic>
     <diagnostic id="bare-text_de" xml:lang="de">Das Container-Element '<value-of select="name()"/>' <value-of select="$atts-string"/> enthält
     ungetaggten Text: <value-of select="$occurrences"/>. Dies kann zwar vom HTML-Schema gestattet sein, sollte aber vermieden
     werden. Es wird hier als Fehler gemeldet, weil es ein typisches Symptom von Auszeichnungs- und/oder Konvertierungsfehlern ist.</diagnostic>
