@@ -93,7 +93,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
 
   <p:try name="html-splitter-group">
     <p:documentation>You might need to comment out this p:try/p:catch and move name="html-splitter-group" to the
-      followin p:group in order to facilitate debugging if there is an error in the splitter XSLT. In extreme cases, it
+      following p:group in order to facilitate debugging if there is an error in the splitter XSLT. In extreme cases, it
       might be necessary to invoke the XSLT directly. For instructions, see the comments after the xsl:param
       instructions in html-splitter.xsl.</p:documentation>
     <p:group>
@@ -150,6 +150,10 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
           <p:document href="../xsl/html-splitter.xsl"/>
         </p:input>
       </p:xslt>
+      
+      <!--<cx:message>
+          <p:with-option name="message" select="'PRIMARY-SPLIT: ', base-uri(), ' :: ', base-uri(/*)"/>
+        </cx:message>-->
 
       <tr:store-debug>
         <p:with-option name="pipeline-step" select="concat('epubtools/html-splitter/', $basename, '/chunks')"/>
@@ -161,6 +165,9 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
         <p:iteration-source select="/*[matches(base-uri(), '/epubtools/html-splitter/')]">
           <p:pipe port="secondary" step="split"/>
         </p:iteration-source>
+        <!--<cx:message>
+          <p:with-option name="message" select="'SECONDARY-SPLIT: ', base-uri(), ' :: ', base-uri(/*)"/>
+        </cx:message>-->
         <p:store>
           <p:with-option name="href" select="base-uri()"/>
         </p:store>
@@ -192,10 +199,16 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
         <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
       </epub:split-css>
       
+      <!--<p:for-each>
+        <cx:message>
+          <p:with-option name="message" select="'PRIMARY-PER-SPLIT-CSS: ', base-uri(), ' :: ', /*/name(), ' :: ', base-uri(/*)"/>
+        </cx:message>
+      </p:for-each>-->
+      
       <p:sink/>
       
       <epub:insert-amzn-region-magnification name="insert-amzn-region-magnification" cx:depends-on="per-split-css">
-        <p:input port="source">
+        <p:input port="source" select="/*">
           <p:pipe port="result" step="per-split-css"/>
         </p:input>
         <p:with-option name="amzn-region-magnification" select="$amzn-region-magnification"/>
@@ -218,7 +231,7 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
         <p:iteration-source>
           <p:pipe port="result" step="insert-amzn-region-magnification"/>
         </p:iteration-source>
-
+        
         <p:variable name="chunk-file-uri" select="replace(base-uri(/*), 'chunks/', 'epub/OEBPS/')">
           <p:documentation>base-uri(/*) instead of base-uri() because we set the base uri of the primary CSS by adding
             an xml:base attribute.</p:documentation>
