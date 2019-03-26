@@ -14,12 +14,15 @@
   
   <xsl:import href="http://transpect.io/xslt-util/mime-type/xsl/mime-type.xsl"/>
 
-  <xsl:param name="stored-file"/>
+  <xsl:param name="stored-file" as="xs:string"/>
   <xsl:param name="debug-dir-uri"/>
 
   <xsl:variable name="html-form-elements" select="('form', 'input', 'button', 'option', 'select', 'textarea')" as="xs:string+"/>
 
   <xsl:template match="/">
+    <xsl:if test="not(normalize-space($stored-file))">
+      <xsl:message select="'Unexpected empty file URI in epubtools/modules/html-splitter/xsl/collect-file-uri.xsl'"/>
+    </xsl:if>
     <xsl:variable name="file-extension" select="replace($stored-file , '.*\.(.*)$', '$1')"/>
     <xsl:variable name="media-type" select="tr:fileref-to-mime-type($file-extension)"/>
     <!-- exclude debug files from html-splitter.xsl which are 
