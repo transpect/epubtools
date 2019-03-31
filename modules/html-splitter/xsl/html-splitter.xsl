@@ -347,7 +347,7 @@
   <!-- MODE: SEMIFLATTEN
        Dissolve divs which contain more than a single heading (important for later grouping) -->
   <xsl:variable name="tr:dissolvable-for-semiflatten" as="element(*)*"
-    select="//*[local-name() = ('aside', 'div', 'nav', 'section', 'table', 'tbody', 'tr', 'td', 'th')]"/>
+    select="//*[local-name() = ('aside', 'div', 'nav', 'header', 'section', 'table', 'tbody', 'tr', 'td', 'th')]"/>
 
   <xsl:template
     match="*[exists(. intersect $tr:dissolvable-for-semiflatten)][
