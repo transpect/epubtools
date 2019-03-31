@@ -275,13 +275,40 @@
       </p:input>
     </tr:store-debug>
     
-    <p:sink name="sink2a"/>
+    <p:choose name="optionally-use-alternative-head">
+      <p:when test="exists(/epub-config/html:head)">
+        <p:replace match="/html:html/html:head">
+          <p:input port="source">
+            <p:pipe port="source" step="create-ops"/>
+          </p:input>
+          <p:input port="replacement" select="/epub-config/html:head">
+            <p:pipe port="meta-with-uri-resolved-cover-href" step="image-info"/>
+          </p:input>
+        </p:replace>
+      </p:when>
+      <p:otherwise>
+        <p:identity>
+          <p:input port="source">
+            <p:pipe port="source" step="create-ops"/>
+          </p:input>
+        </p:identity>
+      </p:otherwise>
+    </p:choose>
+    
+    <p:choose name="optionally-remove-scripts">
+      <p:xpath-context>
+        <p:pipe port="meta-with-uri-resolved-cover-href" step="image-info"/>
+      </p:xpath-context>
+      <p:when test="/epub-config/@remove-scripts = 'true'">
+        <p:delete match="html:script | @*[starts-with(name(), 'on')]"/>
+      </p:when>
+      <p:otherwise>
+        <p:identity/>
+      </p:otherwise>
+    </p:choose>
     
     <p:delete match="/html:html/@version | /html:html/html:head/@profile" name="delete-dtd-artifacts">
       <p:documentation>Possible DTD parsing artifacts</p:documentation>
-      <p:input port="source">
-        <p:pipe port="source" step="create-ops"/>
-      </p:input>
     </p:delete>
 
     <p:choose name="conditionally-check-hrefs">
@@ -705,7 +732,7 @@
   <p:sink  name="sink7"/>
     
   <p:validate-with-relax-ng name="validate-metadata-conf">
-      <p:with-option name="assert-valid" select="if ($terminate-on-error = 'yes') then 'true' else 'false'"/>
+      <p:with-option name="assert-valid" select="'false'"/>
     <p:input port="source">
       <p:pipe port="meta-with-uri-resolved-cover-href" step="copy-resources"/>
     </p:input>

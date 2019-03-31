@@ -128,4 +128,12 @@
       schematron/epub.sch.xml for rule examples. -->
 <!--    <schematron uri="http://some.location/schematron.sch"/>-->
   </checks>
+  
+  <!-- Replace the input HTML head element with this one (for using different CSS, etc.): -->
+  <head xmlns="http://www.w3.org/1999/xhtml">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>beer2poetry</title>
+    <meta name="author" content="Codrops"/>
+    <link rel="stylesheet" type="text/css" href="css/epub.css"/>
+  </head>
 </epub-config>

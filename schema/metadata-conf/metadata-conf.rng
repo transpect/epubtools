@@ -25,6 +25,9 @@
           <optional>
             <ref name="checks"/>
           </optional>
+          <optional>
+            <ref name="html-head"/>
+          </optional>
         </interleave>
       </element>
     </start>
@@ -43,6 +46,12 @@
       </optional>
       <optional>
         <ref name="indent"/>
+      </optional>
+      <optional>
+        <ref name="remove-scripts"/>
+      </optional>
+      <optional>
+        <ref name="subset"/>
       </optional>
       <optional>
         <ref name="variant"/>
@@ -103,6 +112,28 @@
       </choice>
     </attribute>
   </define>
+  
+  <define name="remove-scripts">
+    <attribute name="remove-scripts">
+      <a:documentation>Whether to remove script elements and event attributes. Default: false</a:documentation>
+      <choice>
+        <value>true</value>
+        <value>false</value>
+      </choice>
+    </attribute>
+  </define>
+  
+  <define name="subset">
+    <attribute name="font-subset">
+      <a:documentation>Use only a subset that covers the characters that are displeyed
+      with that font. Requires https://github.com/transpect/epub-font-subsetter and Python</a:documentation>
+      <choice>
+        <value>true</value>
+        <value>false</value>
+      </choice>
+    </attribute>
+  </define>
+
   <define name="layout">
     <attribute name="layout">
       <choice>
@@ -551,6 +582,28 @@
         </attribute>
       </optional>
     </element>
+  </define>
+  
+  <define name="html-head">
+    <element name="head" ns="http://www.w3.org/1999/xhtml">
+      <ref name="any-html"/>
+    </element>
+  </define>
+  
+  <define name="any-html">
+    <zeroOrMore>
+      <attribute>
+        <anyName/>
+      </attribute>
+    </zeroOrMore>
+    <mixed>
+      <zeroOrMore>
+        <element>
+          <anyName ns="http://www.w3.org/1999/xhtml"/>
+          <ref name="any-html"/>
+        </element>
+      </zeroOrMore>
+    </mixed>
   </define>
 
 </grammar>
