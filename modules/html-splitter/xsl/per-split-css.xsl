@@ -160,6 +160,7 @@
         </css>
       </xsl:result-document>
     </xsl:for-each>
+    <nothing/>
   </xsl:template>
 
   <xsl:function name="css:relative-result-filename" as="xs:string">

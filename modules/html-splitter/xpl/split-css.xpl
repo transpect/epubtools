@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <p:declare-step xmlns:p="http://www.w3.org/ns/xproc"
   xmlns:c="http://www.w3.org/ns/xproc-step" 
+  xmlns:cx="http://xmlcalabash.com/ns/extensions" 
   xmlns:tr="http://transpect.io" 
   xmlns:css="http://www.w3.org/1996/css" 
   xmlns:epub="http://transpect.io/epubtools"
@@ -69,8 +70,9 @@
       
       <p:xslt name="per-split-css-xml-representations">
         <p:documentation>
-          Primary output: the new, reduced common CSS. Secondary port: individual CSS files if
-          applicable. Also on secondary port: A file named 'unused-css-resources.xml'
+          Primary output: probably nothing. Secondary port: individual CSS representations (internal-XX or
+          their initial name) as /css:css documents. 
+          Also on secondary port: A file named 'unused-css-resources.xml'
         </p:documentation>
         <p:input port="parameters">
           <p:empty/>
@@ -90,8 +92,20 @@
       
       <p:sink/>
       
+<!--      <p:for-each>
+        <p:iteration-source>
+          <p:pipe port="result" step="per-split-css-xml-representations"/>
+          <p:pipe port="secondary" step="per-split-css-xml-representations"/>
+        </p:iteration-source>
+        <cx:message>
+          <p:with-option name="message" select="'PER-SPLIT-CSS: ', base-uri(), ' :: ', base-uri(/*), ' :: ', name(/*)"/>
+        </cx:message>
+      </p:for-each>
+      
+      <p:sink/>-->
+      
       <p:identity name="unused-css-resources">
-        <p:input port="source" select="/*[ends-with(base-uri(/), 'unused-css-resources.xml')]">
+        <p:input port="source" select="/css:css[ends-with(base-uri(/), 'unused-css-resources.xml')]">
           <p:pipe port="secondary" step="per-split-css-xml-representations"/>
         </p:input>
       </p:identity>
@@ -106,7 +120,7 @@
       <p:sink/>
       
       <p:identity name="individual-css-representations">
-        <p:input port="source" select="/*[not(ends-with(base-uri(/), 'unused-css-resources.xml'))]">
+        <p:input port="source" select="/css:css[not(ends-with(base-uri(/), 'unused-css-resources.xml'))]">
           <p:pipe port="secondary" step="per-split-css-xml-representations"/>
         </p:input>
       </p:identity>
@@ -132,7 +146,7 @@
       </p:xslt>
       
       <p:for-each>
-        <p:iteration-source>
+        <p:iteration-source select="/*">
           <p:pipe port="result" step="insert-individual-css-link"/>
           <p:pipe port="secondary" step="insert-individual-css-link"/>
         </p:iteration-source>
@@ -145,7 +159,7 @@
       </p:for-each>
       
       <p:for-each name="generate-css">
-        <p:iteration-source>
+        <p:iteration-source select="/css:css">
           <p:pipe port="result" step="per-split-css-xml-representations"/>
           <p:pipe port="result" step="individual-css-representations"/>
         </p:iteration-source>
