@@ -475,9 +475,15 @@
     </p:xslt>
     
     <p:choose name="conditionally-change-font-subset-name">
+      
       <p:when test="$create-font-subset = 'true'">
           <p:output port="result" primary="true"/>
-        <p:string-replace match="/cx:document/c:file[matches(@media-type,'^font/')]/@local-href" replace="concat(.,'.subset')"/>
+          <p:string-replace match="/cx:document/c:file[@media-type = ('application/vnd.ms-opentype',
+                                                                      'application/vnd.ms-fontobject',
+                                                                      'font/ttf',
+                                                                      'font/woff'
+                                                                      )]/@local-href" 
+                            replace="concat(.,'.subset')"/>
       </p:when>
      <p:otherwise>
          <p:output port="result" primary="true"/>
