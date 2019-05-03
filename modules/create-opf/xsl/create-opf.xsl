@@ -25,7 +25,7 @@
       xmlns:dcterms="http://purl.org/dc/terms/"
       xmlns="http://www.idpf.org/2007/opf" 
       version="{if($target = 'EPUB3') then '3.0' else '2.0'}"
-      unique-identifier="bookid">
+      unique-identifier="{((epub-config/metadata/dc:identifier[1]/@opf:scheme)[$target = 'EPUB3'], 'bookid')[1]}">
       
       <xsl:if test="$target eq 'EPUB3'">
         <xsl:attribute name="prefix" select="'ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/ rendition: http://www.idpf.org/vocab/rendition/#'"/> 
@@ -52,15 +52,37 @@
               <xsl:attribute name="{name()}" select="."/>
             </xsl:for-each>
             <xsl:if test="name() eq 'dc:identifier'">
-              <xsl:if test=". is ../dc:identifier[1]">
-                <xsl:attribute name="id" select="'bookid'"/>  
-              </xsl:if>
-              <xsl:if test="@opf:scheme">
-                <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
-              </xsl:if>
+              <xsl:choose>
+                <xsl:when test="$target = 'EPUB3'">
+                  <xsl:choose>
+                    <xsl:when test=". is ../dc:identifier[1]">
+                      <xsl:attribute name="id" select="(@opf:scheme, 'bookid')[1]"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                      <xsl:attribute name="id" select="@opf:scheme"/>
+                    </xsl:otherwise>
+                  </xsl:choose>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:if test=". is ../dc:identifier[1]">
+                    <xsl:attribute name="id" select="'bookid'"/>
+                  </xsl:if>
+                  <xsl:if test="@opf:scheme">
+                    <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
+                  </xsl:if>
+                  <xsl:if test="@opf:scheme and not(. is ../dc:identifier[1])">
+                    <xsl:attribute name="id" select="@opf:scheme"/>
+                  </xsl:if>
+                </xsl:otherwise>
+              </xsl:choose>
             </xsl:if>
             <xsl:value-of select="."/>
           </xsl:element>
+          <xsl:if test="self::dc:identifier[@opf:scheme] and $target = 'EPUB3'">
+            <meta refines="#{@opf:scheme}" property="identifier-type" scheme="onix:codelist5">
+              <xsl:value-of select="opf:scheme2codelist5(@opf:scheme, .)"/>
+            </meta>
+          </xsl:if>
         </xsl:for-each>
         <xsl:variable name="current-date-string" select="string(current-dateTime())" as="xs:string"/>
         <xsl:if test="$target = ('KF8', 'EPUB2')">
@@ -193,6 +215,25 @@
       <xsl:apply-templates select="collection()[$target = ('KF8', 'EPUB2')]/cx:document/html:html/html:body//html:nav[@epub:type = 'landmarks']"/>
     </package>
   </xsl:template>
+  
+  <xsl:function name="opf:scheme2codelist5" as="xs:string">
+    <xsl:param name="scheme" as="xs:string"/>
+    <xsl:param name="identifier" as="xs:string"/>
+    <xsl:choose>
+      <xsl:when test="$scheme = 'ISBN' and string-length(replace($identifier, '\D', '')) = 13">
+        <xsl:sequence select="'15'"/>
+      </xsl:when>
+      <xsl:when test="$scheme = 'ISBN' and string-length(replace($identifier, '\D', '')) = 10">
+        <xsl:sequence select="'02'"/>
+      </xsl:when>
+      <xsl:when test="$scheme = 'DOI'">
+        <xsl:sequence select="'06'"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="'01'"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
 
   <xsl:template match="html:nav">
     <guide>
