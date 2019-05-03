@@ -492,6 +492,14 @@
                   <text/>
                 </attribute>
               </interleave>
+              <interleave>
+                <attribute name="refines">
+                  <text/>
+                </attribute>
+                <attribute name="scheme">
+                  <text/>
+                </attribute>
+              </interleave>
             </choice>
           </element>
         </zeroOrMore>
