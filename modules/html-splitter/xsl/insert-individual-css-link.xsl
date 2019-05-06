@@ -32,6 +32,12 @@
       <xsl:apply-templates select="@*, node()"/>
     </xsl:copy>
   </xsl:template>
+  <xsl:template match="html:html[$target = 'EPUB3']">
+    <xsl:copy>
+      <xsl:namespace name="epub">http://www.idpf.org/2007/ops</xsl:namespace>
+      <xsl:apply-templates select="@*, node()"/>
+    </xsl:copy>
+  </xsl:template>
   
   <xsl:variable name="affected-files" select="for $u in collection()/base-uri()[ends-with(., 'css')]
                                               return replace($u, '/styles/(.+)\.css$', concat('/', $html-prefix, '$1.xhtml'))" as="xs:string*"/>
