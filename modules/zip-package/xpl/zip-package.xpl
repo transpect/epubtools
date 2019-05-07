@@ -82,7 +82,7 @@
   <p:filter select="//c:file"/>
 
   <p:wrap-sequence wrapper="document" wrapper-prefix="cx" wrapper-namespace="http://xmlcalabash.com/ns/extensions"
-    name="wrap-file-uris"/>
+                   name="wrap-file-uris"/>
 
   <tr:store-debug pipeline-step="epubtools/zip-package/merged-filelist">
     <p:with-option name="active" select="$debug"/>

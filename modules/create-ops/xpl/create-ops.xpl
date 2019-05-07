@@ -56,8 +56,20 @@
   <p:option name="terminate-on-error" required="false" select="'yes'"/>
   <p:option name="debug" required="false" select="'no'"/>
   <p:option name="debug-dir-uri" required="false" select="'debug'"/>
-  <p:option name="create-font-subset" select="'false'"  cx:type="xs:string" required="false"/>
-  <p:option name="font-subset-min-file-size" select="0"  cx:type="xs:integer" required="false"/>
+  <p:option name="create-font-subset" select="'false'"  cx:type="xs:string" required="false">
+    <p:documentation>
+      With this option set to 'true', all fonts will be subsetted. Of each font a 
+      copy with the suffix '.subset' is created.
+    </p:documentation>
+  </p:option>
+  <p:option name="font-subset-min-file-size" select="0"  cx:type="xs:integer" required="false">
+    <p:documentation>
+      Minimum file size of a font to be subsetted (in KiloBytes). Even if files are 
+      below this threshold, a copy with the suffix '.subset' is created, because the 
+      step 'conditionally-change-font-subset-name' simply depends that the fonts are renamed 
+      in that order if the font subsetter is active.
+    </p:documentation>
+  </p:option>
   <p:option name="create-svg-cover" select="'false'"  cx:type="xs:string" required="false"/>
   <p:option name="convert-svg-cover" select="'false'"  cx:type="xs:string" required="false"/>
   
@@ -444,7 +456,7 @@
           <p:input port="expand-css">
             <p:pipe port="result" step="resolve-resource-uris"/>
           </p:input>
-	  <p:with-option name="min-file-size-kb" select="$font-subset-min-file-size"/>
+      	  <p:with-option name="min-file-size-kb" select="$font-subset-min-file-size"/>
           <p:with-option name="debug" select="$debug"/>
           <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
         </tr:create-font-subset>

@@ -14,8 +14,10 @@
   name="create-font-subset"
   type="tr:create-font-subset">
   
-  <p:documentation>This pipeline can be used to create fontsubsets. The characters used in each font will be displayed in a character set.
-  The subset is created using the pyftsubset phython script from fonttools https://github.com/fonttools</p:documentation>
+  <p:documentation>This pipeline creates fontsubsets. The characters used 
+    in each font will be displayed in a character set. The subset is created 
+    using the pyftsubset phython script from fonttools https://github.com/fonttools.
+  </p:documentation>
   
   <p:option name="script-path" select="'../../../scripts/pyftsubset.sh'"/>
   <p:option name="min-file-size-kb" select="0">
@@ -40,6 +42,7 @@
   
   <p:output port="result" primary="true" sequence="true">
     <p:documentation>Ouput is a character set displaying all characters used inside a font</p:documentation>
+    <p:pipe port="result" step="viewport-chars-identity"/>
   </p:output>
   <p:serialization port="result" omit-xml-declaration="false" indent="true"/>
  
@@ -52,7 +55,7 @@
   
   <pos:info name="os-info"/>
   
-  <tr:store-debug pipeline-step="epubtools/fontsubset/os-info">
+  <tr:store-debug pipeline-step="epubtools/fontsubset/00_os-info">
     <p:with-option name="active" select="$debug"/>
     <p:with-option name="base-uri" select="$debug-dir-uri"/>
   </tr:store-debug>
@@ -193,35 +196,65 @@
 			     else 'false'">
       </p:with-option>
     </p:add-attribute>
-
-    <p:delete match="tr:chars[@create-subset eq 'false']"/>
     
   </p:viewport>
-
+  
+  <p:identity name="viewport-chars-identity"/>
+  
   <tr:store-debug name="store4" pipeline-step="epubtools/fontsubset/06_charset-filtered" extension="xml">
-   <p:with-option name="active" select="$debug"/>
-   <p:with-option name="base-uri" select="$debug-dir-uri"/>
+    <p:with-option name="active" select="$debug"/>
+    <p:with-option name="base-uri" select="$debug-dir-uri"/>
   </tr:store-debug>
-    
+  
   <p:for-each name="chars">
     <p:iteration-source select="//tr:chars"/>
     <p:variable name="script-path" select="/c:result/@os-path">
       <p:pipe port="result" step="script-path"/>
     </p:variable>
     
-    <p:exec name="subset" command="bash" arg-separator=";" result-is-xml="false" errors-is-xml="false" cwd="." >
-      <p:with-option name="args" select="concat($script-path,
-					        ';-g',
-						.,
-						';',
-						replace(tr:chars/@font-url,'file:///?',''))">
-      </p:with-option>
-    </p:exec>
-    <cx:message>
-      <p:with-option name="message" select=".">
-        <p:pipe port="result" step="subset"/>
-      </p:with-option>
-    </cx:message>
+    <p:choose>
+      <p:when test="tr:char/@create-subset eq 'true'">
+        <p:exec name="subset" command="bash" arg-separator=";" result-is-xml="false" errors-is-xml="false" cwd="." >
+          <p:with-option name="args" 
+                         select="concat($script-path,
+                                        ';-g', 
+                                        ., 
+                                        ';',
+                                        replace(tr:chars/@font-url,'file:///?',''))">
+          </p:with-option>
+        </p:exec>
+        <cx:message>
+          <p:with-option name="message" select="concat('[fontsubsetter] ', .)">
+            <p:pipe port="result" step="subset"/>
+          </p:with-option>
+        </cx:message>
+        
+      </p:when>
+      <p:otherwise>
+        <!-- nonetheless, create copy with .subset suffix since step entitled
+             "conditionally-change-font-subset-name" in create-ops.xpl depends 
+             that all fonts need to have this suffix -->
+        
+        <cxf:copy name="copy" fail-on-error="false">
+          <p:with-option name="href" select="tr:chars/@font-url"/>
+          <p:with-option name="target" select="concat(tr:chars/@font-url, '.subset')"/>
+        </cxf:copy>
+        
+        <p:identity>
+          <p:input port="source">
+            <p:pipe port="current" step="chars"/>
+          </p:input>
+        </p:identity>
+        
+        <cx:message>
+          <p:with-option name="message" select="'[fontsubsetter] copy: ', tr:chars/@font-url, ' => ', concat(tr:chars/@font-url, '.subset')"/>
+        </cx:message>
+        
+      </p:otherwise>
+    </p:choose>
+
   </p:for-each>
+  
+  <p:sink/>
 
 </p:declare-step>
