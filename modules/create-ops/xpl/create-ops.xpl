@@ -57,6 +57,7 @@
   <p:option name="debug" required="false" select="'no'"/>
   <p:option name="debug-dir-uri" required="false" select="'debug'"/>
   <p:option name="create-font-subset" select="'false'"  cx:type="xs:string" required="false"/>
+  <p:option name="font-subset-min-file-size" select="0"  cx:type="xs:integer" required="false"/>
   <p:option name="create-svg-cover" select="'false'"  cx:type="xs:string" required="false"/>
   <p:option name="convert-svg-cover" select="'false'"  cx:type="xs:string" required="false"/>
   
@@ -443,6 +444,7 @@
           <p:input port="expand-css">
             <p:pipe port="result" step="resolve-resource-uris"/>
           </p:input>
+	  <p:with-option name="min-file-size-kb" select="$font-subset-min-file-size"/>
           <p:with-option name="debug" select="$debug"/>
           <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
         </tr:create-font-subset>

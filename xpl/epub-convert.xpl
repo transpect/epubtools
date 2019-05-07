@@ -108,7 +108,7 @@
   <p:option name="id-in-report-heading" select="'false'">
     <p:documentation>Whether to adorn the reports’ tr:rule-family with the first dc:identifier found in the OPF.</p:documentation>
   </p:option>
-  <p:option name="create-font-subset" cx:type="xs:string" required="false" select="'false'">
+  <p:option name="create-font-subset" cx:type="xs:string" required="false" select="'true'">
     <p:documentation>Whether to create a subset of used fonts. If the attribute @font-subset
     exists in the epub-config (see sample/epub-config.xml), it will generally override this option.</p:documentation>
   </p:option>
@@ -217,6 +217,9 @@
     <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"><p:empty/></p:with-option>
     <p:with-option name="create-font-subset" select="(/epub-config/@font-subset, 'false')[1]">
+      <p:pipe port="meta" step="epub-convert"/>
+    </p:with-option>
+    <p:with-option name="font-subset-min-file-size" select="(/epub-config/@font-subset-min-file-size, 0)[1]">
       <p:pipe port="meta" step="epub-convert"/>
     </p:with-option>
     <p:with-option name="create-svg-cover" select="$create-svg-cover"/>

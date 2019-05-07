@@ -1,23 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<p:declare-step xmlns:p="http://www.w3.org/ns/xproc" 
+<p:declare-step xmlns:p="http://www.w3.org/ns/xproc"
   xmlns:c="http://www.w3.org/ns/xproc-step"
-  xmlns:pos="http://exproc.org/proposed/steps/os"  
-  xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+  xmlns:cx="http://xmlcalabash.com/ns/extensions"
+  xmlns:cxf="http://xmlcalabash.com/ns/extensions/fileutils"
+  xmlns:pos="http://exproc.org/proposed/steps/os"
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:s="http://purl.oclc.org/dsdl/schematron"
-  xmlns:css="http://www.w3.org/1996/css" 
-  xmlns:cx="http://xmlcalabash.com/ns/extensions"
+  xmlns:css="http://www.w3.org/1996/css"
   xmlns:dbk="http://docbook.org/ns/docbook"
-  xmlns:tr="http://transpect.io"  
+  xmlns:tr="http://transpect.io"
   version="1.0"
   name="create-font-subset"
-  type="tr:create-font-subset"
-  >
+  type="tr:create-font-subset">
   
   <p:documentation>This pipeline can be used to create fontsubsets. The characters used in each font will be displayed in a character set.
   The subset is created using the pyftsubset phython script from fonttools https://github.com/fonttools</p:documentation>
   
   <p:option name="script-path" select="'../../../scripts/pyftsubset.sh'"/>
+  <p:option name="min-file-size-kb" select="0">
+    <p:documentation>If the file size of the font is below this limit, the font is not
+      subsetted. This option can prove useful if you just want to subset the usually
+      bigger CJK fonts but leave your standard fonts untouched. 
+    </p:documentation>
+  </p:option>
   <p:option name="debug" required="false" select="'yes'"/>
   <p:option name="debug-dir-uri" select="'debug'"/>
   
@@ -41,7 +47,7 @@
   <p:import href="http://transpect.io/css-tools/xpl/css.xpl"/>
   <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl"/>
   <p:import href="http://transpect.io/xproc-util/file-uri/xpl/file-uri.xpl"/>
-
+  
   <p:sink/>
   
   <pos:info name="os-info"/>
@@ -55,7 +61,7 @@
     <p:with-option name="filename" select="resolve-uri($script-path)"/>
   </tr:file-uri>
 
-  <tr:store-debug pipeline-step="epubtools/fontsubset/path-info">
+  <tr:store-debug pipeline-step="epubtools/fontsubset/00_path-info">
     <p:with-option name="active" select="$debug"/>
     <p:with-option name="base-uri" select="$debug-dir-uri"/>
   </tr:store-debug>
@@ -74,7 +80,7 @@
   </css:expand> 
   
     
-   <tr:store-debug name="store2" pipeline-step="epubtools/fontsubset/expanded-html" extension="xhtml">
+   <tr:store-debug name="store2" pipeline-step="epubtools/fontsubset/02_expanded-html" extension="xhtml">
       <p:with-option name="active" select="$debug"/>
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
     </tr:store-debug>
@@ -159,17 +165,50 @@
       </p:inline>
     </p:input>
   </p:xslt>
-  
-  <tr:store-debug name="store3" pipeline-step="epubtools/fontsubset/charset" extension="xml">
+
+  <tr:store-debug name="store3" pipeline-step="epubtools/fontsubset/04_charset" extension="xml">
    <p:with-option name="active" select="$debug"/>
    <p:with-option name="base-uri" select="$debug-dir-uri"/>
   </tr:store-debug>
-  
+
+  <p:viewport match="tr:chars" name="viewport-chars">
+    
+    <cxf:info name="font-file-info" fail-on-error="false">
+      <p:with-option name="href" select="tr:chars/@font-url"/>
+    </cxf:info>
+
+    <p:add-attribute match="tr:chars" attribute-name="size-kb">
+      <p:input port="source">
+        <p:pipe port="current" step="viewport-chars"/>
+      </p:input>
+      <p:with-option name="attribute-value" select="c:file/@size idiv 1000">
+        <p:pipe port="result" step="font-file-info"/>
+      </p:with-option>
+    </p:add-attribute>
+
+    <p:add-attribute match="tr:chars" attribute-name="create-subset">
+      <p:with-option name="attribute-value"
+		     select="if( xs:integer(tr:chars/@size-kb) gt xs:integer($min-file-size-kb) ) 
+			     then 'true' 
+			     else 'false'">
+      </p:with-option>
+    </p:add-attribute>
+
+    <p:delete match="tr:chars[@create-subset eq 'false']"/>
+    
+  </p:viewport>
+
+  <tr:store-debug name="store4" pipeline-step="epubtools/fontsubset/06_charset-filtered" extension="xml">
+   <p:with-option name="active" select="$debug"/>
+   <p:with-option name="base-uri" select="$debug-dir-uri"/>
+  </tr:store-debug>
+    
   <p:for-each name="chars">
     <p:iteration-source select="//tr:chars"/>
     <p:variable name="script-path" select="/c:result/@os-path">
       <p:pipe port="result" step="script-path"/>
     </p:variable>
+    
     <p:exec name="subset" command="bash" arg-separator=";" result-is-xml="false" errors-is-xml="false" cwd="." >
       <p:with-option name="args" select="concat($script-path,
 					        ';-g',
@@ -184,11 +223,5 @@
       </p:with-option>
     </cx:message>
   </p:for-each>
-  
-   <!--<tr:store-debug name="store4" pipeline-step="epubtools/fontsubset/after-fontsubset" extension="xml">
-   <p:with-option name="active" select="$debug"/>
-   <p:with-option name="base-uri" select="$debug-dir-uri"/>
-  </tr:store-debug>-->
-
 
 </p:declare-step>
