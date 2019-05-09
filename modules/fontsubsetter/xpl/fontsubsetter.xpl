@@ -213,7 +213,7 @@
     </p:variable>
     
     <p:choose>
-      <p:when test="tr:char/@create-subset eq 'true'">
+      <p:when test="tr:chars/@create-subset eq 'true'">
         <p:exec name="subset" command="bash" arg-separator=";" result-is-xml="false" errors-is-xml="false" cwd="." >
           <p:with-option name="args" 
                          select="concat($script-path,
