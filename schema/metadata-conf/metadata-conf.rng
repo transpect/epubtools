@@ -451,6 +451,11 @@
           </element>
         </optional>
         <optional>
+          <element name="dc:contributor">
+            <text/>
+          </element>
+        </optional>
+        <optional>
           <element name="dc:rights">
             <text/>
           </element>
