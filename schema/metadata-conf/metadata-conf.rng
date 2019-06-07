@@ -450,11 +450,11 @@
             <text/>
           </element>
         </optional>
-        <optional>
+        <zeroOrMore>
           <element name="dc:contributor">
             <text/>
           </element>
-        </optional>
+        </zeroOrMore>
         <optional>
           <element name="dc:rights">
             <text/>
