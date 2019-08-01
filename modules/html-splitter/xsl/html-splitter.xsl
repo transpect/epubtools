@@ -666,7 +666,7 @@
         There you’ll see some debugging info attached to the remaining <tr-conditional-split> elements.
         A thing that might facilitate calculations might be attaching each element’s position (the string
         length before, plus 1) as an attribute in a previous mode, in addition to the length. -->
-      <!-- Remove true() here in order to enable the previous splitting of too long chapters at each seaction
+      <!-- Remove true() here in order to enable the previous splitting of too long chapters at each section
         (probably need to introduce an option for that) -->
       <xsl:when test="true() or tr:is-conditional-split-level($level)">
         <xsl:variable name="same-level-nodes" as="element(*)*"
