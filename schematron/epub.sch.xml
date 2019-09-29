@@ -17,6 +17,7 @@
   <ns prefix="tr" uri="http://transpect.io"/>
   <ns prefix="svg" uri="http://www.w3.org/2000/svg"/>
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
+  <ns prefix="ncx" uri="http://www.daisy.org/z3986/2005/ncx/"/>
 
   <let name="opf-package" value="/c:wrap/opf:package"/>
 
@@ -29,6 +30,7 @@
 
   <xsl:include href="http://transpect.io/xslt-util/resolve-uri/xsl/resolve-uri.xsl"/>
   <xsl:include href="http://transpect.io/xslt-util/isbn/xsl/isbncheck.xsl"/>
+  <xsl:include href="http://transpect.io/xslt-util/num/xsl/num.xsl"/>
   
   <include href="http://transpect.io/xslt-util/isbn/sch/check-isbn.sch.xml"/>
   
@@ -857,9 +859,22 @@
     </rule>
   </pattern>
   
-  
+  <pattern id="page_numbers">
+    <rule context="ncx:pageList/ncx:pageTarget">
+      <report test="tr:roman-or-int-to-int(ncx:navLabel/ncx:text) 
+                    &lt; tr:roman-or-int-to-int(preceding-sibling::ncx:pageTarget[1]/ncx:navLabel/ncx:text)"
+        id="page_numbers_ncx-not-ascending" role="warning" diagnostics="page_numbers_ncx-not-ascending_de">
+        An NCX pageList page number, <xsl:value-of select="ncx:navLabel/ncx:text"/>, is smaller than the preceding page number,
+        which is <xsl:value-of select="preceding-sibling::ncx:pageTarget[1]/ncx:navLabel/ncx:text"/>.
+      </report>
+    </rule>
+  </pattern>
   
   <diagnostics>
+    <diagnostic id="page_numbers_ncx-not-ascending_de" xml:lang="de">
+      Eine Seitenzahl in der NCX-pageList, <xsl:value-of select="ncx:navLabel/ncx:text"/>, ist kleiner als die Vorgängerseitenzahl,
+        <xsl:value-of select="preceding-sibling::ncx:pageTarget[1]/ncx:navLabel/ncx:text"/>.
+    </diagnostic>
     <diagnostic id="other_languages_de" xml:lang="de">Weitere Sprachangaben und der Ort ihrer Verwendung: 
       <xsl:variable name="occ" select="html:html[1]//*[@xml:lang]"/>
       <ul xmlns="http://www.w3.org/1999/xhtml">
