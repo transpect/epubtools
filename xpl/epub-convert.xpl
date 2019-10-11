@@ -171,7 +171,9 @@
               <p:inline><message>epubtools error: Input document apparently without /*/@xml:base. Base URI: <xp1
               />,  /*/@xml:base: <xp2/>, top-level element: <xp3/></message></p:inline>
             </p:input>
-            <p:with-option name="replace" select="concat('''', base-uri(/*/@local-href), '''')"/>
+            <p:with-option name="replace" select="concat('''', base-uri(/*), '''')">
+              <p:pipe port="source" step="epub-convert"/>
+            </p:with-option>
           </p:string-replace>
           <p:string-replace name="msg2" match="/*/xp2">
             <p:with-option name="replace" select="concat('''', /*/@xml:base, '''')">
@@ -190,7 +192,7 @@
           </p:error>
         </p:group>
         <p:catch name="xml-base-error">
-          <tr:propagate-caught-error name="propagate" msg-file="xml-base-error.txt">
+          <tr:propagate-caught-error name="propagate" msg-file="xml-base-error.txt" severity="error">
             <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
             <p:input port="source">
               <p:pipe port="error" step="xml-base-error"/>
@@ -203,7 +205,8 @@
       <p:output port="result" primary="true"/>
       <p:identity>
         <p:input port="source">
-          <p:inline><c:ok code="epub:BASE01"/></p:inline>
+          <p:inline><c:ok code="epub:BASE01" tr:step-name="epub-convert"
+         tr:rule-family="epub-input-xml-base"/></p:inline>
         </p:input>
       </p:identity>
     </p:otherwise>
