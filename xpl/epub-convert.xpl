@@ -83,6 +83,7 @@
   <p:output port="report" primary="false" sequence="true">
     <p:pipe port="report" step="create-ops"/>
     <p:pipe port="report" step="schematrons"/>
+    <p:pipe port="result" step="missing-xml-base"/>
   </p:output>
   <p:output port="html">
     <p:pipe port="html" step="create-ops"/>
@@ -148,23 +149,63 @@
     </p:input>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
   </tr:simple-progress-msg>
+  
+  <p:sink name="sink1"/>
 	
   <tr:file-uri name="base-uri">
     <p:documentation>
       The output files are stored relative to the base-uri of the document on the primary input port.
     </p:documentation>
-    <p:with-option name="filename" select="(base-uri(/*), static-base-uri())[1]"/>
+    <p:with-option name="filename" select="(base-uri(/*), concat(static-base-uri(), '.html'))[1]">
+      <p:pipe port="source" step="epub-convert"/>
+    </p:with-option>
   </tr:file-uri>
   
-  <p:choose name="warn-xml-base">
-    <p:when test="matches(/*/@local-href, '\.xpl$')">
-      <cx:message name="msg1">
-        <p:with-option name="message" select="'epubtools WARNING: Input document apparently without /*/@xml:base. Base URI: ',
-          base-uri(/*), ' /*/@xml:base:', /*/@xml:base"></p:with-option>
-      </cx:message>
+  <p:choose name="missing-xml-base">
+    <p:when test="matches(/*/@local-href, '\.xpl\.html$')">
+      <p:output port="result" primary="true"/>
+      <p:try>
+        <p:group>
+          <p:string-replace name="msg1" match="/*/xp1">
+            <p:input port="source">
+              <p:inline><message>epubtools error: Input document apparently without /*/@xml:base. Base URI: <xp1
+              />,  /*/@xml:base: <xp2/>, top-level element: <xp3/></message></p:inline>
+            </p:input>
+            <p:with-option name="replace" select="concat('''', base-uri(/*/@local-href), '''')"/>
+          </p:string-replace>
+          <p:string-replace name="msg2" match="/*/xp2">
+            <p:with-option name="replace" select="concat('''', /*/@xml:base, '''')">
+              <p:pipe port="source" step="epub-convert"/>
+            </p:with-option>
+          </p:string-replace>
+          <p:string-replace name="msg3" match="/*/xp3">
+            <p:with-option name="replace" select="concat('''', /*/name(), '''')">
+              <p:pipe port="source" step="epub-convert"/>
+            </p:with-option>
+          </p:string-replace>
+          <p:error code="epub:BASE01" name="throw-error">
+            <p:input port="source">
+              <p:pipe port="result" step="msg3"/>
+            </p:input>
+          </p:error>
+        </p:group>
+        <p:catch name="xml-base-error">
+          <tr:propagate-caught-error name="propagate" msg-file="xml-base-error.txt">
+            <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
+            <p:input port="source">
+              <p:pipe port="error" step="xml-base-error"/>
+            </p:input>
+          </tr:propagate-caught-error>    
+        </p:catch>
+      </p:try>
     </p:when>
     <p:otherwise>
-      <p:identity/>
+      <p:output port="result" primary="true"/>
+      <p:identity>
+        <p:input port="source">
+          <p:inline><c:ok code="epub:BASE01"/></p:inline>
+        </p:input>
+      </p:identity>
     </p:otherwise>
   </p:choose>
   
