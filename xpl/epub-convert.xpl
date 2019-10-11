@@ -154,7 +154,21 @@
       The output files are stored relative to the base-uri of the document on the primary input port.
     </p:documentation>
     <p:with-option name="filename" select="(base-uri(/*), static-base-uri())[1]"/>
-  </tr:file-uri>	
+  </tr:file-uri>
+  
+  <p:choose name="warn-xml-base">
+    <p:when test="matches(/*/@local-href, '\.xpl$')">
+      <cx:message name="msg1">
+        <p:with-option name="message" select="'epubtools WARNING: Input document apparently without /*/@xml:base. Base URI: ',
+          base-uri(/*), ' /*/@xml:base:', /*/@xml:base"></p:with-option>
+      </cx:message>
+    </p:when>
+    <p:otherwise>
+      <p:identity/>
+    </p:otherwise>
+  </p:choose>
+  
+  <p:sink/>
 
   <epub:create-ocf name="create-ocf">
     <p:with-option name="base-uri" select="/c:result/@local-href">
