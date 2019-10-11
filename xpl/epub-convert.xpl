@@ -167,7 +167,7 @@
     <p:xpath-context>
       <p:pipe port="source" step="epub-convert"/>
     </p:xpath-context>
-    <p:when test="true()(:empty(/*/@xml:base):) (:matches(/*/@local-href, '\.xpl\.html$'):)">
+    <p:when test="empty(/*/@xml:base) (:matches(/*/@local-href, '\.xpl\.html$'):)">
       <p:try>
         <p:group>
           <p:string-replace name="msg1" match="//*:xp1">
