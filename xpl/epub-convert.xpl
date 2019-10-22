@@ -281,6 +281,7 @@
     <p:with-option name="terminate-on-error" select="$terminate-on-error"/>
     <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"><p:empty/></p:with-option>
+    <p:with-option name="status-dir-uri" select="$status-dir-uri"><p:empty/></p:with-option>
     <p:with-option name="create-font-subset" select="(/epub-config/@font-subset, 'false')[1]">
       <p:pipe port="meta" step="epub-convert"/>
     </p:with-option>

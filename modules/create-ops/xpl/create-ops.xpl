@@ -56,6 +56,7 @@
   <p:option name="terminate-on-error" required="false" select="'yes'"/>
   <p:option name="debug" required="false" select="'no'"/>
   <p:option name="debug-dir-uri" required="false" select="'debug'"/>
+  <p:option name="status-dir-uri" select="'status'" cx:type="xs:string"/>
   <p:option name="create-font-subset" select="'false'"  cx:type="xs:string" required="false">
     <p:documentation>
       With this option set to 'true', all fonts will be subsetted. Of each font a 
@@ -412,6 +413,7 @@
       </p:input>
       <p:with-option name="debug" select="$debug"/>
       <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+      <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
       <p:with-option name="remove-comments" select="$css-remove-comments"/>
     </css:parse>
     
