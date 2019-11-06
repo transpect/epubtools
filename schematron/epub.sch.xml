@@ -505,7 +505,7 @@
     <!-- Both assertions are also checked against in epubcheck. These checks also locate the error in the source HTML. -->
     <rule context="/c:wrap/cx:document[@name = 'wrap-chunks']
                      /html:html
-                       //html:a[@href][not(matches(@href, '^(#|https?:|mailto:|ftp:)'))]">
+                       //html:a[@href][not(matches(@href, '^(#|https?:|mailto:|ftp:)', 'i'))]">
       <let name="srcpath" value="tokenize(ancestor-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
       <let name="base-uri" value="ancestor::html:html/@xml:base"/>
       <let name="resolved" value="tr:uri-composer($base-uri, @href)"/>
