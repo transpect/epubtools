@@ -923,8 +923,8 @@
           <xsl:variable name="filename" select="replace(@file, '^.+/', '')" as="xs:string"/>
           <xsl:variable name="chunk-pagenum-elts" as="element(*)*" select="tr:pagenums(.)"/>
           <xsl:for-each select="$chunk-pagenum-elts">
-            <page name="{(self::*[@epub-type = 'pagebreak']/@title, 
-                          self::*[@epub-type = 'pagebreak'][normalize-space()], 
+            <page name="{(self::*[@epub:type = 'pagebreak']/@title, 
+                          self::*[@epub:type = 'pagebreak'][normalize-space()], 
                           replace(@id, '^page_?', '')
                          )[1]}" href="{$filename}{concat('#', @id)}"
               playOrder="{replace(generate-id(($root//*[@id eq current()/@id])[1]), '^.+?(\d+)$', '$1')}">
