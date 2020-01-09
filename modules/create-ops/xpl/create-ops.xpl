@@ -116,6 +116,12 @@
     <p:variable name="cover-href" select="resolve-uri(/epub-config/cover/@href, base-uri())">
       <p:pipe port="meta" step="create-ops"/>
     </p:variable>
+    <p:variable name="link-check" select="(/epub-config/checks/check[@param = 'epub-check-http-resources']/@value, '')[1]">
+      <p:pipe port="meta" step="create-ops"/>
+      <p:documentation>The value can be 'true', 'false', or something like 'only:spiegel.de|zeit.de|never:.rdf|.xml',
+      'only:http:', or 'never:doi.org'. If something is excluded by 'never:', it cannot be re-included by 'only:'. Matching
+      is by substring, not by regex, against the literal href string, it is not percent-encoded before.</p:documentation>
+    </p:variable>
 
     <tr:store-debug pipeline-step="epubtools/hierarchy">
       <p:with-option name="active" select="$debug" />
@@ -329,13 +335,28 @@
       <p:xpath-context>
         <p:pipe port="meta" step="create-ops"/>
       </p:xpath-context>
-      <p:when test="/epub-config/checks/check[@param = 'epub-check-http-resources']/@value = 'true'">
+      <p:when test="normalize-space($link-check) and not($link-check = 'false')">
         <p:output port="result" primary="true"/>
+        
+        <p:variable name="only" select="if (contains($link-check, 'only:'))
+                                          then replace($link-check, '^.*only:(.*?)(\|never:.*|$)', '$1')
+                                          else ''"/>
+        <p:variable name="never" select="if (contains($link-check, 'never:')) 
+                                         then replace($link-check, '^.*never:(.*?)(\|only:.*|$)', '$1')
+                                         else ''"/>
         <p:viewport match="*[@src | @href | @xlink:href | @poster]
                             [some $att in @*[local-name() = ('src', 'href', 'poster')] 
                              satisfies $att[starts-with(., 'http')]]" name="check-hrefs">
           <tr:file-uri fetch-http="false" check-http="true" name="fu2" make-unique="false">
             <p:with-option name="filename" select="for $u in /*/(@src | @href | @xlink:href | @poster)
+                                                      [if (normalize-space($never))
+                                                       then (every $n in tokenize($never, '\|') 
+                                                            satisfies not(contains(., $n)))
+                                                       else true()]
+                                                      [if (normalize-space($only)) 
+                                                       then (some $o in tokenize($only, '\|') 
+                                                            satisfies contains(., $o))
+                                                       else true()] 
                                                    return resolve-uri(escape-html-uri($u), base-uri())">
               <p:documentation>If it is a relative URI, resolve it wrt the HTML source.</p:documentation>
             </p:with-option>
