@@ -347,27 +347,50 @@
         <p:viewport match="*[@src | @href | @xlink:href | @poster]
                             [some $att in @*[local-name() = ('src', 'href', 'poster')] 
                              satisfies $att[starts-with(., 'http')]]" name="check-hrefs">
-          <tr:file-uri fetch-http="false" check-http="true" name="fu2" make-unique="false">
-            <p:with-option name="filename" select="for $u in /*/(@src | @href | @xlink:href | @poster)
-                                                      [if (normalize-space($never))
-                                                       then (every $n in tokenize($never, '\|') 
-                                                            satisfies not(contains(., $n)))
-                                                       else true()]
-                                                      [if (normalize-space($only)) 
-                                                       then (some $o in tokenize($only, '\|') 
-                                                            satisfies contains(., $o))
-                                                       else true()] 
-                                                   return resolve-uri(escape-html-uri($u), base-uri())">
-              <p:documentation>If it is a relative URI, resolve it wrt the HTML source.</p:documentation>
-            </p:with-option>
-            <p:input port="resolver">
-              <p:document href="http://transpect.io/xslt-util/xslt-based-catalog-resolver/xsl/resolve-uri-by-catalog.xsl"/>
-            </p:input>
-            <p:input port="catalog">
-              <p:document href="http://this.transpect.io/xmlcatalog/catalog.xml"/>
-            </p:input>
-          </tr:file-uri>
+          <p:try name="fu2t">
+            <p:group>
+              <tr:file-uri fetch-http="false" check-http="true" name="fu2i" make-unique="false">
+                <p:with-option name="filename" select="for $u in /*/(@src | @href | @xlink:href | @poster)
+                                                          [if (normalize-space($never))
+                                                           then (every $n in tokenize($never, '\|') 
+                                                                satisfies not(contains(., $n)))
+                                                           else true()]
+                                                          [if (normalize-space($only)) 
+                                                           then (some $o in tokenize($only, '\|') 
+                                                                satisfies contains(., $o))
+                                                           else true()] 
+                                                       return resolve-uri(escape-html-uri($u), base-uri())">
+                  <p:documentation>If it is a relative URI, resolve it wrt the HTML source.</p:documentation>
+                </p:with-option>
+                <p:input port="resolver">
+                  <p:document href="http://transpect.io/xslt-util/xslt-based-catalog-resolver/xsl/resolve-uri-by-catalog.xsl"/>
+                </p:input>
+                <p:input port="catalog">
+                  <p:document href="http://this.transpect.io/xmlcatalog/catalog.xml"/>
+                </p:input>
+              </tr:file-uri>
+            </p:group>
+            <p:catch name="catch-fu2">
+              <p:insert match="/*" position="first-child">
+                <p:input port="source">
+                  <p:inline>
+                    <c:result error-status="999"/>
+                  </p:inline>
+                </p:input>
+                <p:input port="insertion">
+                  <p:pipe port="error" step="catch-fu2"/>
+                </p:input>
+              </p:insert>
+              <p:add-attribute attribute-name="href" match="/*">
+                <p:with-option name="attribute-value" select="/*/(@src | @href | @xlink:href | @poster)">
+                  <p:pipe port="current" step="check-hrefs"/>
+                </p:with-option>
+              </p:add-attribute>
+            </p:catch>
+          </p:try>
+          <p:identity name="fu2"/>
           <p:sink/>
+
           <p:identity>
             <p:input port="source">
               <p:pipe port="current" step="check-hrefs"/>  
@@ -378,8 +401,8 @@
               <p:pipe port="result" step="fu2"/>
             </p:xpath-context>
             <p:when test="/*/@error-status">
-              <p:add-attribute attribute-name="error-status" match="/*">
-                <p:with-option name="attribute-value" select="/*/@error-status">
+              <p:add-attribute attribute-name="error-message" match="/*">
+                <p:with-option name="attribute-value" select="string(/*)">
                   <p:pipe port="result" step="fu2"/>
                 </p:with-option>
               </p:add-attribute>
@@ -388,12 +411,17 @@
                   <p:pipe port="result" step="fu2"/>
                 </p:with-option>
               </p:add-attribute>
+              <p:add-attribute attribute-name="error-status" match="/*">
+                <p:with-option name="attribute-value" select="/*/@error-status">
+                  <p:pipe port="result" step="fu2"/>
+                </p:with-option>
+              </p:add-attribute>
             </p:when>
             <p:otherwise>
               <p:identity/>
             </p:otherwise>
           </p:choose>
-        </p:viewport>        
+        </p:viewport>
       </p:when>
       <p:otherwise>
         <p:output port="result" primary="true"/>
