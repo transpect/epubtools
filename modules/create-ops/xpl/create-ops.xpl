@@ -386,6 +386,10 @@
                   <p:pipe port="current" step="check-hrefs"/>
                 </p:with-option>
               </p:add-attribute>
+              <cx:message>
+                <!-- without this message, due to a Calabash bug, no error-status will be attached to the element: -->
+                <p:with-option name="message" select="'ERROR: PROBABLY ILLEGAL CHARACTERS IN URL: ', /*/@*"/>
+              </cx:message>
             </p:catch>
           </p:try>
           <p:identity name="fu2"/>
