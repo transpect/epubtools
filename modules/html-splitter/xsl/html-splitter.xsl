@@ -1303,6 +1303,8 @@
     </xsl:if>
   </xsl:template>
   
+  <xsl:template match="@error-message" mode="resolve-refs"/>
+  
 
   <xsl:template match="ncx:ncx | ncx:navMap | ncx:navLabel | ncx:text" mode="nav-xhtml">
     <xsl:apply-templates mode="#current"/>
