@@ -1469,6 +1469,10 @@
     <xsl:variable name="chunk" select="key('chunk-by-id', ., $final-chunks)" as="element(html:chunk)*"/>
     <xsl:variable name="elt" select="key('by-any-id-available', ., $final-chunks)" as="element(*)*"/>
     <xsl:variable name="id" select="($elt/descendant-or-self::*/@id)[1]" as="attribute(id)?"/>
+    <xsl:if test="count($chunk) gt 1">
+      <xsl:message>[ERROR] Error in source data: More than one element with id <xsl:value-of select="."/>.
+        Only considering the first one.</xsl:message>
+    </xsl:if>
     <xsl:choose>
       <xsl:when
         test="count($chunk) eq 0 
@@ -1485,10 +1489,6 @@
           <xsl:attribute name="src" select="replace($left-chunk[1]/@file, '^.+/', $html-prefix)"/>
         </xsl:if>
       </xsl:when>
-      <xsl:when test="count($chunk) gt 1">
-        <xsl:message>[ERROR] Error in source data: More than one element with id <xsl:value-of select="."/>.
-          Only considering the first one.</xsl:message>
-      </xsl:when>
       <xsl:when test="count($chunk) eq 0 and count($elt) ge 1 and count($id) = 0">
         <xsl:message>[ERROR] Error in intermediate data: Element with generated id <xsl:value-of select="."/> does not have a proper ID.</xsl:message>
       </xsl:when>
@@ -1504,7 +1504,7 @@
         <xsl:message select="../.."></xsl:message>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:variable name="pos" select="index-of($chunk//@id, .)" as="xs:integer+"/>
+        <xsl:variable name="pos" select="index-of($chunk[1]//@id, .)" as="xs:integer+"/>
         <xsl:attribute name="src" select="concat(
                                             replace($chunk[1]/@file, '^.+/', $html-prefix), concat('#', current())
                                           )"
