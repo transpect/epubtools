@@ -1212,7 +1212,7 @@
       select="($landmarks[tr:contains-token(@epub:type, 'toc')]/(@id, @tr-generated-id))[1]"/>
     <nav epub:type="landmarks" id="landmarks-navigation">
       <xsl:if test="$epub-config/types/type[@name = 'landmarks']/@hidden = 'true'">
-        <xsl:attribute name="hidden"/>
+        <xsl:attribute name="hidden" select="'hidden'"/>
       </xsl:if>
       <xsl:if test="not($epub-config/types/type[@name = 'landmarks']/@heading = '')">
         <h1>
