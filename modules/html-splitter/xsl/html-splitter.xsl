@@ -361,7 +361,7 @@
     <xsl:processing-instruction name="origin" select="'A'"/>
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
-  
+
   <!-- match a no split element (i.e. cover div) before very first split candidate -->
   <xsl:template
     match="*[. is $tr:dissolvable-for-semiflatten[1]]
@@ -384,7 +384,21 @@
       <xsl:apply-templates select="node()" mode="#current"/>
     </xsl:copy>
   </xsl:template>
-
+  
+  
+  <xsl:template
+    match="*[empty(@id)]
+            [tr:contains-token(@class, ('TOC_same', 'TOC_sub'))]" 
+    mode="semiflatten export-chunk-subtree export-chunk-with-surroundings">
+    <xsl:copy>
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:attribute name="id" select="generate-id()"/>
+      <xsl:attribute name="tr-source-element-without-id-attribute" select="'true'"/>
+      <xsl:attribute name="tr-generated-id" select="generate-id()"/>
+      <xsl:apply-templates mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
   <xsl:template match="*[exists(. intersect $tr:dissolvable-for-semiflatten)][count(.//* intersect $candidates) eq 1]
                         [not(ancestor::*[exists(. intersect $tr:dissolvable-for-semiflatten)][count(.//* intersect $candidates) eq 1])]" mode="semiflatten"
     priority="2">
@@ -843,7 +857,7 @@
     <xsl:attribute name="tr-reason" select="'parent-short-enough'"/>
   </xsl:template>
 
-  <!-- close enough to previous headings: -->
+    <!-- close enough to previous headings: -->
   <xsl:template
     match="html:tr-conditional-split[
              sum(
@@ -1028,11 +1042,33 @@
     be hierarchized…), we must dissolve every container that contains headings. -->
   <xsl:template match="*[@tr-splitting-priority]
                         [not(@tr-heading-level)]
-                        [descendant::*/@tr-heading-level]" mode="fullflatten">
+                        [exists(
+                          descendant::*/@tr-heading-level
+                          union
+                          descendant::*[tr:contains-token(@class, ('TOC_same', 'TOC_sub'))]
+                        )]" mode="fullflatten">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
     </xsl:copy>
     <xsl:apply-templates mode="#current"/>
+  </xsl:template>
+  
+  <xsl:template match="*[tr:contains-token(@class, 'TOC_same')]" mode="fullflatten">
+    <xsl:copy>
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:copy-of select="preceding::*[@tr-heading-level]/@tr-heading-level"/>
+      <xsl:apply-templates mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="*[tr:contains-token(@class, 'TOC_sub')]" mode="fullflatten">
+    <xsl:copy>
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:for-each select="preceding::*[@tr-heading-level]/@tr-heading-level">
+        <xsl:attribute name="{name()}" select="number(.) + 1"/>
+      </xsl:for-each>
+      <xsl:apply-templates mode="#current"/>
+    </xsl:copy>
   </xsl:template>
 
   <!-- NCX (ToC) EXPORT: -->
@@ -1148,7 +1184,7 @@
           <xsl:otherwise>
             <!-- so that the generated cover will be sorted between cover 
               (sequence # 1) and the remainder of the exported files -->
-            <meta name="sequence" content="1.5"/>
+            <meta name="sequence" content="($epub-config/types/@nav-spine-pos, 1.5)[1]"/>
           </xsl:otherwise>
         </xsl:choose>
         
@@ -1391,9 +1427,6 @@
                       then $fullflatten//*[@tr-generated-id[. eq current()/@tr-split-delegation-to]]/@id
                       else (@id, @tr-generated-id, .//@id)[1]"/>
               <content genid="{$genid}" xmlns="http://www.daisy.org/z3986/2005/ncx/"/>
-              <!--<xsl:for-each select="tr-subsplit">
-                        <xsl:call-template name="subsplit-navpoint" />
-          </xsl:for-each>-->
               <xsl:variable name="next-level" select="(current-group() except .)/@tr-heading-level" as="xs:integer*"/>
               <!--<xsl:message select="'nl1 ', $next-level"></xsl:message>-->
               <xsl:if test="min($next-level) = $level">
@@ -1410,7 +1443,16 @@
                 <!--<nl min="{min($next-level)}" levels="{$next-level}"/>-->
                 <xsl:sequence select="tr:group-for-ncx(current-group() except ., min($next-level), false())"/>
               </xsl:if>
+              <!-- https://redmine.le-tex.de/issues/8015
+              The following will only give the results in correct order if there is no mix between proper heading
+              and TOC_sub headings. -->
+              <xsl:apply-templates select="descendant::*[@tr-heading-level[. = current()/@tr-heading-level + 1]]
+                                                        [tr:contains-token(@class, 'TOC_sub')]"
+                                   mode="raw-ncx"/>
             </navPoint>
+            <xsl:apply-templates select="descendant::*[@tr-heading-level[. = current()/@tr-heading-level]]
+                                                      [tr:contains-token(@class, 'TOC_same')]"
+                                 mode="raw-ncx"/>
           </xsl:if>
         </xsl:when>
         <xsl:when test="current-group()//@tr-heading-level[not(../@tr-split-delegation-to)][not(../@tr-exclude-from-nav)]">
@@ -1462,6 +1504,18 @@
       </xsl:choose>
     </xsl:for-each-group>
   </xsl:function>
+
+  <xsl:template match="*[tr:contains-token(@class, ('TOC_same', 'TOC_sub'))]" mode="raw-ncx">
+    <navPoint id="" class="default" playOrder="{replace(@tr-generated-id, '^.+?(\d+)$', '$1')}" 
+      xmlns="http://www.daisy.org/z3986/2005/ncx/">
+      <navLabel>
+        <text>
+          <xsl:value-of select="(@title, normalize-space(.))[1]"/>
+        </text>
+      </navLabel>
+      <content genid="{@tr-generated-id}"/>
+    </navPoint>
+  </xsl:template>
 
 
   <xsl:template match="ncx:navPoint/ncx:content/@genid" mode="play-order">

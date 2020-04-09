@@ -354,6 +354,13 @@
       namespace prefix. Their namespace must be declared.</a:documentation>
       <ref name="global-atts"/>
       <optional>
+        <attribute name="nav-spine-pos">
+          <data type="decimal"/>
+          <a:documentation>Defaults to 1.5, the cover typically gets 1. If you want to sort nav.xhtml after 
+          the 3rd split chunk in the spine, use 3.5 for example.</a:documentation>
+        </attribute>
+      </optional>
+      <optional>
         <ref name="toc-type-element"/>
       </optional>
       <optional>
