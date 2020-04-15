@@ -1056,7 +1056,7 @@
   <xsl:template match="*[tr:contains-token(@class, 'TOC_same')]" mode="fullflatten">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:copy-of select="preceding::*[@tr-heading-level]/@tr-heading-level"/>
+      <xsl:copy-of select="preceding::*[@tr-heading-level][1]/@tr-heading-level"/>
       <xsl:apply-templates mode="#current"/>
     </xsl:copy>
   </xsl:template>
@@ -1064,7 +1064,7 @@
   <xsl:template match="*[tr:contains-token(@class, 'TOC_sub')]" mode="fullflatten">
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:for-each select="preceding::*[@tr-heading-level]/@tr-heading-level">
+      <xsl:for-each select="preceding::*[@tr-heading-level][1]/@tr-heading-level">
         <xsl:attribute name="{name()}" select="number(.) + 1"/>
       </xsl:for-each>
       <xsl:apply-templates mode="#current"/>
