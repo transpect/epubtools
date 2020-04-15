@@ -1513,7 +1513,7 @@
           <xsl:value-of select="(@title, normalize-space(.))[1]"/>
         </text>
       </navLabel>
-      <content genid="{@tr-generated-id}"/>
+      <content genid="{(@id, @tr-generated-id)[1]}"/>
     </navPoint>
   </xsl:template>
 
