@@ -1446,11 +1446,11 @@
               <!-- https://redmine.le-tex.de/issues/8015
               The following will only give the results in correct order if there is no mix between proper heading
               and TOC_sub headings. -->
-              <xsl:apply-templates select="descendant::*[@tr-heading-level[. = current()/@tr-heading-level + 1]]
+              <xsl:apply-templates select="current-group()/descendant-or-self::*[@tr-heading-level[. = current()/@tr-heading-level + 1]]
                                                         [tr:contains-token(@class, 'TOC_sub')]"
                                    mode="raw-ncx"/>
             </navPoint>
-            <xsl:apply-templates select="descendant::*[@tr-heading-level[. = current()/@tr-heading-level]]
+            <xsl:apply-templates select="current-group()/descendant-or-self::*[@tr-heading-level[. = current()/@tr-heading-level]]
                                                       [tr:contains-token(@class, 'TOC_same')]"
                                  mode="raw-ncx"/>
           </xsl:if>
