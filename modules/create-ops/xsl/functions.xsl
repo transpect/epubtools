@@ -61,7 +61,7 @@
     <xsl:if test="not(normalize-space($prelim/self::attribute(base-url)))">
       <xsl:message select="'Empty base-url attribute in epubtools/modules/create-ops/xsl/functions.xsl, tr:parse-url(). Attributes: ', $prelim"/>
     </xsl:if>
-    <xsl:variable name="media-type" select="tr:fileref-to-mime-type($prelim/self::attribute(base-url))" as="xs:string"/>
+    <xsl:variable name="media-type" select="tr:fileref-to-mime-type($prelim/self::attribute(base-url))" as="xs:string?"/>
 
     <xsl:variable name="potentially-relative" select="replace($prelim/self::attribute(base-url), $htmlroot-uri-regex, '')" as="xs:string"/>
 
