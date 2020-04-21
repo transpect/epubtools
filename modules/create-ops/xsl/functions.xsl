@@ -71,7 +71,7 @@
       <xsl:choose>
         <xsl:when test="matches($potentially-relative, '^(https?|file):')">
           <xsl:choose>
-            <xsl:when test="matches($media-type, '^application/(vnd.ms-opentype|(x-)?(truetype-font|font-woff))$')">
+            <xsl:when test="matches($media-type, '^(application/(vnd.ms-opentype|(x-)?(truetype-font|font-woff)))|font/(ttf|woff)$')">
               <xsl:sequence select="concat('fonts/', replace($potentially-relative, '^.+/', ''))"/>
             </xsl:when>
             <xsl:otherwise>
