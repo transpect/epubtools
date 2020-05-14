@@ -721,7 +721,6 @@
                                            )"/>
         <xsl:variable name="indexes" select="index-of($flags, true())"/>
         <xsl:variable name="split-nodes" as="element(*)*" select="$same-level-nodes[position() = $indexes]"/>
-        <xsl:message select="'AAAAAAAAAAAA ', count($split-nodes), $max-text-length, $indexes, ' :: ', $same-level-total-text-lengths, ' ;; ', $modulos"></xsl:message>
         <xsl:for-each-group select="$nodes" group-starting-with="*[some $s in $split-nodes
                                                                    satisfies (. is $s)]">
           <xsl:variable name="subitems" select="current-group()[position() gt 1]"/>
@@ -801,7 +800,6 @@
                       ($nodes/ancestor-or-self::*[@tr-max-text-length]/@tr-max-text-length)[last()], 
                       $heading-conf/@max-text-length
                     )[1]"/>
-          <xsl:message select="'BBBBBBBBBB ', $max-text-length"></xsl:message>
           <tr-conditional-split>
             <xsl:copy-of select="@*"/>
             <content text-length="{@text-length}">
