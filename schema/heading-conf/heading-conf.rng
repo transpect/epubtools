@@ -32,9 +32,7 @@
           <data type="integer"/>
         </attribute>
       </optional>
-      <attribute name="max-text-length">
-        <data type="integer"/>
-      </attribute>
+      <ref name="max-text-length"/>
       <optional>
         <ref name="anonymous-division-title"/>
       </optional>
@@ -50,6 +48,12 @@
         </zeroOrMore>
       </interleave>
     </element>
+  </define>
+  
+  <define name="max-text-length">
+    <attribute name="max-text-length">
+      <data type="integer"/>
+    </attribute>
   </define>
 
   <define name="anonymous-division-title">
@@ -101,6 +105,9 @@
           <value>no</value>
         </attribute>
       </optional>
+      <optional>
+        <ref name="max-text-length"/>
+      </optional>
       <ref name="content-selector"/>
     </element>
   </define>
@@ -109,6 +116,9 @@
     <element name="heading">
       <a:documentation>Headings that will otherwise be selected for toc generation may be excluded from toc generation
       by adding a class '_notoc' (in the HTML file).</a:documentation>
+      <optional>
+        <ref name="max-text-length"/>
+      </optional>
       <ref name="content-selector"/>
       <optional>
         <ref name="anonymous-division-title"/>

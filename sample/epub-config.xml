@@ -96,6 +96,12 @@
          'emptyline' or 'asterism' are not reserved words; you may name and implement the classes as you like. -->
     <conditional-split elt="p" attr="class" attval="emptyline" nav="no"/>
     <heading elt="h1"/>
+    <heading elt="h2" attr="class" attval="index" level="2" max-text-length="15000">
+      <!-- allow a more fine-grained splitting, in particular for generated content where manual splits 
+        cannot be inserted, and/or for HTML with a small text/markup ratio, as might be the case in index
+        lists. Then splitting by text length might lead to large chunks that may still make reading systems
+        choke. -->
+    </heading>
     <unconditional-split attr="epub:type" attval="tr:bio"/>
     <unconditional-split attr="epub:type" attval="cover"/>
   </hierarchy>

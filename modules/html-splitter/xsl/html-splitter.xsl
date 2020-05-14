@@ -132,9 +132,11 @@
   <xsl:variable name="chunks" as="document-node(element(html:chunks))">
     <xsl:document>
       <xsl:sequence 
-        select="tr:chunks($output-file-names/html:html/html:body//@tr-generated-id[
+        select="tr:chunks($output-file-names/html:html/html:body//@tr-generated-id
+                          [empty(ancestor::html:content)]
+                          [
                             (: https://redmine.le-tex.de/issues/6590 also 6624 :)
-                            not(./ancestor-or-self::*/@tr-generated-id = ../ancestor::*/(@tr-dont-split-at-genid | @tr-generated-id))
+                            not(./ancestor-or-self::*/@tr-generated-id = ../ancestor::*/(@tr-dont-split-at-genid (:| @tr-generated-id:)))
                           ])"/>
     </xsl:document>
   </xsl:variable>
@@ -421,6 +423,9 @@
                 union
                 $corresponding-conf-items-for-candidates"
         as="element()+"/>
+      <xsl:for-each select="$corresponding-conf-items/@max-text-length">
+        <xsl:attribute name="tr-max-text-length" select="."/>
+      </xsl:for-each>
       <xsl:attribute name="tr-splitting-priority">
         <xsl:choose>
           <!-- unconditional split on a splitting delegate div beats _nosplit on its contained heading -->
@@ -509,6 +514,9 @@
           <xsl:attribute name="tr-exclude-from-nav" select="'tr-exclude-from-nav'"/>  
         </xsl:if>
       </xsl:if>
+      <xsl:for-each select="$corresponding-conf-items/@max-text-length">
+        <xsl:attribute name="tr-max-text-length" select="."/>
+      </xsl:for-each>
       <xsl:choose>
         <xsl:when test="$split-for">
           <xsl:attribute name="tr-split-delegation-to" select="$split-for"/>
@@ -651,7 +659,9 @@
       />
       <xsl:attribute name="text-length" select="sum((@text-length, $processed/self::html:content/@text-length))"/>
       <content text-length="{@text-length}">
-        <xsl:sequence select="tr:subsplit(* except html:tr-conditional-split, (@text-length, 0)[1])"/>
+        <xsl:sequence select="tr:subsplit(* except html:tr-conditional-split, 
+                                          (@text-length, 0)[1], 
+                                          (ancestor-or-self::*/@tr-max-text-length, $heading-conf/@max-text-length)[1])"/>
       </content>
       <xsl:sequence select="$processed"/>
     </xsl:copy>
@@ -672,7 +682,9 @@
               return xs:integer($min)"/>
     <xsl:choose>
       <xsl:when test="not($level)">
-        <xsl:sequence select="tr:subsplit($nodes, sum(for $n in $nodes return string-length($n)))"/>
+        <xsl:sequence select="tr:subsplit($nodes, 
+                                          sum(for $n in $nodes return string-length($n)), 
+                                          (($nodes/ancestor-or-self::*[@tr-max-text-length])[last()]/@tr-max-text-length, $heading-conf/@max-text-length)[1])"/>
       </xsl:when>
       
       <!-- This seems rather complicated. It might help to look at a resulting debug file, 
@@ -689,20 +701,27 @@
           <xsl:for-each-group select="$nodes" group-starting-with="html:tr-conditional-split[@tr-heading-level = $level]">
             <xsl:sequence select="xs:integer(sum(current-group()/@text-length))"/>
           </xsl:for-each-group>
-        </xsl:variable> 
+        </xsl:variable>
+        <xsl:variable name="max-text-length" as="xs:integer" 
+          select="(
+                    ($nodes/ancestor-or-self::*[@tr-max-text-length]/@tr-max-text-length)[last()], 
+                    $heading-conf/@max-text-length
+                  )[1]"/>
+        
         <xsl:variable name="same-level-text-offsets"
           select="tr:text-offsets($start-length, 
                                      $same-level-total-text-lengths)"/>
         <xsl:variable name="modulos" as="xs:double*"
           select="for $o in $same-level-text-offsets
-                  return $o mod $heading-conf/@max-text-length"/>
+                  return $o mod $max-text-length"/>
         <xsl:variable name="flags" select="(for $i in (1 to count($modulos) - 1)
                                             return ($modulos[$i + 1] lt $modulos[$i]
                                                     or 
-                                                    $same-level-text-offsets[$i + 1] &gt; $same-level-text-offsets[$i] + $heading-conf/@max-text-length) 
+                                                    $same-level-text-offsets[$i + 1] &gt; $same-level-text-offsets[$i] + $max-text-length) 
                                            )"/>
         <xsl:variable name="indexes" select="index-of($flags, true())"/>
         <xsl:variable name="split-nodes" as="element(*)*" select="$same-level-nodes[position() = $indexes]"/>
+        <xsl:message select="'AAAAAAAAAAAA ', count($split-nodes), $max-text-length, $indexes, ' :: ', $same-level-total-text-lengths, ' ;; ', $modulos"></xsl:message>
         <xsl:for-each-group select="$nodes" group-starting-with="*[some $s in $split-nodes
                                                                    satisfies (. is $s)]">
           <xsl:variable name="subitems" select="current-group()[position() gt 1]"/>
@@ -725,12 +744,12 @@
                 <xsl:attribute name="text-length" select="$chunk-length"/>
                 <xsl:attribute name="tr-current-index" select="$current-index, $next-index" separator=" "/>
                 <content text-length="{@text-length}"  tr-heading-level="{$level}" tr-origin="B">
-                  <xsl:sequence select="tr:subsplit(*, @text-length)"/>
+                  <xsl:sequence select="tr:subsplit(*, @text-length, $max-text-length)"/>
                 </content>
                 <xsl:for-each-group select="$subitems" 
                   group-starting-with="html:tr-conditional-split[@tr-heading-level cast as xs:integer eq $level]">
                   <content>
-                    <xsl:sequence select="tr:subsplit(*, @text-length)"/>
+                    <xsl:sequence select="tr:subsplit(*, @text-length, $max-text-length)"/>
                   </content>
                   <xsl:sequence
                   select="tr:group-according-to-heading(
@@ -747,7 +766,7 @@
                 <xsl:choose>
                   <xsl:when test="self::html:tr-conditional-split[@tr-heading-level = $level]">
                     <content text-length="{@text-length}" tr-heading-level="{$level}" tr-origin="C">
-                      <xsl:sequence select="tr:subsplit(*, @text-length)"/>
+                      <xsl:sequence select="tr:subsplit(*, @text-length, $max-text-length)"/>
                     </content>
                     <xsl:sequence
                       select="tr:group-according-to-heading(
@@ -777,10 +796,16 @@
           removing "true() or" above. -->
         <xsl:for-each-group select="$nodes" group-starting-with="html:tr-conditional-split[@tr-heading-level cast as xs:integer eq $level]">
           <xsl:variable name="subitems" select="current-group()[position() gt 1]"/>
+          <xsl:variable name="max-text-length" as="xs:integer" 
+            select="(
+                      ($nodes/ancestor-or-self::*[@tr-max-text-length]/@tr-max-text-length)[last()], 
+                      $heading-conf/@max-text-length
+                    )[1]"/>
+          <xsl:message select="'BBBBBBBBBB ', $max-text-length"></xsl:message>
           <tr-conditional-split>
             <xsl:copy-of select="@*"/>
             <content text-length="{@text-length}">
-              <xsl:sequence select="tr:subsplit(*, @text-length)"/>
+              <xsl:sequence select="tr:subsplit(*, @text-length, $max-text-length)"/>
             </content>
             <xsl:sequence
               select="tr:group-according-to-heading(
@@ -810,13 +835,14 @@
   <xsl:function name="tr:subsplit" as="node()*">
     <xsl:param name="nodes" as="node()*"/>
     <xsl:param name="length" as="xs:double"/>
+    <xsl:param name="max-length" as="xs:double"/>
     <xsl:choose>
-      <xsl:when test="$length le number($heading-conf/@max-text-length)">
+      <xsl:when test="$length le number($max-length)">
         <xsl:sequence select="$nodes"/>
       </xsl:when>
       <xsl:otherwise>
         <xsl:for-each-group select="$nodes"
-          group-starting-with="*[position() mod ((last() idiv (($length idiv number($heading-conf/@max-text-length)) + 1)) + 1) eq 0]">
+          group-starting-with="*[position() mod ((last() idiv (($length idiv number($max-length)) + 1)) + 1) eq 0]">
           <xsl:if test="position() gt 1">
             <tr-subsplit text-length="{string-length(normalize-space(string-join(current-group(), '')))}"
               tr-generated-id="{@tr-generated-id}"/>
@@ -834,11 +860,17 @@
        * the parent heading's group is short enough anyway, or
        * there is only minimal introductory content before the conditional split. 
        -->
-  <xsl:template match="*[number(@text-length) le number($heading-conf/@max-text-length)]/html:content"
+  <xsl:template match="*[number(@text-length) 
+                         le 
+                         number((ancestor::*[@tr-max-text-length][1]/@tr-max-text-length, 
+                                 $heading-conf/@max-text-length)[1])]/html:content"
     mode="partially-ungroup-to-final-split-points"/>
 
 
-  <xsl:template match="*[number(@text-length) gt number($heading-conf/@max-text-length)]/html:content"
+  <xsl:template match="*[number(@text-length) 
+                         gt 
+                         number((ancestor::*[@tr-max-text-length][1]/@tr-max-text-length, 
+                                 $heading-conf/@max-text-length)[1])]/html:content"
     mode="partially-ungroup-to-final-split-points">
     <xsl:sequence select=".//html:tr-subsplit"/>
   </xsl:template>
@@ -850,7 +882,7 @@
                  ../@text-length,
                  ..//html:tr-conditional-split/@text-length
                ) return number($l)
-             ) le number($heading-conf/@max-text-length)
+             ) le number((../@tr-max-text-length, $heading-conf/@max-text-length)[1])
            ]/@tr-generated-id"
     mode="partially-ungroup-to-final-split-points" priority="4">
     <xsl:attribute name="tr-dont-split-at-genid" select="."/>
@@ -865,7 +897,7 @@
                  preceding-sibling::html:tr-conditional-split//@text-length, 
                  ../@text-length
                ) return number($l)
-             ) le number($heading-conf/@max-text-length) * 0.03 ]"
+             ) le number((../@tr-max-text-length, $heading-conf/@max-text-length)[1]) * 0.03 ]"
     mode="partially-ungroup-to-final-split-points">
     <!-- only the subsplits (if present), but don't split here because it's too close to the parent heading -->
     <xsl:copy copy-namespaces="no">
@@ -1078,10 +1110,12 @@
       select="tr:export-filename(($output-file-names/html:html/html:body//@tr-generated-id)[1])"/>
     <navMap xmlns="http://www.daisy.org/z3986/2005/ncx/" tr-first-export-file="{$first-export-file}">
       <xsl:choose>
-        <xsl:when test="html:body/*/@tr-heading-level[not(../@tr-exclude-from-nav)]">
+        <xsl:when test="html:body/*/@tr-heading-level[not(../@tr-exclude-from-nav)]
+                                                     [not(tr:is-conditional-split-level(.))]">
           <xsl:sequence select="tr:group-for-ncx(
                                   html:body/*, 
-                                  xs:integer(min(html:body/*/@tr-heading-level[not(../@tr-exclude-from-nav)])), 
+                                  xs:integer(min(html:body/*/@tr-heading-level[not(../@tr-exclude-from-nav)]
+                                                                              [not(tr:is-conditional-split-level(.))])), 
                                   true()
                                 )"/>
         </xsl:when>
@@ -1427,7 +1461,8 @@
                       then $fullflatten//*[@tr-generated-id[. eq current()/@tr-split-delegation-to]]/@id
                       else (@id, @tr-generated-id, .//@id)[1]"/>
               <content genid="{$genid}" xmlns="http://www.daisy.org/z3986/2005/ncx/"/>
-              <xsl:variable name="next-level" select="(current-group() except .)/@tr-heading-level" as="xs:integer*"/>
+              <xsl:variable name="next-level" as="xs:integer*"
+                select="(current-group() except .)/@tr-heading-level[not(tr:is-conditional-split-level(.))]"/>
               <!--<xsl:message select="'nl1 ', $next-level"></xsl:message>-->
               <xsl:if test="min($next-level) = $level">
                 <!-- GI 2017-02-25: I’ve seen this message raised when processing the interview in the backmatter of
@@ -1441,7 +1476,8 @@
               </xsl:if>
               <xsl:if test="exists($next-level)">
                 <!--<nl min="{min($next-level)}" levels="{$next-level}"/>-->
-                <xsl:sequence select="tr:group-for-ncx(current-group() except ., min($next-level), false())"/>
+                <xsl:sequence select="tr:group-for-ncx(current-group()
+                                                       except ., min($next-level), false())"/>
               </xsl:if>
               <!-- https://redmine.le-tex.de/issues/8015
               The following will only give the results in correct order if there is no mix between proper heading
@@ -1898,7 +1934,7 @@
     <xsl:if test="empty($split-genid)">
       <xsl:message terminate="no"> Something’s wrong: should have a generated ID in every chunk </xsl:message>
     </xsl:if>
-    <xsl:sequence select="key('by-tr-genid', $split-genid, $output-file-names)/@tr-output-name"/>
+    <xsl:sequence select="distinct-values(key('by-tr-genid', $split-genid, $output-file-names)/@tr-output-name)"/>
   </xsl:function>
 
   <xsl:function name="tr:custom-pad" as="xs:string">
