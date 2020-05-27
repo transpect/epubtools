@@ -1,6 +1,7 @@
 default namespace = ""
 namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
 namespace dc = "http://purl.org/dc/elements/1.1/"
+namespace ns1 = "http://www.w3.org/1999/xhtml"
 namespace opf = "http://www.idpf.org/2007/opf"
 namespace s = "http://purl.oclc.org/dsdl/schematron"
 
@@ -10,7 +11,7 @@ include "heading-conf.rnc" {
   start =
     element epub-config {
       epub-config-attributes,
-      (cover? & types? & meta & hierarchy? & checks?)
+      (cover? & types? & meta & hierarchy? & checks? & html-head?)
     }
 }
 epub-config-attributes =
@@ -18,11 +19,14 @@ epub-config-attributes =
   & format?
   & layout?
   & indent?
+  & remove-scripts?
+  & subset?
   & variant?
   & css-handling?
   & page-map-xml?
   & html-subdir-name?
   & out-file-basename?
+  & consider-headings-in-tables?
 global-atts =
   attribute xml:lang { text }?,
   attribute xml:base { xsd:anyURI }?,
@@ -34,6 +38,15 @@ indent =
   ##       'selective' means: indent="false" with textual insertions of line breaks and spaces
   ##       before p, h?, div, nav, aside elements.
   attribute indent { "true" | "false" | "selective" }
+remove-scripts =
+  
+  ## Whether to remove script elements and event attributes. Default: false
+  attribute remove-scripts { "true" | "false" }
+subset =
+  
+  ## Use only a subset that covers the characters that are displeyed
+  ##       with that font. Requires https://github.com/transpect/epub-font-subsetter and Python
+  attribute font-subset { "true" | "false" }
 layout = attribute layout { "reflowable" | "fixed" }
 
 ## Space-separated names of arbitrary layout/format variants that may or may not
@@ -76,6 +89,12 @@ out-file-basename =
   attribute out-file-basename {
     xsd:string { pattern = "[\-_.a-zA-Z0-9]+" }
   }
+consider-headings-in-tables =
+  
+  ## Whether tables should be considered as splitting candidates. 
+  ##         If this option is true, this may slow down the splitting of large documents 
+  ##         with many tables.
+  attribute consider-headings-in-tables { xsd:boolean }
 
 ## http://www.idpf.org/epub/vocab/structure/
 landmark-types =
@@ -188,6 +207,13 @@ types =
   ##       namespace prefix. Their namespace must be declared.
   element types {
     global-atts,
+    attribute nav-spine-pos {
+      xsd:decimal
+      >> a:documentation [
+           "Defaults to 1.5, the cover typically gets 1. If you want to sort nav.xhtml after \x{a}" ~
+           "          the 3rd split chunk in the spine, use 3.5 for example."
+         ]
+    }?,
     toc-type-element?,
     landmark-type-element?,
     plain-type-element*
@@ -234,6 +260,7 @@ meta =
          text
        }?
      & element dc:publisher { text }?
+     & element dc:contributor { text }*
      & element dc:rights { text }?
      & element dc:date { text }?
      & element dc:language { text }?
@@ -244,6 +271,8 @@ meta =
           text)
          | (attribute name { text }
             & attribute content { text })
+         | (attribute refines { text }
+            & attribute scheme { text })
        }*)
   }
 [
@@ -329,4 +358,10 @@ schematron =
     
     ## not implemented yet
     attribute phase { xsd:NCName | "#all" }?
+  }
+html-head = element ns1:head { any-html }
+any-html =
+  attribute * { text }*,
+  mixed {
+    element * { any-html }*
   }

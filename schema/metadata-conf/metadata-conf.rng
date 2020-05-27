@@ -68,6 +68,9 @@
       <optional>
         <ref name="out-file-basename"/>
       </optional>
+      <optional>
+        <ref name="consider-headings-in-tables"/>
+      </optional>
     </interleave>
   </define>
   
@@ -199,6 +202,15 @@
       <data type="string">
         <param name="pattern">[\-_.a-zA-Z0-9]+</param>
       </data>      
+    </attribute>
+  </define>
+  
+  <define name="consider-headings-in-tables">
+    <attribute name="consider-headings-in-tables">
+      <a:documentation>Whether tables should be considered as splitting candidates. 
+        If this option is true, this may slow down the splitting of large documents 
+        with many tables.</a:documentation>
+      <data type="boolean"/>
     </attribute>
   </define>
 
