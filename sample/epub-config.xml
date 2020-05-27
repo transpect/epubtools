@@ -7,7 +7,8 @@
   css-handling="regenerated-per-split remove-comments"
   html-subdir-name="text" 
   indent="selective"
-  font-subset="false">
+  font-subset="false"
+  consider-headings-in-tables="false">
 	<!-- layout: reflowable|fixed
 	       (default: reflowable; fixed only permitted for KF8 and EPUB3 layouts)
 	     format: EPUB2|EPUB3|KF8 (default: EPUB3)
@@ -16,6 +17,9 @@
 	       Note: 'regenerated-per-split remove-comments' is the same as 'remove-comments regenerated-per-split' 
 	     font-subset: true|false (default: false); whether a subset of the font should be created which 
 	       includes only the characters that are used in the book
+	     consider-headings-in-tables: true|false (default: false). If true, allow headings or other splitting points 
+	       to be in tables. This might come with a performance penalty for table-heavy documents, and it need not be
+	       used unless there are split points in tables, which is rare.
 	-->
 	
 	<!-- COVER:
