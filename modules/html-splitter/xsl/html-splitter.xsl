@@ -359,6 +359,7 @@
                            generate-id(.) = $candidate-ids
                            and $heading-conf/unconditional-split[tr:signature-from-conf(.) = tr:signature-from-doc(current())]  
                          )
+                         or count(.//*[tr:contains-token(@class, ('TOC_same', 'TOC_sub'))]) ge 1
                        ]"
     mode="semiflatten">
     <xsl:processing-instruction name="origin" select="'A'"/>
