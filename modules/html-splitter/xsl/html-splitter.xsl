@@ -350,7 +350,11 @@
        Dissolve divs which contain more than a single heading (important for later grouping) -->
   <xsl:variable name="tr:dissolvable-for-semiflatten" as="element(*)*"
     select="//*[local-name() = ('aside', 'div', 'nav', 'header', 'section', 
-                ('table', 'tbody', 'tr', 'td', 'th')[$epub-config/@consider-headings-in-tables = 'true'])]"/>
+                ('table', 'tbody', 'tr', 'td', 'th')[$epub-config/@consider-headings-in-tables = 'true'
+                                                     or $tr:subheadings-in-table])]"/>
+
+  <xsl:variable name="tr:subheadings-in-table" as="xs:boolean" 
+    select="exists(//html:tr[exists(.//*[tr:contains-token(@class, ('TOC_same', 'TOC_sub'))])])"/>
 
   <xsl:template
     match="*[exists(. intersect $tr:dissolvable-for-semiflatten)][
@@ -359,7 +363,7 @@
                            generate-id(.) = $candidate-ids
                            and $heading-conf/unconditional-split[tr:signature-from-conf(.) = tr:signature-from-doc(current())]  
                          )
-                         or count(.//*[tr:contains-token(@class, ('TOC_same', 'TOC_sub'))]) ge 1
+                         or exists(.//*[tr:contains-token(@class, ('TOC_same', 'TOC_sub'))])
                        ]"
     mode="semiflatten">
     <xsl:processing-instruction name="origin" select="'A'"/>
