@@ -1403,6 +1403,11 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
+  <xsl:template match="ncx:navPoint[preceding-sibling::ncx:navPoint[@playOrder = current()/@playOrder]]"
+    priority="2" mode="#all">
+    <!-- hack to fix duplicate TOC_sub entries, https://redmine.le-tex.de/issues/8015#note-32 -->
+  </xsl:template>
 
   <xsl:template match="ncx:content" mode="nav-xhtml">
     <a href="{@src}" srcpath="nav-{generate-id()}">
