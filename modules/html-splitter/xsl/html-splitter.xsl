@@ -39,6 +39,13 @@
      and run saxon from the command line. See html-splitter.xpl for an example.
        -->
 
+  <xsl:param name="collection-uri" as="xs:string?" select="()">
+    <!-- Pass the URI of epubtools/html-splitter/…/splitter-input.catalog.xml that whas stored during
+      debugging for standalone invocation with Saxon.
+    Note that you still need to provide an input document for XSLT invocation. It can be the HTML source,
+    but if an HTML source document is listed in $collection-uri, this will have precedence. Then you 
+    can supply a bogus source document, for example, this XSLT file or the collection catalog file. --> 
+  </xsl:param>
   <xsl:param name="datadir" select="resolve-uri('.', base-uri(/*))" as="xs:string"/>
   <xsl:param name="heading-conf-uri" as="xs:string?"/>
   <xsl:param name="meta-uri" as="xs:string?"/>
@@ -59,14 +66,10 @@
     select="replace($datadir, '/+', '/+')"/>
   <xsl:variable name="orig-filename" select="replace(base-uri(/*), '^.*/', '')"/>
   <xsl:variable name="raw-smil-filename" select="replace(base-uri(/*), '[.]\w+$', '.raw.smil')"/>
-  <xsl:variable name="epub-config" select="collection()/epub-config" as="element(epub-config)"/>
-  <!-- uncomment this for standalone Saxon operation: -->
-  <!--<xsl:variable name="epub-config" select="document($meta-uri)/epub-config" as="element(epub-config)"/>-->
+  <xsl:variable name="epub-config" select="collection($collection-uri)/epub-config" as="element(epub-config)"/>
   <!-- If heading conf is submitted in a separate file, it will have precedence. It may be submitted as /epub-config/hierarchy -->
   <xsl:variable name="heading-conf"
-    select="(collection()/hierarchy, collection()/epub-config/hierarchy)[1]" as="element(hierarchy)"/>
-    <!-- uncomment this for standalone Saxon operation: -->
-  <!--<xsl:variable name="heading-conf" select="$epub-config/hierarchy" as="element(hierarchy)"/>-->
+    select="(collection($collection-uri)/hierarchy, collection($collection-uri)/epub-config/hierarchy)[1]" as="element(hierarchy)"/>
   <xsl:variable name="metadata" select="$epub-config/metadata" as="element(metadata)"/>
 
   <!-- CATCH-ALL IDENTITY TEMPLATE -->
@@ -79,7 +82,7 @@
 
 
   <!-- KEYS and GLOBAL VARIABLES -->
-  <xsl:variable name="root" select="/" as="document-node(element(html:html))"/>
+  <xsl:variable name="root" select="(collection($collection-uri)[html:html], /)[1]" as="document-node(element(html:html))"/>
 
   <!-- input file name / URL without path and extension: --> 
   <xsl:param name="basename" as="xs:string" select="replace(base-uri(/*), '^.+/', '')"/>
@@ -94,7 +97,7 @@
   <xsl:key name="by-any-id-available" match="*[@id | @tr-generated-id]" use="@id, @tr-generated-id"/>
   <xsl:key name="chunk-by-id" match="html:chunk" use=".//@id[not(. = '')]"/>
 
-  <xsl:variable name="candidates" select="key('by-signature', for $h in $heading-conf/* return tr:signature-from-conf($h))"
+  <xsl:variable name="candidates" select="key('by-signature', for $h in $heading-conf/* return tr:signature-from-conf($h), $root)"
     as="element(*)*"/>
   <xsl:variable name="candidate-ids" select="for $n in $candidates return generate-id($n)" as="xs:string*"/>
   <xsl:variable name="removable-ids"
@@ -106,7 +109,7 @@
   <!-- PROCESSING PIPELINE using global variables which hold transformed trees: -->
   <xsl:variable name="semiflatten" as="document-node(element(html:html))">
     <xsl:document>
-      <xsl:apply-templates select="/" mode="semiflatten"/>  
+      <xsl:apply-templates select="$root" mode="semiflatten"/>  
     </xsl:document>
   </xsl:variable>
   <xsl:variable name="fullflatten" as="element(html:html)">
@@ -349,7 +352,7 @@
   <!-- MODE: SEMIFLATTEN
        Dissolve divs which contain more than a single heading (important for later grouping) -->
   <xsl:variable name="tr:dissolvable-for-semiflatten" as="element(*)*"
-    select="//*[local-name() = ('aside', 'div', 'nav', 'header', 'section', 
+    select="$root//*[local-name() = ('aside', 'div', 'nav', 'header', 'section', 
                 ('table', 'tbody', 'tr', 'td', 'th')[$epub-config/@consider-headings-in-tables = 'true'
                                                      or $tr:subheadings-in-table])]"/>
 

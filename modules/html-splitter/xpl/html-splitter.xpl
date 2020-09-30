@@ -127,25 +127,29 @@ saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -
         <p:pipe port="meta" step="html-splitter"/>
       </p:variable>
 
-      <tr:store-debug>
-        <p:with-option name="pipeline-step" select="concat('epubtools/html-splitter/', $basename, '/splitter-input')"/>
-        <p:with-option name="active" select="$debug"/>
-        <p:with-option name="base-uri" select="$debug-dir-uri"/>
-      </tr:store-debug>
-
-      <p:xslt name="split" template-name="main">
+      <p:identity name="splitter-xsl-source">
         <p:input port="source">
           <p:pipe port="result" step="strip-leading-non-elements"/>
           <p:pipe port="conf" step="html-splitter"/>
           <p:pipe port="meta" step="html-splitter"/>
         </p:input>
-        <p:with-param name="debug" select="$debug"/>
-        <p:with-param name="debug-dir-uri" select="replace($debug-dir-uri, '^(.+)\?.*$', '$1')"/>
-        <p:with-param name="final-pub-type" select="$target"/>
-        <p:with-param name="indent" select="$indent"/>
-        <p:with-param name="datadir" select="$workdir"/>
-        <p:with-param name="basename" select="$basename"/>
-        <p:with-param name="html-subdir-name" select="$html-subdir-name"/>
+      </p:identity>
+
+      <tr:store-debug>
+        <p:with-option name="pipeline-step" select="concat('epubtools/html-splitter/', $basename, '/splitter-input')"
+          ><p:empty/></p:with-option>
+        <p:with-option name="active" select="$debug"><p:empty/></p:with-option>
+        <p:with-option name="base-uri" select="$debug-dir-uri"><p:empty/></p:with-option>
+      </tr:store-debug>
+      
+      <p:xslt name="split" template-name="main">
+        <p:with-param name="debug" select="$debug"><p:empty/></p:with-param>
+        <p:with-param name="debug-dir-uri" select="replace($debug-dir-uri, '^(.+)\?.*$', '$1')"><p:empty/></p:with-param>
+        <p:with-param name="final-pub-type" select="$target"><p:empty/></p:with-param>
+        <p:with-param name="indent" select="$indent"><p:empty/></p:with-param>
+        <p:with-param name="datadir" select="$workdir"><p:empty/></p:with-param>
+        <p:with-param name="basename" select="$basename"><p:empty/></p:with-param>
+        <p:with-param name="html-subdir-name" select="$html-subdir-name"><p:empty/></p:with-param>
         <p:input port="stylesheet">
           <p:document href="../xsl/html-splitter.xsl"/>
         </p:input>
