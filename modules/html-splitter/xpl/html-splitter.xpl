@@ -23,14 +23,9 @@
     <p>Calabash seems to suppress some XSLT errors, for instance when a stylesheet is looping. Therefore it might be
       necessary to replace collection()[…] with document(…) in the XSL (alternative variable declarations are already
       included in the xsl file, commented out) and run saxon from the command line, for example like this:</p>
-    <pre>PRE_SPLIT=file:/$(cygpath -ma ../content/le-tex/whitepaper/de/output/output/debug/epubtools/create-ops/pre-split.html)
-saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -s:$PRE_SPLIT -it:main \
-    debug-dir-uri=file:/$(cygpath -ma debug) \
-    debug=yes \
-    final-pub-type=EPUB2 \
-    heading-conf-uri=file:/$(cygpath -ma a9s/common/epubtools/heading-conf.xml) \
-    meta-uri=file:/$(cygpath -ma ../content/le-tex/whitepaper/de/output/output/debug/epubtools/epub-config.xml) \
-    datadir=file:/$(cygpath -ma debug/datadir)</pre>
+    <pre>saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl -it:main \ 
+      collection-uri=file:/path/to/debugdir/epubtools/html-splitter/…/splitter-input.catalog.xml) \ 
+      -s:[any.xml] debug=yes debug-dir-uri=file:/other/path/to/debug/dir</pre>
   </p:documentation>
 
   <p:input port="source" primary="true"/>
