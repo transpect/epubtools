@@ -32,11 +32,11 @@
   <xsl:output name="text" method="text" encoding="UTF-8"/>
 
   <!-- Sample invocation:
-       only through XProc because we utilize the default collection(). See ../xpl/html-splitter.xpl 
+       See ../xpl/html-splitter.xpl 
 
      Calabash seems to suppress some XSLT errors, for instance when a stylesheet is looping.
-     Therefore it might be necessary to replace collection()[…] with document(…) in this XSL
-     and run saxon from the command line. See html-splitter.xpl for an example.
+     Therefore it might be necessary to run saxon from the command line. 
+     See html-splitter.xpl for an example.
        -->
 
   <xsl:param name="collection-uri" as="xs:string?" select="()">
