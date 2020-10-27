@@ -579,7 +579,7 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="@shape" mode="#all" priority="10"/>
+  <xsl:template match="@shape | html:colgroup[html:col]/@span" mode="#all" priority="10"/>
 
   <!-- A signature is a footprint or a hash value for a specific kind of element. It may be calculated 
        for configuration selectors as well as for content items. By means of this signature, configuration
