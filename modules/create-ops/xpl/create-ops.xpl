@@ -330,7 +330,7 @@
     <p:delete match="/html:html/@version | /html:html/html:head/@profile" name="delete-dtd-artifacts">
       <p:documentation>Possible DTD parsing artifacts</p:documentation>
     </p:delete>
-
+    
     <p:choose name="conditionally-check-hrefs">
       <p:xpath-context>
         <p:pipe port="meta" step="create-ops"/>
@@ -344,6 +344,20 @@
         <p:variable name="never" select="if (contains($link-check, 'never:')) 
                                          then replace($link-check, '^.*never:(.*?)(\|only:.*|$)', '$1')
                                          else ''"/>
+        
+        
+        <tr:simple-progress-msg name="linkcheck-start-msg" file="linkcheck-start.txt">
+          <p:input port="msgs">
+            <p:inline>
+              <c:messages>
+                <c:message xml:lang="en">Starting Link Check</c:message>
+                <c:message xml:lang="de">Beginne Link-Check</c:message>
+              </c:messages>
+            </p:inline>
+          </p:input>
+          <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
+        </tr:simple-progress-msg>
+        
         <p:viewport match="*[@src | @href | @xlink:href | @poster]
                             [some $att in @*[local-name() = ('src', 'href', 'poster')] 
                              satisfies $att[starts-with(., 'http')]]" name="check-hrefs">
@@ -426,6 +440,19 @@
             </p:otherwise>
           </p:choose>
         </p:viewport>
+        
+        <tr:simple-progress-msg name="linkcheck-end-msg" file="linkcheck-end.txt">
+          <p:input port="msgs">
+            <p:inline>
+              <c:messages>
+                <c:message xml:lang="en">Finished Link Check</c:message>
+                <c:message xml:lang="de">Link-Check abgeschlossen</c:message>
+              </c:messages>
+            </p:inline>
+          </p:input>
+          <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
+        </tr:simple-progress-msg>
+        
       </p:when>
       <p:otherwise>
         <p:output port="result" primary="true"/>
