@@ -361,6 +361,10 @@
         <p:viewport match="*[@src | @href | @xlink:href | @poster]
                             [some $att in @*[local-name() = ('src', 'href', 'poster')] 
                              satisfies $att[starts-with(., 'http')]]" name="check-hrefs">
+          <cx:message>
+            <!-- to determine which links need especially much time to be resolved -->
+            <p:with-option name="message" select="'– Check URL : [', format-time(current-time(), '[H]:[m]:[s]'), '] ', /*/@*[local-name() = ('src', 'href', 'poster')][starts-with(., 'http')]"/>
+          </cx:message>
           <p:try name="fu2t">
             <p:group>
               <tr:file-uri fetch-http="false" check-http="true" name="fu2i" make-unique="false">
