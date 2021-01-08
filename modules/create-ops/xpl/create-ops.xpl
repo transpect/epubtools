@@ -120,7 +120,8 @@
       <p:pipe port="meta" step="create-ops"/>
       <p:documentation>The value can be 'true', 'false', or something like 'only:spiegel.de|zeit.de|never:.rdf|.xml',
       'only:http:', or 'never:doi.org'. If something is excluded by 'never:', it cannot be re-included by 'only:'. Matching
-      is by substring, not by regex, against the literal href string, it is not percent-encoded before.</p:documentation>
+      is by substring, not by regex, against the literal href string, it is not percent-encoded before. 
+      Instead of '|' as delimiter '~' can be used, especially for parameter delivery via the davomat.</p:documentation>
     </p:variable>
 
     <tr:store-debug pipeline-step="epubtools/hierarchy">
@@ -339,10 +340,10 @@
         <p:output port="result" primary="true"/>
         
         <p:variable name="only" select="if (contains($link-check, 'only:'))
-                                          then replace($link-check, '^.*only:(.*?)(\|never:.*|$)', '$1')
+                                          then replace($link-check, '^.*only:(.*?)([\|~]never:.*|$)', '$1')
                                           else ''"/>
         <p:variable name="never" select="if (contains($link-check, 'never:')) 
-                                         then replace($link-check, '^.*never:(.*?)(\|only:.*|$)', '$1')
+                                         then replace($link-check, '^.*never:(.*?)([\|~]only:.*|$)', '$1')
                                          else ''"/>
         
         
@@ -361,23 +362,28 @@
         <p:viewport match="*[@src | @href | @xlink:href | @poster]
                             [some $att in @*[local-name() = ('src', 'href', 'poster')] 
                              satisfies $att[starts-with(., 'http')]]" name="check-hrefs">
-          <cx:message>
-            <!-- to determine which links need especially much time to be resolved -->
-            <p:with-option name="message" select="'– Check URL : [', format-time(current-time(), '[H]:[m]:[s]'), '] ', /*/@*[local-name() = ('src', 'href', 'poster')][starts-with(., 'http')]"/>
-          </cx:message>
-          <p:try name="fu2t">
-            <p:group>
-              <tr:file-uri fetch-http="false" check-http="true" name="fu2i" make-unique="false">
-                <p:with-option name="filename" select="for $u in /*/(@src | @href | @xlink:href | @poster)
+              <p:variable name="actual-link-to-be-checked" select="for $u in /*/(@src | @href | @xlink:href | @poster)
                                                           [if (normalize-space($never))
-                                                           then (every $n in tokenize($never, '\|') 
+                                                           then (every $n in tokenize($never, '(\||~)') 
                                                                 satisfies not(contains(., $n)))
                                                            else true()]
                                                           [if (normalize-space($only)) 
-                                                           then (some $o in tokenize($only, '\|') 
+                                                           then (some $o in tokenize($only, '(\||~)') 
                                                                 satisfies contains(., $o))
                                                            else true()] 
-                                                       return resolve-uri(escape-html-uri($u), base-uri())">
+                                                       return $u">
+                <p:pipe port="current" step="check-hrefs"></p:pipe>
+              </p:variable>
+           <p:try name="fu2t">
+            <p:group>
+              <cx:message>
+                <!-- to determine which links need especially much time to be resolved -->
+                <p:with-option name="message" select="if (not($actual-link-to-be-checked[normalize-space()])) then '- Not ' else '- ', 'Checking URL : [', format-time(current-time(), '[H]:[m]:[s]'), '] ', /*/(@src | @href | @xlink:href | @poster)">
+                  <p:pipe port="current" step="check-hrefs"></p:pipe>
+                </p:with-option>
+              </cx:message>
+              <tr:file-uri fetch-http="false" check-http="true" name="fu2i" make-unique="false">
+                <p:with-option name="filename" select="resolve-uri(escape-html-uri($actual-link-to-be-checked), base-uri())">
                   <p:documentation>If it is a relative URI, resolve it wrt the HTML source.</p:documentation>
                 </p:with-option>
                 <p:input port="resolver">
