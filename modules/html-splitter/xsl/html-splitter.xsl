@@ -1775,8 +1775,11 @@
                         ]" 
                 mode="export-chunk-with-surroundings export-chunk-subtree">
     <xsl:copy copy-namespaces="no">
-      <xsl:attribute name="id" select="generate-id()"/>
-      <xsl:apply-templates select="@*, node()" mode="#current"/>
+      <xsl:apply-templates select="@*" mode="#current"/>
+      <xsl:element name="a">
+        <xsl:attribute name="id" select="generate-id()"/>
+      </xsl:element>
+      <xsl:apply-templates select="node()" mode="#current"/>
     </xsl:copy>
   </xsl:template>
   
@@ -1794,7 +1797,9 @@
     priority="-0.6" mode="export-chunk-with-surroundings export-chunk-subtree mobi-htm">
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:attribute name="id" select="(@id, generate-id())[1]"/>
+      <xsl:element name="a">
+        <xsl:attribute name="id" select="generate-id()"/>
+      </xsl:element>
       <xsl:apply-templates mode="#current"/>
     </xsl:copy>
   </xsl:template>
@@ -1804,18 +1809,22 @@
     priority="-0.65" mode="export-chunk-with-surroundings export-chunk-subtree mobi-htm">
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:attribute name="id" select="generate-id()"/>
+      <xsl:element name="a">
+        <xsl:attribute name="id" select="generate-id()"/>
+      </xsl:element>
       <xsl:apply-templates mode="#current"/>
     </xsl:copy>
   </xsl:template>
-
+  
   <!-- audio spans will not be dealt with by above templates, but only by the following,
        id-adding template. This implies that no audio span may serve as a splitting candidate. -->
   <xsl:template match="*[@class eq 'au'][not(starts-with(@id, 'au-'))]"
     mode="export-chunk-with-surroundings export-chunk-subtree mobi-htm">
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:attribute name="id" select="generate-id()"/>
+      <xsl:element name="a">
+        <xsl:attribute name="id" select="generate-id()"/>
+      </xsl:element>
       <xsl:apply-templates mode="#current"/>
     </xsl:copy>
   </xsl:template>
