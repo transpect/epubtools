@@ -242,7 +242,7 @@
       select="$chunks/html:chunks/html:chunk//*[@id | @tr-generated-id][tr:contains-token(@epub:type, $landmark-types)]"/>-->
 
     <xsl:variable name="landmarks" as="element(*)*">
-      <xsl:for-each-group select="$chunks/html:chunks/html:chunk//*[@id | @tr-generated-id]
+      <xsl:for-each-group select="$chunks/html:chunks/html:chunk//*[@id | @tr-generated-id | .[empty(@id)]/html:a/@id]
                                                                    [tr:contains-token(@epub:type, $landmark-types)]"
                           group-by="@epub:type">
         <!-- index, preface, … may occur multiple times. Use only the first item of a kind 
