@@ -1345,7 +1345,7 @@
       <a srcpath="landmarks-{generate-id()}">
         <xsl:attribute name="epub:type" select="string-join($landmark-type, ' ')"/>
         <xsl:variable name="unresolved-href" as="attribute(href)">
-          <xsl:attribute name="href" select="concat('#', (@id, @tr-generated-id)[1])"/>
+          <xsl:attribute name="href" select="concat('#', (@id, @tr-generated-id, .[empty(@id)]/html:a/@id)[1])"/>
         </xsl:variable>
         <xsl:apply-templates select="$unresolved-href" mode="resolve-refs">
           <xsl:with-param name="element" select="."/>
