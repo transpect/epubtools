@@ -439,15 +439,15 @@
         <choice>
           <ref name="dc-identifier"/>
           <oneOrMore>
-            <ref name="dc-identifier-mandatory-scheme"/>  
+            <ref name="dc-identifier-mandatory-scheme"/>
           </oneOrMore>
         </choice>
-        <optional>
+        <oneOrMore>
           <element name="dc:title">
             <text/>
           </element>
-        </optional>
-        <optional>
+        </oneOrMore>
+        <zeroOrMore>
           <element name="dc:creator">
             <optional>
               <attribute name="opf:role">
@@ -463,39 +463,64 @@
             </optional>
             <text/>
           </element>
-        </optional>
-        <optional>
+        </zeroOrMore>
+        <zeroOrMore>
           <element name="dc:publisher">
             <text/>
           </element>
-        </optional>
+        </zeroOrMore>
         <zeroOrMore>
           <element name="dc:contributor">
             <text/>
           </element>
         </zeroOrMore>
-        <optional>
+        <zeroOrMore>
           <element name="dc:rights">
             <text/>
           </element>
-        </optional>
-        <optional>
+        </zeroOrMore>
+        <zeroOrMore>
           <element name="dc:date">
             <text/>
           </element>
-        </optional>
-        <optional>
+        </zeroOrMore>
+        <oneOrMore>
           <element name="dc:language">
             <text/>
           </element>
-        </optional>
-        <optional>
+        </oneOrMore>
+        <zeroOrMore>
+          <element name="dc:format">
+            <text/>
+          </element>
+        </zeroOrMore>
+        <zeroOrMore>
           <element name="dc:description">
             <text/>
           </element>
-        </optional>
+        </zeroOrMore>
         <zeroOrMore>
           <element name="dc:subject">
+            <text/>
+          </element>
+        </zeroOrMore>
+        <zeroOrMore>
+          <element name="dc:relation">
+            <text/>
+          </element>
+        </zeroOrMore>
+        <zeroOrMore>
+          <element name="dc:source">
+            <text/>
+          </element>
+        </zeroOrMore>
+        <zeroOrMore>
+          <element name="dc:type">
+            <text/>
+          </element>
+        </zeroOrMore>
+        <zeroOrMore>
+          <element name="dc:coverage">
             <text/>
           </element>
         </zeroOrMore>
@@ -525,6 +550,23 @@
                 </attribute>
               </interleave>
             </choice>
+          </element>
+        </zeroOrMore>
+        <zeroOrMore>
+          <element name="link">
+            <interleave>  
+              <attribute name="href"><text/></attribute>
+              <attribute name="rel"><text/></attribute>
+              <optional>
+                <attribute name="properties"><text/></attribute>
+              </optional>
+              <optional>
+                <attribute name="refines"><text/></attribute>
+              </optional>
+              <optional>
+                <attribute name="media-type"><text/></attribute>
+              </optional>
+            </interleave>
           </element>
         </zeroOrMore>
       </interleave>
