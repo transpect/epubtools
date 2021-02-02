@@ -1775,11 +1775,8 @@
                         ]" 
                 mode="export-chunk-with-surroundings export-chunk-subtree">
     <xsl:copy copy-namespaces="no">
-      <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:element name="a">
-        <xsl:attribute name="id" select="generate-id()"/>
-      </xsl:element>
-      <xsl:apply-templates select="node()" mode="#current"/>
+      <xsl:attribute name="id" select="generate-id()"/>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
     </xsl:copy>
   </xsl:template>
   
@@ -1797,9 +1794,7 @@
     priority="-0.6" mode="export-chunk-with-surroundings export-chunk-subtree mobi-htm">
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:element name="a">
-        <xsl:attribute name="id" select="generate-id()"/>
-      </xsl:element>
+      <xsl:attribute name="id" select="(@id, generate-id())[1]"/>
       <xsl:apply-templates mode="#current"/>
     </xsl:copy>
   </xsl:template>
@@ -1822,9 +1817,7 @@
     mode="export-chunk-with-surroundings export-chunk-subtree mobi-htm">
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:element name="a">
-        <xsl:attribute name="id" select="generate-id()"/>
-      </xsl:element>
+      <xsl:attribute name="id" select="generate-id()"/>
       <xsl:apply-templates mode="#current"/>
     </xsl:copy>
   </xsl:template>
