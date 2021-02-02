@@ -1804,9 +1804,16 @@
     priority="-0.65" mode="export-chunk-with-surroundings export-chunk-subtree mobi-htm">
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*" mode="#current"/>
-      <xsl:element name="a">
+      <xsl:choose>
+        <xsl:when test="local-name() = ('a', 'ul', 'dl', 'ol', 'table', 'tbody', 'tr', 'thead', 'tfoot', 'img', 'hgroup', 'pre')">
+          <xsl:attribute name="id" select="generate-id()"/>
+        </xsl:when>
+        <xsl:otherwise>
+        <xsl:element name="a">
         <xsl:attribute name="id" select="generate-id()"/>
       </xsl:element>
+      </xsl:otherwise>
+      </xsl:choose>
       <xsl:apply-templates mode="#current"/>
     </xsl:copy>
   </xsl:template>
