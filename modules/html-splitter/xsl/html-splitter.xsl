@@ -14,7 +14,7 @@
   xmlns:mml="http://www.w3.org/1998/Math/MathML"
   xmlns="http://www.w3.org/1999/xhtml"
   version="2.0"
-  exclude-result-prefixes="html opf xs ncx tr smil dc epub svg dtb mml">
+  exclude-result-prefixes="html opf xs ncx tr smil dc epub svg dtb mml xlink">
 
 	<!-- create references between smil and html chunks -->
 	<xsl:include href="media-overlay.xsl"/>
