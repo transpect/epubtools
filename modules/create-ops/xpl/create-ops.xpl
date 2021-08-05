@@ -75,6 +75,7 @@
   <p:option name="convert-svg-cover" select="'false'"  cx:type="xs:string" required="false"/>
   
   <p:import href="../../html-splitter/xpl/html-splitter.xpl"/>
+  <p:import href="../../fontsubsetter/xpl/fontsubsetter.xpl"/>
   
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
   <p:import href="http://transpect.io/calabash-extensions/image-props-extension/image-identify-declaration.xpl"/>
