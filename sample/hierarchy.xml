@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<!-- see epub-config.xml for a more elaborate and better documented sample -->
 <hierarchy media-type="application/xhtml+xml" max-population="40" max-text-length="200000">
   <unconditional-split elt="div" attr="class" attval="white" />
   <unconditional-split elt="h1" />

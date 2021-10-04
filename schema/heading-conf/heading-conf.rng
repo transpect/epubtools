@@ -37,6 +37,8 @@
         <ref name="anonymous-division-title"/>
       </optional>
       <interleave>
+        <a:documentation>Please look at ../sample/epub-config.xml for a discussion about precedence in case
+        two of the following conf items match the same content element.</a:documentation>
         <zeroOrMore>
           <ref name="unconditional-split"/>
         </zeroOrMore>
@@ -51,6 +53,9 @@
   </define>
   
   <define name="max-text-length">
+    <a:documentation>Can be used on hierarchy or, as override, on a child element of hierarchy. If used as override 
+      attribute, not only a potential max-text-length setting on the the first matching child will be taken into account,
+      but the first max-text-length setting that is found on any matching conf items.</a:documentation>
     <attribute name="max-text-length">
       <data type="integer"/>
     </attribute>

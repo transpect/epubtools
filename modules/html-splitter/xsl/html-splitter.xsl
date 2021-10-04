@@ -16,6 +16,20 @@
   version="2.0"
   exclude-result-prefixes="html opf xs ncx tr smil dc epub svg dtb mml xlink">
 
+  <!-- Standalone Saxon invocation:
+    First invoke an XProc-based conversion with debugging enabled. 
+    Then, from the project directory that contains the project’s catalog/catalog.xml:
+    saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl \
+          -s:any.xml \
+          collection-uri=file:/$(cygpath.exe -ma ../path/to/debug-dir/epubtools/html-splitter/base/splitter-input.catalog.xml) \
+          -o:x.xml \
+          debug=yes \
+          debug-dir-uri=file:/$(cygpath.exe -ma debug) \
+          -it:main
+    Debugging the Saxon invocation is optional.
+    any.xml means that the source file given in splitter-input.catalog.xml has precedence and you can supply any XML file as source.
+    Instead of using cygpath, you can use readlink -f on GNU systems, or you can compute URIs yourself. -->
+
 	<!-- create references between smil and html chunks -->
 	<xsl:include href="media-overlay.xsl"/>
 
@@ -495,10 +509,11 @@
         <xsl:attribute name="id" select="generate-id()"/>
         <xsl:attribute name="tr-source-element-without-id-attribute" select="'true'"/>
       </xsl:if>
+      <xsl:variable name="conf-item-candidates" as="element(*)+"
+        select="$heading-conf/*[tr:signature-from-conf(.) = tr:signature-from-doc(current())]"/>
       <xsl:variable name="corresponding-conf-items" as="element()+">
-        <xsl:for-each-group select="$heading-conf/*[tr:signature-from-conf(.) = tr:signature-from-doc(current())]"
-          group-by="name()">
-          <!-- For each group (there may be two: unconditional-split and heading) return the first
+        <xsl:for-each-group select="$conf-item-candidates" group-by="name()">
+          <!-- For each group (there may be three: unconditional-split, conditional-split, and heading) return the first
                item after they've been sortet by hash length. This is the most specific element of each category.
                This approach seems a bit clumsy. -->
           <xsl:variable name="conf-signatures" as="xs:string+">
@@ -523,9 +538,20 @@
           <xsl:attribute name="tr-exclude-from-nav" select="'tr-exclude-from-nav'"/>  
         </xsl:if>
       </xsl:if>
-      <xsl:for-each select="$corresponding-conf-items/@max-text-length">
-        <xsl:attribute name="tr-max-text-length" select="."/>
-      </xsl:for-each>
+      <!-- While the topmost matching item is selected as corresponding conf item, the max-text-length setting may
+        also be attached to a non-winning conf item candidate. For example, if the content contains h2.chapter-level.ref-list,
+        the item <heading elt="h2" attr="class" attval="chapter-level" level="4"/> in line 48 might win over 
+        <heading elt="h2" attr="class" attval="ref-list" level="2" max-text-length="70000"/> in line 62.
+        Still, if the h2 element also has the class 'ref-list', the latter conf item’s max-text-length should be 
+        used (unless the former also specifies max-text-length).
+      -->
+      <xsl:variable name="max-text-length-override" as="attribute(max-text-length)?" 
+        select="($corresponding-conf-items/@max-text-length, $conf-item-candidates/@max-text-length)[1]"/>
+      <!--<xsl:message select="'RRRRRRRRRRRR ', $max-text-length-override, 
+        string-join(for $i in $conf-item-candidates return tr:signature-from-conf($i), '&#xa;  ')"/>-->
+      <xsl:if test="exists($max-text-length-override)">
+        <xsl:attribute name="tr-max-text-length" select="string($max-text-length-override)"/>
+      </xsl:if>
       <xsl:choose>
         <xsl:when test="$split-for">
           <xsl:attribute name="tr-split-delegation-to" select="$split-for"/>
@@ -600,7 +626,13 @@
       </xsl:choose>
     </xsl:if>
     <!-- For a specification that pertains to a specific class, issue the fully qualified specification in any case:  -->
-    <xsl:sequence select="string-join((if ($conf-item/@elt) then concat('elt=', $conf-item/@elt) else (), $conf-item[@attr = ('class', 'epub:type', 'id')]/(@attr, @attval)), '__')"/>
+    <xsl:sequence select="string-join((if ($conf-item/@elt) 
+                                       then concat('elt=', $conf-item/@elt) 
+                                       else (), 
+                                       $conf-item[@attr = ('class', 'epub:type', 'id')]/(@attr, @attval)
+                                      ),
+                                      '__'
+                                     )"/>
   </xsl:function>
 
   <xsl:function name="tr:signature-from-doc" as="xs:string+">
@@ -749,6 +781,8 @@
                   select="if ($next-index) 
                           then $same-level-text-offsets[$next-index - 1] - $current-index-offset-at-start
                           else $same-level-text-offsets[last()] - $current-index-offset-at-start"/>
+                <xsl:attribute name="current-index-offset-at-start" select="$current-index-offset-at-start"/>
+                <xsl:attribute name="next-index" select="$next-index"/>
                 <xsl:attribute name="text-length" select="$chunk-length"/>
                 <xsl:attribute name="tr-current-index" select="$current-index, $next-index" separator=" "/>
                 <content text-length="{@text-length}"  tr-heading-level="{$level}" tr-origin="B">
@@ -869,14 +903,14 @@
        -->
   <xsl:template match="*[number(@text-length) 
                          le 
-                         number((ancestor::*[@tr-max-text-length][1]/@tr-max-text-length, 
+                         number((ancestor-or-self::*[@tr-max-text-length][1]/@tr-max-text-length, 
                                  $heading-conf/@max-text-length)[1])]/html:content"
     mode="partially-ungroup-to-final-split-points"/>
 
 
-  <xsl:template match="*[number(@text-length) 
+  <xsl:template match="*[number(@text-length)
                          gt 
-                         number((ancestor::*[@tr-max-text-length][1]/@tr-max-text-length, 
+                         number((ancestor-or-self::*[@tr-max-text-length][1]/@tr-max-text-length, 
                                  $heading-conf/@max-text-length)[1])]/html:content"
     mode="partially-ungroup-to-final-split-points">
     <xsl:sequence select=".//html:tr-subsplit"/>

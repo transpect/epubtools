@@ -100,6 +100,16 @@
          'emptyline' or 'asterism' are not reserved words; you may name and implement the classes as you like. -->
     <conditional-split elt="p" attr="class" attval="emptyline" nav="no"/>
     <heading elt="h1"/>
+    <heading elt="h2" attr="class" attval="chapter-level" level="3">
+      <!-- For a h2 element that has both classes, 'chapter-level' and 'index', this conf item wins over the following
+        item. However, the max-text-length setting will be taken from the following conf item since both
+        items match in principle and this one doesn’t specify max-text-length. -->
+      <!-- Specificity calculations for these conf items are done differently than in CSS. As a general rule,
+        the more attributes (class, epub-type, id) are specified, the more specific a conf item matches. 
+        If all are otherwise equal, the longer string value of the serialized attributes wins. If string lengths
+        are equal, the topmost conf item will win. (At least from looking at the splitter XSL code this should 
+        be an accurate description of the rules.) -->
+    </heading>
     <heading elt="h2" attr="class" attval="index" level="2" max-text-length="15000">
       <!-- allow a more fine-grained splitting, in particular for generated content where manual splits 
         cannot be inserted, and/or for HTML with a small text/markup ratio, as might be the case in index
