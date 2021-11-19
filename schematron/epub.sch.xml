@@ -809,21 +809,21 @@
                   return concat('''', normalize-space($d), ''''), ', ') 
       then removed ' [draft]' and removed the items marked as ' [deprecated]' -->
     <let name="epub-types" value="('cover', 'frontmatter', 'bodymatter', 'backmatter', 'volume', 'part', 'chapter', 
-      'subchapter', 'division', 'abstract', 'foreword', 'preface', 'prologue', 'introduction', 'preamble', 'conclusion', 
+      'division', 'abstract', 'foreword', 'preface', 'prologue', 'introduction', 'preamble', 'conclusion', 
       'epilogue', 'afterword', 'epigraph', 'toc', 'toc-brief', 'landmarks', 'loa', 'loi', 'lot', 'lov', 'appendix', 
       'colophon', 'credits', 'keywords', 'index', 'index-headnotes', 'index-legend', 'index-group', 'index-entry-list', 
       'index-entry', 'index-term', 'index-editor-note', 'index-locator', 'index-locator-list', 'index-locator-range', 
       'index-xref-preferred', 'index-xref-related', 'index-term-category', 'index-term-categories', 'glossary', 'glossterm', 
       'glossdef', 'bibliography', 'biblioentry', 'titlepage', 'halftitlepage', 'copyright-page', 'seriespage', 
       'acknowledgments', 'imprint', 'imprimatur', 'contributors', 'other-credits', 'errata', 'dedication', 
-      'revision-history', 'case-study', 'help', 'notice', 'pullquote', 'halftitle', 'fulltitle', 'covertitle', 'title', 
+      'revision-history', 'case-study', 'notice', 'pullquote', 'tip', 'halftitle', 'fulltitle', 'covertitle', 'title', 
       'subtitle', 'label', 'ordinal', 'bridgehead', 'learning-objective', 'learning-objectives', 'learning-outcome', 
       'learning-outcomes', 'learning-resource', 'learning-resources', 'learning-standard', 'learning-standards', 'answer', 
       'answers', 'assessment', 'assessments', 'feedback', 'fill-in-the-blank-problem', 'general-problem', 'qna', 
       'match-problem', 'multiple-choice-problem', 'practice', 'practices', 'question', 'true-false-problem', 'panel', 
-      'panel-group', 'balloon', 'text-area', 'sound-area', 'footnote', 'rearnote', 'footnotes', 'rearnotes', 'biblioref', 
-      'glossref', 'noteref', 'referrer', 'credit', 'keyword', 'topic-sentence', 'concluding-sentence', 'pagebreak', 
-      'page-list', 'table', 'table-row', 'table-cell', 'list', 'list-item', 'figure')"/>
+      'panel-group', 'balloon', 'text-area', 'sound-area', 'footnote', 'endnote', 'footnotes', 'endnotes', 'annoref', 
+      'biblioref', 'glossref', 'noteref', 'backlink', 'credit', 'keyword', 'topic-sentence', 'concluding-sentence', 'pagebreak', 
+      'page-list', 'table', 'table-row', 'table-cell', 'list', 'list-item', 'figure', 'aside')"/>
     <rule context="/c:wrap/html:html[1]/html:body//*[@epub:type]">
       <let name="actual-types" value="tokenize(@epub:type, '\s+')[not(contains(., ':'))]"/>
       <let name="namespaced-types" value="tokenize(@epub:type, '\s+')[contains(., ':')]"/>
@@ -837,7 +837,7 @@
         <span class="srcpath"><xsl:value-of select="for $s in tokenize(@srcpath, '\s+') return concat($source-dir-uri, $s)"/></span>
         epub:type <xsl:value-of select="$wrong-type-string"/> not allowed. Allowed values according to <a 
           xmlns="http://www.w3.org/1999/xhtml" 
-          href="http://www.idpf.org/epub/vocab/structure/">EPUB 3 Structural Semantics Vocabulary</a> (as of 2015-08-26): 
+          href="http://www.idpf.org/epub/vocab/structure/">EPUB 3 Structural Semantics Vocabulary</a> (as of 2019-05-08): 
         <xsl:value-of select="$allowed-type-string"/>.
       </assert>
       <report test="exists($namespaced-types)" 
@@ -901,7 +901,7 @@
     <diagnostic id="epub-type_de" xml:lang="de">epub:type <xsl:value-of select="$wrong-type-string"/> ist nicht zulässig. 
       Zulässige Werte gemäß <a 
           xmlns="http://www.w3.org/1999/xhtml" 
-          href="http://www.idpf.org/epub/vocab/structure/">EPUB 3 Structural Semantics Vocabulary</a> (Stand 2015-08-26): 
+          href="http://www.idpf.org/epub/vocab/structure/">EPUB 3 Structural Semantics Vocabulary</a> (Stand 2019-05-08): 
       <xsl:value-of select="$allowed-type-string"/>.</diagnostic>
   	<diagnostic id="meta-tags_de" xml:lang="de">EPUB Metadaten:<br xmlns="http://www.w3.org/1999/xhtml"/><br xmlns="http://www.w3.org/1999/xhtml"/>
     			<ul xmlns="http://www.w3.org/1999/xhtml">
