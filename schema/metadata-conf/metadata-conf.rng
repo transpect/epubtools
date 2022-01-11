@@ -60,6 +60,9 @@
         <ref name="css-handling"/>
       </optional>
       <optional>
+        <ref name="css-parser"/>
+      </optional>
+      <optional>
         <ref name="page-map-xml"/>
       </optional>
       <optional>
@@ -180,6 +183,21 @@
       </list>
     </attribute>
   </define>
+  
+  <define name="css-parser">
+    <a:documentation>Defaults to 'REx', a generated parser based on an EBNF grammar. Very large CSS documents 
+      seem to challenge REx though. Therefore you may switch to the traditional 'regex' parser.
+      The regex parser supports fewer features though. Background images and fonts seem to be supported.
+     </a:documentation>
+    <attribute name="css-parser">
+      <choice>
+        <value>REx</value>
+        <value>REx-css3</value>
+        <value>regex</value>
+      </choice>
+    </attribute>
+  </define>
+
   <define name="page-map-xml">
     <attribute name="page-map-xml">
       <data type="boolean"/>

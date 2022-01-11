@@ -5,6 +5,7 @@
   format="EPUB3" 
   layout="reflowable" 
   css-handling="regenerated-per-split remove-comments"
+  css-parser="REx"
   html-subdir-name="text" 
   indent="selective"
   font-subset="false"

@@ -111,6 +111,9 @@
     <p:variable name="css-handling" select="(/epub-config/@css-handling, 'regenerated-per-split')[1]">
       <p:pipe port="meta" step="create-ops"/>
     </p:variable>
+    <p:variable name="css-parser" select="(/epub-config/@css-parser, 'REx')[1]">
+      <p:pipe port="meta" step="create-ops"/>
+    </p:variable>
     <p:variable name="css-remove-comments" select="if (contains($css-handling, 'remove-comments')) then 'yes' else 'no'">
       <p:pipe port="meta" step="create-ops"/>
     </p:variable>
@@ -132,6 +135,39 @@
         <p:pipe port="conf" step="create-ops"/>
       </p:input>
     </tr:store-debug>
+    
+    <p:choose name="css-parser-xsl">
+      <p:when test="$css-parser = 'regex'">
+        <p:output port="result" primary="true"/>
+        <p:identity>
+          <p:input port="source">
+            <p:documentation>The traditional regex-based parser. Use if there are performance issues 
+              with large CSS files.</p:documentation>
+            <p:document href="http://transpect.io/css-tools/xsl/css-parser.xsl"/>
+          </p:input>
+        </p:identity>
+      </p:when>
+      <p:when test="$css-parser = 'REx-css3'">
+        <p:output port="result" primary="true"/>
+        <p:identity>
+          <p:input port="source">
+            <p:document href="http://transpect.io/css-tools/xsl/REx_css-parser.xsl"/>
+          </p:input>
+        </p:identity>
+      </p:when>
+      <p:otherwise><!-- default $css-parser='REx' -->
+        <p:output port="result" primary="true"/>
+        <p:identity>
+          <p:input port="source">
+            <p:documentation>This stylesheet overwrites certain css:expand templates or variables.
+              This is done because CSS3 isn't supported completely. In that stylesheet
+              text-decoration and other porperties can be changed to supported values. When CSS3 is
+              supported it might be necessary to use this input port dynamically.</p:documentation>
+            <p:document href="http://transpect.io/css-tools/xsl/css2-1-parser.xsl"/>
+          </p:input>
+        </p:identity>
+      </p:otherwise>
+    </p:choose>
     
     <!-- create svg cover -->
     <p:choose name="create-svg-cover">
@@ -498,9 +534,7 @@
     
     <css:parse name="css-parse0">
       <p:input port="stylesheet">
-        <p:documentation>This stylesheet overwrites certain css:expand templates or variables. This is done because CSS3 isn't supported completely. 
-          In that stylesheet text-decoration and other porperties can be changed to supported values. When CSS3 is supported it might be necessary to use this input port dynamically.</p:documentation>
-        <p:document href="http://transpect.io/css-tools/xsl/css2-1-parser.xsl"/>
+        <p:pipe port="result" step="css-parser-xsl"/>
       </p:input>
       <p:with-option name="debug" select="$debug"/>
       <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
