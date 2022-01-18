@@ -130,7 +130,7 @@
             <tr:charset>
             <xsl:variable name="context" select="."/>
               <xsl:for-each select="$fonts">
-                <xsl:variable name="font-family" select="replace(current()/*:declaration[@property='font-family']/@value,'&#34;','')"/>
+                <xsl:variable name="font-family" select="replace(current()/*:declaration[@property='font-family']/@value,'(&#34;|'')','')"/>
                 <xsl:variable name="font-weight" select="if (current()/*:declaration[@property='font-weight']/@value) 
                                                          then current()/*:declaration[@property='font-weight']/@value
                                                          else 'normal'"/>
@@ -142,10 +142,9 @@
                 <xsl:variable name="font-weight-regex" select="if (matches($font-weight,'normal')) then '^$' else $font-weight"/>
                 <xsl:variable name="font-style-regex" select="if (matches($font-style,'normal')) then '^$' else $font-style"/>
                 
-<!--                <xsl:message select="$font-family,$font-weight, $font-style"></xsl:message>-->
+<!--            <xsl:message select="'########4: ', $font-family, ':&#xa;', $font-weight, $font-style"></xsl:message>-->
 
-                <xsl:variable name="elements" select="(collection()[1]//*[matches(@css:font-family,$font-family)]
-                                                                         )"/>
+                <xsl:variable name="elements" select="(collection()[1]//*[@css:font-family[matches(.,$font-family)]])" as="element(*)*"/>
 <!--/descendant-or-self::*[matches(@css:font-weight,$font-weight-regex) 
                                                                                         and matches(@css:font-style,$font-style-regex)]-->
               <tr:chars>
@@ -154,7 +153,7 @@
                 <xsl:attribute name="font-family" select="$font-family"/>
                 <xsl:attribute name="font-weight" select="$font-weight"/>
                 <xsl:attribute name="font-style" select="$font-style"/>
-                <!--<xsl:message select="count($elements), current()/*:declaration[@property='src']/*:resource[1][not(@format='woff')]/@local-href"/>-->
+<!--                <xsl:message select="'~~~~~~5: ', count($elements)(:, current()/*:declaration[@property='src']/*:resource[1][not(@format='woff')]/@local-href:)"/>-->
                 <xsl:variable name="chars"  select="distinct-values(string-to-codepoints(string-join($elements/descendant::text(),'')))"/>
                 <xsl:for-each select="$chars">
                   <xsl:sequence select="tr:int-to-hex(xs:integer(.))"/><xsl:text>,</xsl:text>
