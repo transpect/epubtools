@@ -252,6 +252,8 @@
     </p:input>
   </p:label-elements>
   
+  <p:rename match="@*:srcpath" new-name="srcpath"/>
+  
   <tr:store-debug pipeline-step="epubtools/add-srcpaths-to-input" extension="xhtml">
     <p:with-option name="active" select="$debug"/>
     <p:with-option name="base-uri" select="$debug-dir-uri"/>
