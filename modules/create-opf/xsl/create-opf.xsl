@@ -129,9 +129,9 @@
             <xsl:variable name="text" select="some $t in $html-content//*:body satisfies $t[normalize-space()][string-length(.) gt 10]"/>
             <xsl:variable name="images" select="some $i in $html-content//*:body//* satisfies $i[self::*:img][not(matches(@src, 'logo|cover', 'i'))]
                                                                                                               [not(@role = 'presentation')]"/>
-            <xsl:variable name="image-alts" select="every $ia in $html-content//*:body//*:img satisfies $ia[@alt[string-length(normalize-space(.)) gt 5]
+            <xsl:variable name="image-alts" select="exists($html-content//*:body//*:img) and (every $ia in $html-content//*:body//*:img satisfies $ia[@alt[string-length(normalize-space(.)) gt 5]
                                                                                                                 [not(matches(substring-before($ia/@src, '.'), substring-before(normalize-space(.), '.'), 'i'))]
-                                                                                                            or @role = 'presentation']"/>
+                                                                                                            or @role = 'presentation'])"/>
   
             <xsl:if test="not(/epub-config/metadata/meta/@property = 'schema:accessMode')">
               <xsl:if test="$text"><meta property="schema:accessMode">textual</meta></xsl:if>
@@ -195,6 +195,8 @@
 
             <!-- formulas described-->
             <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'describedMath']) 
+                          and 
+                          (some $m in $html-content//* satisfies $m[self::math[namespace-uri(.)= 'http://www.w3.org/1998/Math/MathML']])
                           and 
                           (every $m in $html-content//math[namespace-uri(.)= 'http://www.w3.org/1998/Math/MathML'] satisfies $m[@alttext[normalize-space()]])">
               <meta property="schema:accessibilityFeature">describedMath</meta>
