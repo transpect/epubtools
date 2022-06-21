@@ -38,7 +38,7 @@
   <!-- EPUB2 | EPUB3 | MOBI | KF8 | FIXED-Apple -->
   <p:option name="terminate-on-error" select="'yes'"/>
   <p:option name="use-svg" select="'yes'"/> 
-  <p:option name="create-a11y-meta" select="'yes'" required="false"/>
+  <p:option name="create-a11y-meta" select="'yes'" cx:type="xsd:string" required="false"/>
   <p:option name="debug" select="'no'"/>
   <p:option name="debug-dir-uri" select="'debug'"/>
   

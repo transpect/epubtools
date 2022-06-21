@@ -17,7 +17,7 @@
   <xsl:param name="use-svg" select="'yes'"/>
   <xsl:param name="terminate-on-error" select="'yes'"/>
   <xsl:param name="html-subdir-name" as="xs:string"/>
-  <xsl:param name="create-a11y-meta" select="'yes'"/>
+  <xsl:param name="create-a11y-meta" select="'yes'" as="xs:string""/>
 
   <xsl:template match="/">
     <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
@@ -120,7 +120,7 @@
           </xsl:if>
 
           <xsl:message select="'### Generate Accessibility meta tags: ', $create-a11y-meta"/>
-          <xsl:if test="(xs:boolean($create-a11y-meta) = true()) or ($create-a11y-meta = ('yes', 'true'))">
+          <xsl:if test="$create-a11y-meta = ('yes', 'true')">
             <xsl:variable name="html-content" as="element(*)*" select="collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')][not(matches(@xml:base, 'cover|toc|ncx', 'i'))]"/>
             <xsl:variable name="nav-html" as="element(*)*" select="collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')][matches(@xml:base, 'toc|ncx', 'i')]"/>
             <xsl:variable name="aud-video" select="some $av in $html-content//*:body//* satisfies $av[self::*:video|self::*:audio]"/>
