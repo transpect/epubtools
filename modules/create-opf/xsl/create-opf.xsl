@@ -17,6 +17,7 @@
   <xsl:param name="use-svg" select="'yes'"/>
   <xsl:param name="terminate-on-error" select="'yes'"/>
   <xsl:param name="html-subdir-name" as="xs:string"/>
+  <xsl:param name="create-a11y-meta" select="'yes'"/>
 
   <xsl:template match="/">
     <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
@@ -117,7 +118,121 @@
           <xsl:if test="not(/epub-config/metadata/meta/@property = 'ibooks:specified-fonts')">
             <meta property="ibooks:specified-fonts">true</meta>
           </xsl:if>
+
+          <xsl:message select="'### Generate Accessibility meta tags: ', $create-a11y-meta"/>
+          <xsl:if test="(xs:boolean($create-a11y-meta) = true()) or ($create-a11y-meta = ('yes', 'true'))">
+            <xsl:variable name="html-content" as="element(*)*" select="collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')][not(matches(@xml:base, 'cover|toc|ncx', 'i'))]"/>
+            <xsl:variable name="nav-html" as="element(*)*" select="collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')][matches(@xml:base, 'toc|ncx', 'i')]"/>
+            <xsl:variable name="aud-video" select="some $av in $html-content//*:body//* satisfies $av[self::*:video|self::*:audio]"/>
+            <xsl:variable name="audio" select="some $av in $html-content//*:body//* satisfies $av[self::*:audio]"/>
+            <xsl:variable name="video" select="some $av in $html-content//*:body//* satisfies $av[self::*:video]"/>
+            <xsl:variable name="text" select="some $t in $html-content//*:body satisfies $t[normalize-space()][string-length(.) gt 10]"/>
+            <xsl:variable name="images" select="some $i in $html-content//*:body//* satisfies $i[self::*:img][not(matches(@src, 'logo|cover', 'i'))]
+                                                                                                              [not(@role = 'presentation')]"/>
+            <xsl:variable name="image-alts" select="every $ia in $html-content//*:body//*:img satisfies $ia[@alt[string-length(normalize-space(.)) gt 5]
+                                                                                                                [not(matches(substring-before($ia/@src, '.'), substring-before(normalize-space(.), '.'), 'i'))]
+                                                                                                            or @role = 'presentation']"/>
+  
+            <xsl:if test="not(/epub-config/metadata/meta/@property = 'schema:accessMode')">
+              <xsl:if test="$text"><meta property="schema:accessMode">textual</meta></xsl:if>
+              <xsl:if test="$images or $video"><meta property="schema:accessMode">visual</meta></xsl:if>
+              <xsl:if test="$aud-video"><meta property="schema:accessMode">auditory</meta></xsl:if>
+            </xsl:if>
+            <xsl:if test="not(/epub-config/metadata/meta/@property = 'schema:accessibilityHazard')">
+              <!-- if video or audio content is available we cannot analyze whether hazards are contained -->
+              <xsl:choose>
+                <xsl:when test="not($audio) and not($video)"><meta property="schema:accessibilityHazard">none</meta></xsl:when>
+                <xsl:when test="not($video)"><meta property="schema:accessibilityHazard">noFlashingHazard,noMotionSimulationHazard</meta></xsl:when>
+              </xsl:choose>
+            </xsl:if>
+            <xsl:if test="not(/epub-config/metadata/meta/@property = 'schema:accessModeSufficient')">
+  
+              <xsl:choose>   
+                <xsl:when test="$text and (every $e in $html-content//*:body//* satisfies $e[not(self::*:img|self::*:video|self::*:audio) or (self::*:img) and $image-alts])">
+                  <!-- only text content or if images are contained those are decorational or have a description -->
+                  <meta property="schema:accessModeSufficient">textual</meta>
+                </xsl:when>
+                <xsl:when test="($images and $text) and not($image-alts) and not($audio)">
+                   <!-- visual access needed -->
+                  <meta property="schema:accessModeSufficient">textual,visual</meta>
+                </xsl:when>
+                <xsl:when test="($images or $video) and not($image-alts) and not($audio) and not($text)">
+                   <!-- visual access needed -->
+                  <meta property="schema:accessModeSufficient">visual</meta>
+                </xsl:when>
+                <xsl:when test="$text and ($video or ($audio and $images))">
+                   <!-- auditory access needed -->
+                  <meta property="schema:accessModeSufficient">textual,visual,auditory</meta>
+                </xsl:when>
+                <xsl:when test="$text and $audio and (not($images) or $image-alts) and not($video)">
+                   <!-- auditory access needed -->
+                  <meta property="schema:accessModeSufficient">textual,auditory</meta>
+                </xsl:when>
+                <xsl:when test="not($text) and $audio and not($images) and not($video)">
+                   <!-- auditory access needed -->
+                  <meta property="schema:accessModeSufficient">auditory</meta>
+                </xsl:when>
+              </xsl:choose>
+            </xsl:if>
+            <xsl:variable name="css-styles" select="string-join($html-content//*:body//@style, ' ')" as="xs:string?"/>
+            <xsl:variable name="css" select="string-join((collection()/cx:document[@name='wrap-chunks']/c:data[ends-with(@xml:base, '.css')], $css-styles), ' ')" as="xs:string?"/>
+  
+            <!-- accessibilityFeature -->
+
+            <!-- only relative units used in CSS. also not texts should be available as images (like tables etc.) -->
+            <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'displayTransformability']) 
+                          and 
+                          not(matches($css, '[\d\s](px|pt|cm|Q|in|pc)[\s;\}]'))">
+              <meta property="schema:accessibilityFeature">displayTransformability</meta>
+            </xsl:if>
+
+            <!-- equations as MathML-->
+            <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'MathML']) 
+                          and 
+                          $html-content//*[namespace-uri(.)= 'http://www.w3.org/1998/Math/MathML']">
+                          <meta property="schema:accessibilityFeature">MathML</meta>
+            </xsl:if>
+
+            <!-- formulas described-->
+            <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'describedMath']) 
+                          and 
+                          (every $m in $html-content//math[namespace-uri(.)= 'http://www.w3.org/1998/Math/MathML'] satisfies $m[@alttext[normalize-space()]])">
+              <meta property="schema:accessibilityFeature">describedMath</meta>
+            </xsl:if>
+
+            <!-- all images decorational or have alt text -->
+            <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'alternativeText']) 
+                          and $image-alts">
+              <meta property="schema:accessibilityFeature">alternativeText</meta>
+            </xsl:if>
+
+            <!-- is not yet included, only proposed-->
+            <!--<xsl:if test="$nav-html//*:nav[@epub:type='page-list']"><meta property="schema:accessibilityFeature">pageNavigation</meta></xsl:if>-->
+
+            <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'printPageNumbers']) 
+                          and 
+                          exists($html-content//*[@role='doc-pagebreak']) 
+                          and 
+                          (count($nav-html//*:nav[@epub:type='page-list']//*:li) = count($html-content//*[@role='doc-pagebreak']))">
+              <meta property="schema:accessibilityFeature">printPageNumbers</meta>
+            </xsl:if>
+
+            <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'tableOfContents']) 
+                          and 
+                          $nav-html//*:nav[@epub:type='toc'][descendant::*:li] 
+                          and
+                          $html-content[descendant::*:h1]
+                          and 
+                          (count($nav-html//*:nav[@epub:type='toc'][descendant::*:li]) gt count($html-content//*:h1))">
+              <meta property="schema:accessibilityFeature">tableOfContents</meta></xsl:if>
+            <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'index']) 
+                          and $html-content[descendant::*[@epub:type= 'index']]">
+              <meta property="schema:accessibilityFeature">index</meta>
+            </xsl:if>
+            <!-- other not yet handled or not automatically to handle Features: highContrastDisplay, longDescription, readingOrder, structuralNavigation -->
+           </xsl:if>
         </xsl:if>
+
         <xsl:if test="collection()/epub-config/cover/@href ne ''">
           <!-- This fails to match the cover file id. Exclude it for EPUB3 since there are other mechanisms?
                Or fix it? -->

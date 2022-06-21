@@ -37,7 +37,8 @@
   <p:option name="target" select="'EPUB2'" cx:type="xsd:string"/>
   <!-- EPUB2 | EPUB3 | MOBI | KF8 | FIXED-Apple -->
   <p:option name="terminate-on-error" select="'yes'"/>
-  <p:option name="use-svg" select="'yes'"/>
+  <p:option name="use-svg" select="'yes'"/> 
+  <p:option name="create-a11y-meta" select="'yes'" required="false"/>
   <p:option name="debug" select="'no'"/>
   <p:option name="debug-dir-uri" select="'debug'"/>
   
@@ -60,6 +61,7 @@
     <p:with-param name="layout" select="$layout"/>
     <p:with-param name="terminate-on-error" select="$terminate-on-error"/>
     <p:with-param name="html-subdir-name" select="$html-subdir-name"/>
+    <p:with-param name="create-a11y-meta" select="$create-a11y-meta"/>
     <p:input port="stylesheet">
       <p:document href="../xsl/create-opf.xsl"/>
     </p:input>

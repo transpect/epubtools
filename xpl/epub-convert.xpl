@@ -104,6 +104,9 @@
   </p:option>
   <p:option name="debug" select="'no'" cx:type="xs:string"/>
   <p:option name="use-svg" select="''" cx:type="xs:string" required="false"/>
+  <p:option name="create-a11y-meta" select="'yes'" required="false">
+    <p:documentation>Default is yes. Will create accessibility meta tags in EPUB3 if set to 'yes' or 'true' or true(). </p:documentation>
+  </p:option>
   <p:option name="debug-dir-uri" select="'debug'" cx:type="xs:string"/>
   <p:option name="status-dir-uri" select="'status'" cx:type="xs:string"/>
   <p:option name="id-in-report-heading" select="'false'">
@@ -160,6 +163,11 @@
       <p:pipe port="source" step="epub-convert"/>
     </p:with-option>
   </tr:file-uri>
+  
+  <tr:store-debug pipeline-step="epubtools/file-uri" extension="xml">
+    <p:with-option name="active" select="$debug"/>
+    <p:with-option name="base-uri" select="$debug-dir-uri"/>
+  </tr:store-debug>  
   
   <p:choose name="missing-xml-base-choose">
     <p:documentation>We could have done the check in Schematron. The (small) advantage of doing it here is
@@ -238,7 +246,7 @@
     <p:documentation>Make base uri explicit if it isn’t already.</p:documentation>
   </p:label-elements>-->
   
-  <p:label-elements attribute="srcpath" replace="false" name="srcpaths"
+  <p:label-elements attribute="srcpath" replace="false" name="srcpaths" cx:depends-on="create-ocf"
     match="*[local-name() = ( 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
                               'div', 'nav', 'section', 'main',
                               'ol', 'ul', 'li', 'dd', 'dt', 
@@ -308,6 +316,7 @@
     <p:with-option name="target" select="$target-format"/>
     <p:with-option name="terminate-on-error" select="$terminate-on-error"/>
     <p:with-option name="use-svg" select="$wrap-cover-in-svg"/>
+    <p:with-option name="create-a11y-meta" select="$create-a11y-meta"/>
     <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"><p:empty/></p:with-option>
   </epub:create-opf>
