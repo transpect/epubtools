@@ -17,7 +17,7 @@
   <xsl:param name="use-svg" select="'yes'"/>
   <xsl:param name="terminate-on-error" select="'yes'"/>
   <xsl:param name="html-subdir-name" as="xs:string"/>
-  <xsl:param name="create-a11y-meta" select="'yes'" as="xs:string""/>
+  <xsl:param name="create-a11y-meta" select="'yes'" as="xs:string"/>
 
   <xsl:template match="/">
     <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 

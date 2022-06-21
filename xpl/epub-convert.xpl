@@ -104,7 +104,7 @@
   </p:option>
   <p:option name="debug" select="'no'" cx:type="xs:string"/>
   <p:option name="use-svg" select="''" cx:type="xs:string" required="false"/>
-  <p:option name="create-a11y-meta" select="'yes'" cx:type="xsd:string" required="false">
+  <p:option name="create-a11y-meta" select="'yes'" cx:type="xs:string" required="false">
     <p:documentation>Default is yes. Will create accessibility meta tags in EPUB3 if set to 'yes' or 'true' or true(). </p:documentation>
   </p:option>
   <p:option name="debug-dir-uri" select="'debug'" cx:type="xs:string"/>
