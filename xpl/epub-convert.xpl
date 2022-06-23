@@ -288,6 +288,7 @@
     </p:with-option>
     <p:with-option name="target" select="$target-format"/>
     <p:with-option name="use-svg" select="$wrap-cover-in-svg"/>
+    <p:with-option name="create-a11y-meta" select="$create-a11y-meta"/>
     <p:with-option name="terminate-on-error" select="$terminate-on-error"/>
     <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"><p:empty/></p:with-option>

@@ -57,6 +57,12 @@
   <p:option name="debug" required="false" select="'no'"/>
   <p:option name="debug-dir-uri" required="false" select="'debug'"/>
   <p:option name="status-dir-uri" select="'status'" cx:type="xs:string"/>
+  <p:option name="create-a11y-meta" select="'yes'" cx:type="xs:string">
+    <p:documentation>
+      In the context of tr:create-ops, this adds to elements with @epub:type 
+      attribute a matching ARIA @role attribute.
+    </p:documentation>
+  </p:option>
   <p:option name="create-font-subset" select="'false'"  cx:type="xs:string" required="false">
     <p:documentation>
       With this option set to 'true', all fonts will be subsetted. Of each font a 
@@ -368,6 +374,37 @@
     <p:delete match="/html:html/@version | /html:html/html:head/@profile" name="delete-dtd-artifacts">
       <p:documentation>Possible DTD parsing artifacts</p:documentation>
     </p:delete>
+    
+    <p:choose name="epub-type2aria-role">
+      <p:when test="$create-a11y-meta eq 'yes'">
+        <p:xslt>
+          <p:input port="stylesheet">
+            <p:inline>
+              <xsl:stylesheet version="2.0" xmlns:epub="http://www.idpf.org/2007/ops">
+                <xsl:import href="http://transpect.io/epubtools/modules/create-ops/xsl/functions.xsl"/>
+                
+                <xsl:template match="*[not(@role)]/@epub:type">
+                  <xsl:copy-of select="."/>
+                  <xsl:sequence select="epub:type2aria(., parent::*)"/>
+                </xsl:template>
+                
+                <xsl:template match="@*|*">
+                  <xsl:copy>
+                    <xsl:apply-templates select="@*, node()"/>
+                  </xsl:copy>
+                </xsl:template>
+              </xsl:stylesheet>
+            </p:inline>
+          </p:input>
+          <p:input port="parameters">
+            <p:empty/>
+          </p:input>
+        </p:xslt>
+      </p:when>
+      <p:otherwise>
+        <p:identity/>
+      </p:otherwise>
+    </p:choose>
     
     <p:choose name="conditionally-check-hrefs">
       <p:xpath-context>
