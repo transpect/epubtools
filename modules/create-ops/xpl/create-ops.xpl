@@ -388,7 +388,7 @@
                   <xsl:sequence select="epub:type2aria(., parent::*)"/>
                 </xsl:template>
                 
-                <xsl:template match="@*|*">
+                <xsl:template match="@*|node()">
                   <xsl:copy>
                     <xsl:apply-templates select="@*, node()"/>
                   </xsl:copy>
