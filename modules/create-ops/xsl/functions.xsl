@@ -153,7 +153,6 @@
     <entry epub:type="conclusion" aria-role="doc-conclusion" applicable="section"/>
     <entry epub:type="contributors" aria-role="" applicable=""/>
     <entry epub:type="copyright-page" aria-role="" applicable=""/>
-    <entry epub:type="cover" aria-role="" applicable=""/>
     <entry epub:type="cover" aria-role="doc-cover" applicable="img"/>
     <entry epub:type="covertitle" aria-role="" applicable=""/>
     <entry epub:type="credit" aria-role="doc-credit" applicable="section"/>
