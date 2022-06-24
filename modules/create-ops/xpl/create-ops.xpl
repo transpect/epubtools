@@ -376,7 +376,7 @@
     </p:delete>
     
     <p:choose name="epub-type2aria-role">
-      <p:when test="$create-a11y-meta eq 'yes' and $target eq 'EPUB3'">
+      <p:when test="($create-a11y-meta = ('yes', 'true')) and $target eq 'EPUB3'">
         <p:xslt>
           <p:input port="stylesheet">
             <p:inline>
