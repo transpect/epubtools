@@ -1945,7 +1945,7 @@
   <xsl:template match="@xml:base" mode="resolve-refs"/>
 
   <!-- should be [not(html:nav[@epub:type = 'toc'])] but people are using other stuff in EPUB2 production -->
-  <xsl:template match="html:body[count(*/@epub:type) = 1][*[1]/@epub:type][not(*[@epub:type = 'toc'])]" mode="resolve-refs">
+  <xsl:template match="html:body[count(*/@epub:type) = 1][*[1][@epub:type][not(self::html:section|self::html:div)]][not(*[@epub:type = 'toc'])]" mode="resolve-refs">
     <!-- If there is only one element with an epub:type, and if it is the first (incl.: only) child
       of body, assume that its epub:type applies to the whole chunk and merge its epub:type with
     the body’s epub:type -->
@@ -1956,12 +1956,14 @@
     </xsl:copy>
   </xsl:template>
   
+  
   <!-- should be self::html:nav[@epub:type = 'toc'] but people are using other stuff in EPUB2 production -->
-  <xsl:template match="html:body[count(*/@epub:type) = 1][*[1]/@epub:type]/*[@epub:type][not(self::*[@epub:type = 'toc'])]" mode="resolve-refs">
+  <xsl:template match="html:body[count(*/@epub:type) = 1][*[1][@epub:type][not(self::html:section|self::html:div)]]/*[@epub:type][not(self::*[@epub:type = 'toc'])]" mode="resolve-refs">
     <xsl:copy>
       <xsl:apply-templates select="@* except @epub:type, node()" mode="#current"/>
     </xsl:copy>
   </xsl:template>
+  
 
   <xsl:function name="tr:abbreviate-for-toc" as="xs:string?">
     <xsl:param name="content" as="xs:string?"/>
