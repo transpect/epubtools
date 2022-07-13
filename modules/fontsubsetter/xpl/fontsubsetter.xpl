@@ -183,16 +183,19 @@
       <p:input port="source">
         <p:pipe port="current" step="viewport-chars"/>
       </p:input>
-      <p:with-option name="attribute-value" select="c:file/@size idiv 1000">
+      <p:with-option name="attribute-value" select="if (c:file) then c:file/@size idiv 1000 else 0">
         <p:pipe port="result" step="font-file-info"/>
       </p:with-option>
     </p:add-attribute>
 
     <p:add-attribute match="tr:chars" attribute-name="create-subset">
       <p:with-option name="attribute-value"
-		     select="if( xs:integer(tr:chars/@size-kb) gt xs:integer($min-file-size-kb) ) 
-			     then 'true' 
-			     else 'false'">
+		     select="if (xs:integer(tr:chars/@size-kb) gt xs:integer($min-file-size-kb)
+                     and
+                     tr:chars[normalize-space()]
+                    ) 
+      			     then 'true' 
+      			     else 'false'">
       </p:with-option>
     </p:add-attribute>
     
@@ -206,7 +209,7 @@
   </tr:store-debug>
   
   <p:for-each name="chars">
-    <p:iteration-source select="//tr:chars"/>
+    <p:iteration-source select="//tr:chars[xs:integer(@size-kb) gt 0 (:avoid error with non existing fonts:)]"/>
     <p:variable name="script-path" select="/c:result/@os-path">
       <p:pipe port="result" step="script-path"/>
     </p:variable>
@@ -223,7 +226,7 @@
           </p:with-option>
         </p:exec>
         <cx:message>
-          <p:with-option name="message" select="concat('[fontsubsetter] ', .)">
+          <p:with-option name="message" select="concat('[fontsubsetter] ', .">
             <p:pipe port="result" step="subset"/>
           </p:with-option>
         </cx:message>
