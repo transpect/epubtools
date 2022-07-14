@@ -226,7 +226,7 @@
           </p:with-option>
         </p:exec>
         <cx:message>
-          <p:with-option name="message" select="concat('[fontsubsetter] ', .">
+          <p:with-option name="message" select="concat('[fontsubsetter] ', .)">
             <p:pipe port="result" step="subset"/>
           </p:with-option>
         </cx:message>
