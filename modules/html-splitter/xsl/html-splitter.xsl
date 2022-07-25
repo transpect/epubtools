@@ -1307,7 +1307,7 @@
       <ol>
         <xsl:for-each select="$pgl/html:page[normalize-space(@name)]">
           <li>
-            <a href="{@href}" srcpath="pgl_{generate-id()}">
+            <a href="{$html-prefix}{@href}" srcpath="pgl_{generate-id()}">
               <xsl:value-of select="@name"/>
             </a>
           </li>
