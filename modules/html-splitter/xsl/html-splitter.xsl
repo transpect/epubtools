@@ -1259,7 +1259,7 @@
           <xsl:otherwise>
             <!-- so that the generated cover will be sorted between cover 
               (sequence # 1) and the remainder of the exported files -->
-            <meta name="sequence" content="($epub-config/types/@nav-spine-pos, 1.5)[1]"/>
+            <meta name="sequence" content="{($epub-config/types/@nav-spine-pos, 1.5)[1]}"/>
           </xsl:otherwise>
         </xsl:choose>
         
