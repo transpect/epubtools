@@ -597,7 +597,7 @@
         <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
         You should also set @lang in addition to @xml:lang
       </report>
-      <report test="@lang != @xml:lang" role="warning" id="lang-not-equal-xml-lang">
+      <report test="@lang != @xml:lang" role="warning" id="lang-not-equal-xml-lang" diagnostics="lang-not-equal-xml-lang_de">
         <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
          @lang '<value-of select="@lang"/>' and @xml:lang '<value-of select="@xml:lang"/>' differ
       </report>
@@ -616,11 +616,11 @@
     <rule context="/c:wrap">
       <report test="html:html[1]//*[@lang | @xml:lang]" role="info" id="other_languages" diagnostics="other_languages_de">
       <span class="srcpath"><xsl:value-of select="'BC_orphans'"/></span>
-        Other Language codes and their occurrences: 
-        <xsl:variable name="occ" select="html:html[1]//*[@xml:lang]"/>
+        Other Language codes and number of their occurrences: 
+        <xsl:variable name="occ" select="html:html[1]//*[@xml:lang|@lang]"/>
         <ul xmlns="http://www.w3.org/1999/xhtml">
-           <xsl:for-each select="distinct-values(html:html[1]//*[@xml:lang]/@xml:lang)">
-             <li><xsl:value-of select="current()"/> :  <xsl:value-of select="count($occ[@xml:lang=current()])"/></li>
+           <xsl:for-each select="distinct-values(html:html[1]//*[@xml:lang|@lang]/@*[local-name() = 'lang'][1])">
+             <li><xsl:value-of select="current()"/> :  <xsl:value-of select="count($occ[@*[local-name() = 'lang'][1]=current()])"/></li>
            </xsl:for-each> 
         </ul>
       </report>
@@ -777,7 +777,7 @@
                           or
                           exists($element-in-split/ancestor::*/@id = 'epub-cover-image-container')
                          )
-                    else true()" role="warning" id="meta-cover-points-to-non-cover">
+                    else true()" role="warning" id="meta-cover-points-to-non-cover" diagnostics="meta-cover-points-to-non-cover_de">
         <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span> Image file
           '<value-of select="$item/@href"/>' should be included in an element that has (or once had) epub:type='cover'. It may be 
       ok to refer to the same image twice, but it must also be referred to in the designated cover div.</assert>
@@ -876,15 +876,16 @@
       Eine Seitenzahl in der NCX-pageList, <xsl:value-of select="ncx:navLabel/ncx:text"/>, ist kleiner als die Vorgängerseitenzahl,
         <xsl:value-of select="preceding-sibling::ncx:pageTarget[1]/ncx:navLabel/ncx:text"/>.
     </diagnostic>
-    <diagnostic id="other_languages_de" xml:lang="de">Weitere Sprachangaben und der Ort ihrer Verwendung: 
-      <xsl:variable name="occ" select="html:html[1]//*[@xml:lang]"/>
+    <diagnostic id="other_languages_de" xml:lang="de">Weitere Sprachangaben und die Anzahl ihrer Verwendung: 
+      <xsl:variable name="occ" select="html:html[1]//*[@xml:lang|@lang]"/>
       <ul xmlns="http://www.w3.org/1999/xhtml">
-        <xsl:for-each select="distinct-values(html:html[1]//*[@xml:lang]/@xml:lang)">
-          <li><xsl:value-of select="current()"/> :  <xsl:value-of select="count($occ[@xml:lang=current()])"/></li>
-        </xsl:for-each> 
+        <xsl:for-each select="distinct-values(html:html[1]//*[@xml:lang|@lang]/@*[local-name() = 'lang'][1])">
+             <li><xsl:value-of select="current()"/> :  <xsl:value-of select="count($occ[@*[local-name() = 'lang'][1]=current()])"/></li>
+           </xsl:for-each> 
       </ul></diagnostic>
+    <diagnostic id="lang-not-equal-xml-lang_de" xml:lang="de">@lang '<value-of select="@lang"/>' und @xml:lang '<value-of select="@xml:lang"/>' wichen voneinander ab!</diagnostic>
     <diagnostic id="xml-lang_de" xml:lang="de">Es sollte auch das Attribut @lang zusätzlich zu @xml:lang gesetzt werden!</diagnostic>
-    <diagnostic id="lang_de" xml:lang="de"> HTML-Element '&lt;name/&gt;' mit lang-Attribut '<value-of select="distinct-values(@xml:lang | @lang)"/>'
+    <diagnostic id="lang_de" xml:lang="de"> HTML-Element '<value-of select="name()"/>' mit lang-Attribut '<value-of select="distinct-values(@xml:lang | @lang)"/>'
     </diagnostic>
     <diagnostic id="doc_language_de" xml:lang="de">Sprache des Dokumentes laut Metadatenelement (dc:language): <xsl:value-of select="."/> 
     </diagnostic>
@@ -922,6 +923,8 @@
     <diagnostic id="meta-cover-points-nowhere-in-content_de" xml:lang="de">Bilddatei
           '<value-of select="$item/@href"/>' ist in opf:metadata/opf:meta[@name = 'cover'] als Cover ausgewiesen. Allerdings
       scheint die Bilddatei in keiner der HTML-Dateien vorzukommen.</diagnostic>
+    <diagnostic id="meta-cover-points-to-non-cover_de" xml:lang="de">Bilddatei '<value-of select="$item/@href"/>' sollte sich in einem Element befinden, dass das Attribut epub:type='cover' enthält. 
+     Es kann in Ordnung sein, dasselbe Bild doppelt zu referenzieren, aber es sollte in dem ausgewiesenen Cover-div-Container stehen.</diagnostic>
     <diagnostic id="meta-cover-points-nowhere-in-manifest_de" xml:lang="de">Es gibt keinen Manifest-Eintrag für 
       opf:metadata/opf:meta[@name = 'cover']/@content = '<value-of select="@content"/>'.</diagnostic>
     <diagnostic id="empty-title_de" xml:lang="de">content.opf: metadata/dc:title darf nicht leer sein</diagnostic>
