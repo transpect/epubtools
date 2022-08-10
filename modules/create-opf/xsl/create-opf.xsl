@@ -31,7 +31,29 @@
       <xsl:if test="$target eq 'EPUB3'">
         <xsl:attribute name="prefix" select="'ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/ rendition: http://www.idpf.org/vocab/rendition/#'"/> 
       </xsl:if>
-      
+
+      <xsl:if test="$target = 'EPUB3'
+                    and
+                    (epub-config[metadata/dc:language[normalize-space()]] 
+                     or 
+                     collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')]
+                                                                   [not(matches(@xml:base, 'cover|toc|nav|ncx', 'i'))]
+                                                                   [@lang or @xml:lang]
+                    )">
+        <xsl:attribute name="xml:lang">
+          <xsl:variable name="langs-on-html">
+            <xsl:for-each-group select="collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')]
+                                                                                       [not(matches(@xml:base, 'cover|toc|nav|ncx', 'i'))]/@*[local-name() = 'lang'][1]"
+                              group-by="." exclude-result-prefixes="#all">
+              <lang-hash xml:lang="{current-grouping-key()}" value="{count(current-group())}"/>
+            </xsl:for-each-group>
+          </xsl:variable>
+          <xsl:value-of select="(epub-config/metadata/dc:language[normalize-space()],
+                                ($langs-on-html//*:lang-hash[@value = max($langs-on-html//*:lang-hash/@value)]/@xml:lang)[1] 
+                                 )[1]"/>
+        </xsl:attribute> 
+      </xsl:if>
+            
       <metadata>
         <xsl:if test="not(/epub-config/metadata/dc:identifier)">
           <xsl:message terminate="{$terminate-on-error}"
