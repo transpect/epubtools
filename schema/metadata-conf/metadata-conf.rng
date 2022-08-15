@@ -233,49 +233,73 @@
   </define>
 
   <define name="landmark-types">
-    <a:documentation>http://www.idpf.org/epub/vocab/structure/</a:documentation>
+    <a:documentation>https://www.w3.org/TR/epub-ssv-11/</a:documentation>
     <choice>
       <value>abstract</value>
       <value>acknowledgments</value>
       <value>afterword</value>
+      <value>antonym-group</value>
       <value>appendix</value>
+      <value>assessment</value>
       <value>backmatter</value>
       <value>bibliography</value>
       <value>bodymatter</value>
       <value>chapter</value>
       <value>colophon</value>
+      <value>conclusion</value>
       <value>contributors</value>
       <value>copyright-page</value>
       <value>cover</value>
+      <value>covertitle</value>
       <value>credits</value>
       <value>dedication</value>
+      <value>dictionary</value>
       <value>division</value>
       <value>epigraph</value>
       <value>epilogue</value>
+      <value>endnotes</value>
       <value>errata</value>
+      <value>etymology</value>
+      <value>example</value>
       <value>footnotes</value>
       <value>foreword</value>
       <value>frontmatter</value>
       <value>fulltitle</value>
       <value>glossary</value>
+      <value>halftitle</value>
+      <value>halftitlepage</value>
+      <value>imprimatur</value>
       <value>imprint</value>
       <value>index</value>
+      <value>index-entry-list</value>
+      <value>index-group</value>
+      <value>index-headnotes</value>
+      <value>index-legend</value>
       <value>introduction</value>
+      <value>landmarks</value>
+      <value>learning-objective</value>
+      <value>learning-resource</value>
       <value>loa</value>
       <value>loi</value>
       <value>lot</value>
       <value>lov</value>
       <value>notice</value>
       <value>other-credits</value>
+      <value>panel-group</value>
+      <value>pagebreak</value>
+      <value>page-list</value>
       <value>part</value>
       <value>preamble</value>
       <value>preface</value>
-      <value>rearnotes</value>
+      <value>prologue</value>
+      <value>qna</value>
+      <!--<value>rearnotes</value> deprecated-->
       <value>revision-history</value>
-      <value>subchapter</value>
+      <!--<value>subchapter</value> deprecated-->
       <value>subtitle</value>
       <value>title</value>
       <value>titlepage</value>
+      <value>toc</value>
       <value>volume</value>
     </choice>
   </define>
