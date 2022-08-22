@@ -9,8 +9,11 @@
   xmlns:ncx="http://www.daisy.org/z3986/2005/ncx/"
   xmlns:cx="http://xmlcalabash.com/ns/extensions" 
   xmlns:c="http://www.w3.org/ns/xproc-step"
+  xmlns:functx="http://www.functx.com"
   xmlns="http://www.idpf.org/2007/opf" 
-  version="2.0" exclude-result-prefixes="c cx html xsi xs ncx">
+  version="2.0" exclude-result-prefixes="c cx html xsi xs ncx functx">
+
+  <xsl:import href="http://transpect.io/xslt-util/functx/xsl/functx.xsl"/>
 
   <xsl:param name="target" select="'EPUB2'"/>
   <xsl:param name="layout" select="'reflowable'"/>
@@ -152,8 +155,8 @@
             <xsl:variable name="images" select="some $i in $html-content//*:body//* satisfies $i[self::*:img][not(matches(@src, 'logo|cover', 'i'))]
                                                                                                               [not(@role = 'presentation')]"/>
             <xsl:variable name="image-alts" select="exists($html-content//*:body//*:img) and (every $ia in $html-content//*:body//*:img satisfies $ia[@alt[string-length(normalize-space(.)) gt 5]
-                                                                                                                [not(matches(substring-before($ia/@src, '.'), substring-before(normalize-space(.), '.'), 'i'))]
-                                                                                                            or @role = 'presentation'])"/>
+                                                                                                                                                     [not(matches(substring-before($ia/@src, '.'), functx:escape-for-regex(substring-before(normalize-space(.), '.')), 'i'))]
+                                                                                                                                                      or @role = 'presentation'])"/>
   
             <xsl:if test="not(/epub-config/metadata/meta/@property = 'schema:accessMode')">
               <xsl:if test="$text"><meta property="schema:accessMode">textual</meta></xsl:if>
