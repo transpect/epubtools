@@ -1242,6 +1242,7 @@
     <xsl:param name="toc-ncx" as="element(ncx:ncx)"/>
     <xsl:param name="landmarks" as="element(*)*"/>
     <html epub:prefix="tr: http://transpect.io">
+      <xsl:apply-templates select="$root/html:html/(@xml:lang, @lang)" mode="#current"/>
       <head>
         <link href="styles/stylesheet.css" type="text/css" rel="stylesheet"/>
         <title>EPUB Navigation: Toc</title>
@@ -1292,6 +1293,7 @@
     <xsl:param name="toc-ncx" as="element(ncx:ncx)"/>
     <xsl:param name="landmarks" as="element(*)*"/>
     <html>
+      <xsl:apply-templates select="$root/html:html/(@xml:lang, @lang)" mode="#current"/>
       <head>
         <link href="styles/stylesheet.css" type="text/css" rel="stylesheet"/>
         <title>EPUB Navigation: Page list</title>
