@@ -1368,11 +1368,24 @@
         <xsl:variable name="prelim" as="element(html:li)*">
           <xsl:apply-templates select="$landmarks" mode="nav-landmarks"/>
         </xsl:variable>
-        <xsl:for-each select="$landmark-types">
-          <xsl:variable name="current-type" select="." as="xs:string"/>
-          <!-- sorting entries to avoid that toc is always rendered first if not in content -->
-          <xsl:sequence select="($toc-link, $prelim)[descendant::*:a/@epub:type = $current-type]"/>
-        </xsl:for-each>
+        <!-- sorting entries to avoid that toc is always rendered first if not in content -->
+        <xsl:variable name="orig-type-order" as="xs:string*" select="tokenize($epub-config/types/type[@name = 'landmarks']/@types, ' ')"/>
+        <xsl:variable name="toc-pos" as="xs:integer?" select="index-of($orig-type-order, 'toc')"/>
+        <xsl:choose>
+          <xsl:when test="some $token in $orig-type-order satisfies $token = 'toc'">
+          <!-- insert toc where it is located in   <type name="landmarks" types=""/> -->
+    
+         
+          <xsl:sequence select="$prelim[descendant::*:a/@epub:type[index-of($orig-type-order, .) lt $toc-pos]],
+                                $toc-link, 
+                                $prelim[descendant::*:a/@epub:type[index-of($orig-type-order, .) gt $toc-pos]]"/>
+        <xsl:message select="index-of($orig-type-order, 'toc')"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <!-- if not in landmarks, insert after Cover -->
+            <xsl:sequence select="$prelim[descendant::*:a/@epub:type = 'cover'], $toc-link, $prelim[not(descendant::*:a/@epub:type = 'cover')]"/>
+          </xsl:otherwise>
+        </xsl:choose>
         <!-- That would discard an index landmark in a backmatter chunk: --> 
         <!--<xsl:for-each-group select="$prelim" group-by="replace(html:a/@href, '#.+$', '')">
           <xsl:sequence select="."/>
