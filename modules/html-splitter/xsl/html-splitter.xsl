@@ -1335,38 +1335,44 @@
       <ol>
         <xsl:variable name="rendered-toc" as="element(*)?"
           select="key('by-id', $epub-config/types/type[@name = 'toc']/@fallback-id-for-landmark)"/>
-        <xsl:choose>
-          <xsl:when test="not($content-toc-id) and 
-                          not($epub-config/types/type[@name = 'toc']/@hidden = 'true')">
-          <!-- nav doc is not already in spine, but generated toc will be.
-            Link to generated toc. 
-            Otherwise, don’t link to generated because it is not allowed to link to non-spine items -->
-          <li>
-            <a epub:type="toc" href="#{$toc-nav-id}" srcpath="landmarks-link-to-toc">
-              <xsl:value-of select="($epub-config/types/type[@name = 'toc']/@heading, 'Table of Contents')[1]"/>
-            </a>
-          </li>
-          </xsl:when>
-          <xsl:when test="$epub-config/types/type[@name = 'toc']/@hidden = 'true'
-                          and
-                          exists($rendered-toc)">
-            <xsl:variable name="unresolved-href" as="attribute(href)">
-              <xsl:attribute name="href" select="concat('#', $epub-config/types/type[@name = 'toc']/@fallback-id-for-landmark)"/>
-            </xsl:variable>
-            <li>
-              <a epub:type="toc" srcpath="landmarks-link-to-toc">
-                <xsl:apply-templates select="$unresolved-href" mode="resolve-refs">
-                  <xsl:with-param name="element" select="$rendered-toc"/>
-                </xsl:apply-templates>
-                <xsl:value-of select="($epub-config/types/type[@name = 'toc']/@heading, 'Table of Contents')[1]"/>
-              </a>
-          </li>
-          </xsl:when>
-        </xsl:choose>
+        <xsl:variable name="toc-link" as="element(html:li)?">
+          <xsl:choose>
+            <xsl:when test="not($content-toc-id) and 
+              not($epub-config/types/type[@name = 'toc']/@hidden = 'true')">
+              <!-- nav doc is not already in spine, but generated toc will be.
+                Link to generated toc. 
+                Otherwise, don’t link to generated because it is not allowed to link to non-spine items -->
+              <li>
+                <a epub:type="toc" href="#{$toc-nav-id}" srcpath="landmarks-link-to-toc">
+                  <xsl:value-of select="($epub-config/types/type[@name = 'toc']/@heading, 'Table of Contents')[1]"/>
+                </a>
+              </li>
+            </xsl:when>
+            <xsl:when test="$epub-config/types/type[@name = 'toc']/@hidden = 'true'
+                                                and
+                                                exists($rendered-toc)">
+              <xsl:variable name="unresolved-href" as="attribute(href)">
+                <xsl:attribute name="href" select="concat('#', $epub-config/types/type[@name = 'toc']/@fallback-id-for-landmark)"/>
+              </xsl:variable>
+              <li>
+                <a epub:type="toc" srcpath="landmarks-link-to-toc">
+                  <xsl:apply-templates select="$unresolved-href" mode="resolve-refs">
+                    <xsl:with-param name="element" select="$rendered-toc"/>
+                  </xsl:apply-templates>
+                  <xsl:value-of select="($epub-config/types/type[@name = 'toc']/@heading, 'Table of Contents')[1]"/>
+                </a>
+              </li>
+            </xsl:when>
+          </xsl:choose>
+        </xsl:variable>
         <xsl:variable name="prelim" as="element(html:li)*">
           <xsl:apply-templates select="$landmarks" mode="nav-landmarks"/>
         </xsl:variable>
-        <xsl:sequence select="$prelim"/>
+        <xsl:for-each select="$landmark-types">
+          <xsl:variable name="current-type" select="." as="xs:string"/>
+          <!-- sorting entries to avoid that toc is always rendered first if not in content -->
+          <xsl:sequence select="($toc-link, $prelim)[descendant::*:a/@epub:type = $current-type]"/>
+        </xsl:for-each>
         <!-- That would discard an index landmark in a backmatter chunk: --> 
         <!--<xsl:for-each-group select="$prelim" group-by="replace(html:a/@href, '#.+$', '')">
           <xsl:sequence select="."/>
