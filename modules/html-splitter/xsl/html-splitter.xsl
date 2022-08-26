@@ -1269,7 +1269,7 @@
         <xsl:call-template name="landmarks">
           <xsl:with-param name="landmarks" select="$landmarks"/>
         </xsl:call-template>
-        <nav epub:type="toc" id="{$toc-nav-id}">
+        <nav epub:type="toc" role="doc-toc" id="{$toc-nav-id}">
           <xsl:if test="not($epub-config/types/type[@name = 'toc']/@heading = '')">
             <h1>
               <xsl:value-of select="($epub-config/types/type[@name = 'toc']/@heading, 'Table of Contents')[1]"/>
@@ -1343,7 +1343,7 @@
                 Link to generated toc. 
                 Otherwise, don’t link to generated because it is not allowed to link to non-spine items -->
               <li>
-                <a epub:type="toc" href="#{$toc-nav-id}" srcpath="landmarks-link-to-toc">
+                <a epub:type="toc" href="nav.xhtml#{$toc-nav-id}" srcpath="landmarks-link-to-toc">
                   <xsl:value-of select="($epub-config/types/type[@name = 'toc']/@heading, 'Table of Contents')[1]"/>
                 </a>
               </li>
@@ -1372,17 +1372,21 @@
         <xsl:variable name="orig-type-order" as="xs:string*" select="tokenize($epub-config/types/type[@name = 'landmarks']/@types, ' ')"/>
         <xsl:variable name="toc-pos" as="xs:integer?" select="index-of($orig-type-order, 'toc')"/>
         <xsl:choose>
-          <xsl:when test="some $token in $orig-type-order satisfies $token = 'toc'">
-          <!-- insert toc where it is located in   <type name="landmarks" types=""/> -->
-    
-         
+          <xsl:when test="empty($toc-link)">
+          <!-- if toc already exists, render it where it was -->
+          <xsl:sequence select="$prelim"/>
+          </xsl:when>
+          <xsl:when test="(some $token in $orig-type-order satisfies $token = 'toc') 
+                          and 
+                          $epub-config/types/@nav-spine-pos" >
+          <!-- insert generated toc where it is located in   <type name="landmarks" types=""/> -->
           <xsl:sequence select="$prelim[descendant::*:a/@epub:type[index-of($orig-type-order, .) lt $toc-pos]],
                                 $toc-link, 
                                 $prelim[descendant::*:a/@epub:type[index-of($orig-type-order, .) gt $toc-pos]]"/>
         <xsl:message select="index-of($orig-type-order, 'toc')"/>
           </xsl:when>
           <xsl:otherwise>
-            <!-- if not in landmarks, insert after Cover -->
+            <!-- if generated toc is not contained in landmarks/@types and no types/@nav-spine-pos is set, insert it directly after Cover -->
             <xsl:sequence select="$prelim[descendant::*:a/@epub:type = 'cover'], $toc-link, $prelim[not(descendant::*:a/@epub:type = 'cover')]"/>
           </xsl:otherwise>
         </xsl:choose>
