@@ -1338,7 +1338,7 @@
         <xsl:variable name="toc-link" as="element(html:li)?">
           <xsl:choose>
             <xsl:when test="not($content-toc-id) and 
-              not($epub-config/types/type[@name = 'toc']/@hidden = 'true')">
+                            not($epub-config/types/type[@name = 'toc']/@hidden = 'true')">
               <!-- nav doc is not already in spine, but generated toc will be.
                 Link to generated toc. 
                 Otherwise, don’t link to generated because it is not allowed to link to non-spine items -->
