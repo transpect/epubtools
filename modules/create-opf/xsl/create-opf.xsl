@@ -158,8 +158,8 @@
                                                                                                                                                      [not(matches(substring-before($ia/@src, '.'), functx:escape-for-regex(substring-before(normalize-space(.), '.')), 'i'))]
                                                                                                                                                       or @role = 'presentation'])"/>
   
-            <xsl:if test="not(/epub-config/metadata/meta/@property = 'schema:schema:accessibilitySummary')">
-              <meta property="schema:schema:accessibilitySummary">This publication conforms to WCAG 2.0 Level AA.</meta>
+            <xsl:if test="not(/epub-config/metadata/meta/@property = 'schema:accessibilitySummary')">
+              <meta property="schema:accessibilitySummary">This publication conforms to WCAG 2.0 Level AA.</meta>
             </xsl:if>  
             <xsl:if test="not(/epub-config/metadata/meta/@property = 'schema:accessMode')">
               <xsl:if test="$text"><meta property="schema:accessMode">textual</meta></xsl:if>
