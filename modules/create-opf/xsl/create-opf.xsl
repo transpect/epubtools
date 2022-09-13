@@ -117,6 +117,7 @@
             />
           </dc:date>
         </xsl:if>
+
         <xsl:if test="$target eq 'EPUB3'">
           <xsl:if test="not(/epub-config/metadata/meta/@property = 'dcterms:modified')">
             <meta property="dcterms:modified">
@@ -153,14 +154,11 @@
             <xsl:variable name="video" select="some $av in $html-content//*:body//* satisfies $av[self::*:video]"/>
             <xsl:variable name="text" select="some $t in $html-content//*:body satisfies $t[normalize-space()][string-length(.) gt 10]"/>
             <xsl:variable name="images" select="some $i in $html-content//*:body//* satisfies $i[self::*:img][not(matches(@src, 'logo|cover', 'i'))]
-                                                                                                              [not(@role = 'presentation')]"/>
+                                                                                                             [not(@role = 'presentation')]"/>
             <xsl:variable name="image-alts" select="exists($html-content//*:body//*:img) and (every $ia in $html-content//*:body//*:img satisfies $ia[@alt[string-length(normalize-space(.)) gt 5]
                                                                                                                                                      [not(matches(substring-before($ia/@src, '.'), functx:escape-for-regex(substring-before(normalize-space(.), '.')), 'i'))]
                                                                                                                                                       or @role = 'presentation'])"/>
   
-            <xsl:if test="not(/epub-config/metadata/meta/@property = 'schema:accessibilitySummary')">
-              <meta property="schema:accessibilitySummary">This publication conforms to WCAG 2.0 Level AA.</meta>
-            </xsl:if>  
             <xsl:if test="not(/epub-config/metadata/meta/@property = 'schema:accessMode')">
               <xsl:if test="$text"><meta property="schema:accessMode">textual</meta></xsl:if>
               <xsl:if test="$images or $video"><meta property="schema:accessMode">visual</meta></xsl:if>
@@ -174,9 +172,14 @@
               </xsl:choose>
             </xsl:if>
             <xsl:if test="not(/epub-config/metadata/meta/@property = 'schema:accessModeSufficient')">
-  
+              <!-- <xsl:message select="'text: ', $text, ' images: ', $images, ' image-alts: ', $image-alts"></xsl:message>-->
               <xsl:choose>   
-                <xsl:when test="$text and (every $e in $html-content//*:body//* satisfies $e[not(self::*:img|self::*:video|self::*:audio) or (self::*:img) and $image-alts])">
+                <xsl:when test="$text and (every $e in $html-content//*:body//* satisfies $e[not(self::*:video|self::*:audio) 
+                                                                                             and
+                                                                                             (not(self::*:img) 
+                                                                                              or $image-alts
+                                                                                              or not($images)
+                                                                                             )])">
                   <!-- only text content or if images are contained those are decorational or have a description -->
                   <meta property="schema:accessModeSufficient">textual</meta>
                 </xsl:when>
