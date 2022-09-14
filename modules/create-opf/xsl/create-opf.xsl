@@ -211,6 +211,8 @@
             <!-- accessibilityFeature -->
 
             <!-- only relative units used in CSS. also not texts should be available as images (like tables etc.) -->
+            <!-- To DO: constain check on font-sizes, otherwise box borders prevent feature. 
+                 allowing to change fonts should be checked as well -->
             <xsl:variable name="accessibilityFeatures" as="element(*)*">
               <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'displayTransformability']) 
                             and 

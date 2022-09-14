@@ -221,6 +221,7 @@ cover =
     ## Whether the generated cover HTML should use svg to wrap the cover image. Should be
     ##           assumed false if omitted.
     attribute svg { "true" | "false" }?
+    attribute alt { text }?
   }
 types =
   

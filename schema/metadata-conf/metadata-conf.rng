@@ -131,7 +131,7 @@
   
   <define name="subset">
     <attribute name="font-subset">
-      <a:documentation>Use only a subset that covers the characters that are displeyed
+      <a:documentation>Use only a subset that covers the characters that are displayed
       with that font. Requires https://github.com/transpect/epub-font-subsetter and Python</a:documentation>
       <choice>
         <value>true</value>
@@ -396,6 +396,12 @@
             <value>true</value>
             <value>false</value>
           </choice>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="alt">
+          <a:documentation>If an alt attribute shall be added to Cover img or svg/title. If not set, 
+           the default value is epub-cover-image or "Cover for {dc:title}/'EPUB'"</a:documentation>
         </attribute>
       </optional>
     </element>

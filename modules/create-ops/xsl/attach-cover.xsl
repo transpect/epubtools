@@ -4,6 +4,7 @@
   xmlns:epub="http://www.idpf.org/2007/ops"
   xmlns:c="http://www.w3.org/ns/xproc-step"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
   xmlns="http://www.w3.org/1999/xhtml" 
   version="2.0" 
   exclude-result-prefixes="#all">
@@ -42,7 +43,11 @@
                 <xsl:attribute name="title" select="collection()/epub-config/types/type[@name = 'cover']/@heading"/>
               </xsl:if>
               <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="100%"
-                height="100%" viewBox="0 0 {$w} {$h}" id="epub-cover-svg-container">
+                height="100%" viewBox="0 0 {$w} {$h}" id="epub-cover-svg-container" role="img">
+                <title><xsl:value-of select="if (collection()/epub-config/cover[@alt[normalize-space()]]) 
+                                             then collection()/epub-config/cover/@alt
+                                             else concat ('Cover for ', (collection()/epub-config/dc:title[normalize-space()], 'EPUB')[1])"/>
+                </title>
                 <image xlink:href="{collection()/epub-config/cover/@href}" width="{$w}" height="{$h}"/>
               </svg>
             </div>
@@ -60,7 +65,11 @@
                 <xsl:attribute name="title" select="collection()/epub-config/types/type[@name = 'cover']/@heading"/>
               </xsl:if>
               <xsl:attribute name="id" select="'epub-cover-image-container'"/>
-              <img id="epub-cover-image" src="{collection()/epub-config/cover/@href}" alt="epub-cover-image"/>
+              <img id="epub-cover-image" src="{collection()/epub-config/cover/@href}">
+                <xsl:attribute name="alt" select="if (collection()/epub-config/cover[@alt[normalize-space()]]) 
+                                                  then collection()/epub-config/cover/@alt
+                                                  else 'epub-cover-image'"/>
+              </img>
             </div>
           </xsl:otherwise>
         </xsl:choose>
