@@ -43,7 +43,7 @@
                 <xsl:attribute name="title" select="collection()/epub-config/types/type[@name = 'cover']/@heading"/>
               </xsl:if>
               <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="100%"
-                height="100%" viewBox="0 0 {$w} {$h}" id="epub-cover-svg-container" role="img">
+                height="100%" viewBox="0 0 {$w} {$h}" id="epub-cover-svg-container">
                 <title><xsl:value-of select="if (collection()/epub-config/cover[@alt[normalize-space()]]) 
                                              then collection()/epub-config/cover/@alt
                                              else concat ('Cover for ', (collection()/epub-config/dc:title[normalize-space()], 'EPUB')[1])"/>
@@ -65,7 +65,7 @@
                 <xsl:attribute name="title" select="collection()/epub-config/types/type[@name = 'cover']/@heading"/>
               </xsl:if>
               <xsl:attribute name="id" select="'epub-cover-image-container'"/>
-              <img id="epub-cover-image" src="{collection()/epub-config/cover/@href}">
+              <img id="epub-cover-image" src="{collection()/epub-config/cover/@href}" role="doc-cover">
                 <xsl:attribute name="alt" select="if (collection()/epub-config/cover[@alt[normalize-space()]]) 
                                                   then collection()/epub-config/cover/@alt
                                                   else 'epub-cover-image'"/>
