@@ -1343,7 +1343,12 @@
                 Link to generated toc. 
                 Otherwise, don’t link to generated because it is not allowed to link to non-spine items -->
               <li>
-                <a epub:type="toc" href="nav.xhtml#{$toc-nav-id}" srcpath="landmarks-link-to-toc">
+                <a epub:type="toc" href="{concat(if (not($final-pub-type = 'EPUB2'))
+                                                 then concat(($epub-config/types/type[@name = 'toc']/@file[normalize-space()], 'nav')[1], '.xhtml') 
+                                                 else (), 
+                                                 '#', 
+                                                 $toc-nav-id
+                                           )}" srcpath="landmarks-link-to-toc">
                   <xsl:value-of select="($epub-config/types/type[@name = 'toc']/@heading, 'Table of Contents')[1]"/>
                 </a>
               </li>
