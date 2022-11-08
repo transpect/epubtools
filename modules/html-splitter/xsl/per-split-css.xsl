@@ -46,11 +46,6 @@
                 </comment>
               </xsl:if>
               <xsl:if test=".//@epub:type[not(ancestor::html:nav)] = 'cover' and contains($final-pub-type, 'EPUB3') and exists(.//svg:svg)">
-                <!-- This is a workaround for ADE 4. SVG covers are displayed too small in EPUB3. 
-                     Thanks, @tobias_fischer! https://twitter.com/tobias_fischer/status/679029226419462144 -->
-                <ruleset origin="epubtools/modules/html-splitter/xsl/per-spli-css.xsl">
-                  <raw-css>div.cover svg { max-height:97%; height:97vh; margin:0; }</raw-css>
-                </ruleset>
                 <comment xmlns="http://www.w3.org/1996/css">
                   <xsl:text>/* Original location: diverse (specifically extracted for </xsl:text>
                   <xsl:value-of select="base-uri(/*)"/>
