@@ -80,14 +80,9 @@
             <xsl:if test="name() eq 'dc:identifier'">
               <xsl:choose>
                 <xsl:when test="$target = 'EPUB3'">
-                  <xsl:choose>
-                    <xsl:when test=". is ../dc:identifier[1]">
+                    <xsl:if test=". is ../dc:identifier[1]">
                       <xsl:attribute name="id" select="(@opf:scheme, 'bookid')[1]"/>
-                    </xsl:when>
-                    <xsl:otherwise>
-                      <xsl:attribute name="id" select="@opf:scheme"/>
-                    </xsl:otherwise>
-                  </xsl:choose>
+                    </xsl:if>
                 </xsl:when>
                 <xsl:otherwise>
                   <xsl:if test=". is ../dc:identifier[1]">
@@ -95,9 +90,6 @@
                   </xsl:if>
                   <xsl:if test="@opf:scheme">
                     <xsl:attribute name="opf:scheme" select="@opf:scheme"/>
-                  </xsl:if>
-                  <xsl:if test="@opf:scheme and not(. is ../dc:identifier[1])">
-                    <xsl:attribute name="id" select="@opf:scheme"/>
                   </xsl:if>
                 </xsl:otherwise>
               </xsl:choose>
