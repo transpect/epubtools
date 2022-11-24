@@ -871,6 +871,33 @@
     </rule>
   </pattern>
   
+  <pattern id="table-string-length" abstract="true">
+    <rule context="/c:wrap/html:html[1]/html:body//html:table">
+      <extends rule="file-calc"/>
+      <let name="max" value="$table-max-str-length"/>
+      <let name="str-length" value="string-length(string-join(.//*[local-name() = ('caption', 'td', 'th')]))"/>
+      <let name="srcpath" value="tokenize(ancestor-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
+      <report test="$str-length &gt; $max" id="table-str-length" 
+              diagnostics="table-string-length_de" role="$severity">
+        <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
+        The table contains <value-of select="$str-length"/> characters and exceeds the limit of <value-of select="$max"/>.
+        Too many characters in a table can cause crashes on some EPUB readers.
+      </report>
+    </rule>
+  </pattern>
+  
+  <pattern id="table-string-length-warnings" is-a="table-string-length">
+    <param name="severity" value="warning"/>
+    <param name="table-max-str-length" 
+           value="/c:wrap/epub-config/checks/check[@param = 'table-max-str-length'][@severity = 'warning']/@value"/>
+  </pattern>
+  
+  <pattern id="table-string-length-errors" is-a="table-string-length">
+    <param name="severity" value="error"/>
+    <param name="table-max-str-length" 
+           value="/c:wrap/epub-config/checks/check[@param = 'table-max-str-length'][@severity = 'error']/@value"/>
+  </pattern>
+  
   <diagnostics>
     <diagnostic id="page_numbers_ncx-not-ascending_de" xml:lang="de">
       Eine Seitenzahl in der NCX-pageList, <xsl:value-of select="ncx:navLabel/ncx:text"/>, ist kleiner als die Vorgängerseitenzahl,
@@ -1001,6 +1028,10 @@
     </diagnostic>
      <diagnostic id="newline-in-chunk_de" xml:lang="de">
       Hier wurde ein unpassender Umbruch verwendet: <xsl:value-of select="descendant::*[matches(string-join(text(),''),$newline-regex)]/text()"/>
+    </diagnostic>
+    <diagnostic id="table-string-length_de" xml:lang="de">
+      Die Zeichenanzahl in der Tabelle ist <value-of select="$str-length"/> und übersteigt die Grenze von: <value-of select="$max"/> Zeichen. 
+      Zu viele Zeichen in einer Tabelle können zu Abstürzen auf manchen EPUB-Lesegeräten führen.
     </diagnostic>
   </diagnostics>
   
