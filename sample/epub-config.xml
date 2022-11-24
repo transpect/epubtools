@@ -146,6 +146,7 @@
     <check param="cover-max-width-px" value="1440" severity="warning"/>
     <!-- max table string length -->
     <check param="table-max-str-length" value="20000" severity="warning"/>
+    <check param="table-max-cell-count" value="1800"  severity="warning"/>
     <!-- Custom Schematron. See the debug-dir/epubtools/input-for-schematron.xml (after running 
       a conversion with debug=yes) for an input example. See the included Schematron file
       schematron/epub.sch.xml for rule examples. -->

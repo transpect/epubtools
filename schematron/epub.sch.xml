@@ -876,12 +876,13 @@
       <extends rule="file-calc"/>
       <let name="max" value="$table-max-str-length"/>
       <let name="str-length" value="string-length(string-join(.//*[local-name() = ('caption', 'td', 'th')]))"/>
-      <let name="srcpath" value="tokenize(ancestor-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
+      <let name="srcpath" value="tokenize(descendant-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
       <report test="$str-length &gt; $max" id="table-str-length" 
               diagnostics="table-string-length_de" role="$severity">
         <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
         The table contains <value-of select="$str-length"/> characters and exceeds the limit of <value-of select="$max"/>.
-        Too many characters in a table can cause crashes on some EPUB readers.
+        Amazon does not support tables with more than <value-of select="$max"/> characters.
+        More information is available in the <a xmlns="http://www.w3.org/1999/xhtml" href="https://kdp.amazon.com/en_US/help/topic/GZ8BAXASXKB5JVML#large_tables" target="_blank">Kindle Publishing Guidelines</a>.
       </report>
     </rule>
   </pattern>
@@ -896,6 +897,34 @@
     <param name="severity" value="error"/>
     <param name="table-max-str-length" 
            value="/c:wrap/epub-config/checks/check[@param = 'table-max-str-length'][@severity = 'error']/@value"/>
+  </pattern>
+  
+  <pattern id="table-cells" abstract="true">
+    <rule context="/c:wrap/html:html[1]/html:body//html:table">
+      <extends rule="file-calc"/>
+      <let name="max" value="$table-max-cell-count"/>
+      <let name="cell-count" value="count(.//*[local-name() = ('td', 'th')])"/>
+      <let name="srcpath" value="tokenize(descendant-or-self::*[@srcpath][1]/@srcpath, '\s+')"/>
+      <report test="$cell-count &gt; $max" id="table-cell-count" 
+              diagnostics="table-cell-count_de" role="$severity">
+        <span class="srcpath"><xsl:value-of select="$srcpath"/></span>
+        The table contains <value-of select="$cell-count"/> cells which exceeds the limit of <value-of select="$max"/>.
+        Amazon does not support tables with more than <value-of select="$max"/> cells.
+        More information is available in the <a xmlns="http://www.w3.org/1999/xhtml" href="https://kdp.amazon.com/en_US/help/topic/GZ8BAXASXKB5JVML#large_tables" target="_blank">Kindle Publishing Guidelines</a>.
+      </report>
+    </rule>
+  </pattern>
+  
+  <pattern id="table-cell-count-warnings" is-a="table-cells">
+    <param name="severity" value="warning"/>
+    <param name="table-max-cell-count" 
+           value="/c:wrap/epub-config/checks/check[@param = 'table-max-cell-count'][@severity = 'warning']/@value"/>
+  </pattern>
+  
+  <pattern id="table-cell-count-errors" is-a="table-cells">
+    <param name="severity" value="error"/>
+    <param name="table-max-cell-count" 
+           value="/c:wrap/epub-config/checks/check[@param = 'table-max-cell-count'][@severity = 'error']/@value"/>
   </pattern>
   
   <diagnostics>
@@ -1030,8 +1059,14 @@
       Hier wurde ein unpassender Umbruch verwendet: <xsl:value-of select="descendant::*[matches(string-join(text(),''),$newline-regex)]/text()"/>
     </diagnostic>
     <diagnostic id="table-string-length_de" xml:lang="de">
-      Die Zeichenanzahl in der Tabelle ist <value-of select="$str-length"/> und übersteigt die Grenze von: <value-of select="$max"/> Zeichen. 
-      Zu viele Zeichen in einer Tabelle können zu Abstürzen auf manchen EPUB-Lesegeräten führen.
+      Die Zeichenanzahl in der Tabelle liegt bei <value-of select="$str-length"/> Zeichen und übersteigt die Grenze von <value-of select="$max"/> Zeichen.
+      Amazon unterstützt keine Tabellen mit mehr als <value-of select="$max"/> Zeichen.
+      Mehr Informationen finden Sie in den <a xmlns="http://www.w3.org/1999/xhtml" href="https://kdp.amazon.com/en_US/help/topic/GZ8BAXASXKB5JVML#large_tables" target="_blank">Kindle Publishing Guidelines</a>.
+    </diagnostic>
+    <diagnostic id="table-cell-count_de" xml:lang="de">
+      Die Tabelle enthält <value-of select="$cell-count"/> Zellen und übersteigt die Grenze von <value-of select="$max"/> Zellen.
+      Amazon unterstützt keine Tabellen mit mehr als <value-of select="$max"/> Zellen.
+      Mehr Informationen finden Sie in den <a xmlns="http://www.w3.org/1999/xhtml" href="https://kdp.amazon.com/en_US/help/topic/GZ8BAXASXKB5JVML#large_tables" target="_blank">Kindle Publishing Guidelines</a>.
     </diagnostic>
   </diagnostics>
   
