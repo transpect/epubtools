@@ -139,8 +139,8 @@
 
           <xsl:message select="'### Generate Accessibility meta tags: ', $create-a11y-meta"/>
           <xsl:if test="$create-a11y-meta = ('yes', 'true')">
-            <xsl:variable name="html-content" as="element(*)*" select="collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')][not(matches(@xml:base, 'cover|toc|nav|ncx', 'i'))]"/>
-            <xsl:variable name="nav-html" as="element(*)*" select="collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')][matches(@xml:base, 'toc|nav', 'i')]"/>
+            <xsl:variable name="html-content" as="element(*)*" select="collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')][not(matches(@xml:base, '\P{L}(cover|toc|nav|ncx)', 'i'))]"/>
+            <xsl:variable name="nav-html" as="element(*)*" select="collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')][matches(@xml:base, '\P{L}(toc|nav)', 'i')]"/>
             <xsl:variable name="aud-video" select="some $av in $html-content//*:body//* satisfies $av[self::*:video|self::*:audio]"/>
             <xsl:variable name="audio" select="some $av in $html-content//*:body//* satisfies $av[self::*:audio]"/>
             <xsl:variable name="video" select="some $av in $html-content//*:body//* satisfies $av[self::*:video]"/>
@@ -150,7 +150,6 @@
             <xsl:variable name="image-alts" select="exists($html-content//*:body//*:img) and (every $ia in $html-content//*:body//*:img satisfies $ia[@alt[string-length(normalize-space(.)) gt 5]
                                                                                                                                                      [not(matches(substring-before($ia/@src, '.'), functx:escape-for-regex(substring-before(normalize-space(.), '.')), 'i'))]
                                                                                                                                                       or @role = 'presentation'])"/>
-  
             <xsl:if test="not(/epub-config/metadata/meta/@property = 'schema:accessMode')">
               <xsl:if test="$text"><meta property="schema:accessMode">textual</meta></xsl:if>
               <xsl:if test="$images or $video"><meta property="schema:accessMode">visual</meta></xsl:if>
