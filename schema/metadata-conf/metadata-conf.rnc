@@ -23,6 +23,7 @@ epub-config-attributes =
   & subset?
   & variant?
   & css-handling?
+  & css-parser?
   & page-map-xml?
   & html-subdir-name?
   & out-file-basename?
@@ -44,7 +45,7 @@ remove-scripts =
   attribute remove-scripts { "true" | "false" }
 subset =
   
-  ## Use only a subset that covers the characters that are displeyed
+  ## Use only a subset that covers the characters that are displayed
   ##       with that font. Requires https://github.com/transpect/epub-font-subsetter and Python
   attribute font-subset { "true" | "false" }
 layout = attribute layout { "reflowable" | "fixed" }
@@ -75,6 +76,12 @@ css-handling =
       "remove-comments"?
     }
   }
+
+## Defaults to 'REx', a generated parser based on an EBNF grammar. Very large CSS documents 
+##       seem to challenge REx though. Therefore you may switch to the traditional 'regex' parser.
+##       The regex parser supports fewer features though. Background images and fonts seem to be supported.
+##      
+css-parser = attribute css-parser { "REx" | "REx-css3" | "regex" }
 page-map-xml = attribute page-map-xml { xsd:boolean }
 html-subdir-name =
   
@@ -96,7 +103,7 @@ consider-headings-in-tables =
   ##         with many tables.
   attribute consider-headings-in-tables { xsd:boolean }
 
-## http://www.idpf.org/epub/vocab/structure/
+## https://www.w3.org/TR/epub-ssv-11/
 landmark-types =
   "abstract"
   | "acknowledgments"
@@ -156,8 +163,10 @@ landmark-types =
   | "preface"
   | "prologue"
   | "qna"
-  | "revision-history"
-  | "subtitle"
+  | # <value>rearnotes</value> deprecated
+    "revision-history"
+  | # <value>subchapter</value> deprecated
+    "subtitle"
   | "title"
   | "titlepage"
   | "toc"
@@ -220,7 +229,13 @@ cover =
     
     ## Whether the generated cover HTML should use svg to wrap the cover image. Should be
     ##           assumed false if omitted.
-    attribute svg { "true" | "false" }?
+    attribute svg { "true" | "false" }?,
+    
+    ## Adds a line of CSS to fix cover scaling for some reading systems.
+    attribute svg-scale-hack { "true" | "false" }?,
+    
+    ## If an alt attribute shall be added to Cover img or svg/title. If not set, 
+    ##            the default value is epub-cover-image or "Cover for {dc:title}/'EPUB'"
     attribute alt { text }?
   }
 types =
@@ -274,21 +289,26 @@ meta =
   element metadata {
     global-atts,
     ((dc-identifier | dc-identifier-mandatory-scheme+)
-     & element dc:title { text }?
+     & element dc:title { text }+
      & element dc:creator {
          
          ## To be completed. Also, to be extended wrt EPUB3
          attribute opf:role { "aut" | "edt" }?,
          attribute opf:file-as { text }?,
          text
-       }?
-     & element dc:publisher { text }?
+       }*
+     & element dc:publisher { text }*
      & element dc:contributor { text }*
-     & element dc:rights { text }?
-     & element dc:date { text }?
-     & element dc:language { text }?
-     & element dc:description { text }?
+     & element dc:rights { text }*
+     & element dc:date { text }*
+     & element dc:language { text }+
+     & element dc:format { text }*
+     & element dc:description { text }*
      & element dc:subject { text }*
+     & element dc:relation { text }*
+     & element dc:source { text }*
+     & element dc:type { text }*
+     & element dc:coverage { text }*
      & element meta {
          (attribute property { text },
           text)
@@ -296,6 +316,13 @@ meta =
             & attribute content { text })
          | (attribute refines { text }
             & attribute scheme { text })
+       }*
+     & element link {
+         attribute href { text }
+         & attribute rel { text }
+         & attribute properties { text }?
+         & attribute refines { text }?
+         & attribute media-type { text }?
        }*)
   }
 [

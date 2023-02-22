@@ -32,7 +32,7 @@
 		It may be an http(s):, a file:, or a relative URI. Relative
 		URIs will be resolved against the HTML source location.
 	  Support for external SVG files yet to be implemented.-->
-	<cover href="images/cover.png" svg="true"/>
+  <cover href="images/cover.png" svg="true" svg-scale-hack="true"/>
 	
 	<types>
     <!-- A mapping from epub:type attribute values to generated

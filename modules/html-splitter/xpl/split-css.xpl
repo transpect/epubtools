@@ -46,6 +46,7 @@
   
   <p:option name="target" required="true"/>
   <p:option name="css-handling" required="true"/>
+  <p:option name="svg-scale-hack" required="true"/>
   <p:option name="basename" required="true"/>
   <p:option name="html-subdir-name" required="true"/>
   <p:option name="common-source-dir-elimination-regex" required="true"/>
@@ -86,6 +87,7 @@
         </p:input>
         <p:with-param name="common-source-dir-elimination-regex" select="$common-source-dir-elimination-regex"/>
         <p:with-param name="html-subdir-name" select="$html-subdir-name"/>
+        <p:with-param name="svg-scale-hack" select="$svg-scale-hack"/>
         <p:with-param name="debug" select="$debug"/>
         <p:with-param name="final-pub-type" select="$target"/>
       </p:xslt>

@@ -77,6 +77,10 @@
   <p:variable name="amzn-region-magnification" select="(/epub-config/metadata/meta[@name eq 'RegionMagnification']/@content, '')[1]">
     <p:pipe port="meta" step="html-splitter"/>
   </p:variable>
+  
+  <p:variable name="svg-scale-hack" select="(/epub-config/cover/@svg-scale-hack, 'true')[1]">
+    <p:pipe port="meta" step="html-splitter"/>
+  </p:variable>
 
   <p:identity name="strip-leading-non-elements">
     <p:documentation>Strip spurious text-only document nodes that sometimes occured before the HTML
@@ -189,6 +193,7 @@
         </p:input>
         <p:with-option name="target" select="$target"/>
         <p:with-option name="css-handling" select="$css-handling"/>
+        <p:with-option name="svg-scale-hack" select="$svg-scale-hack"/>
         <p:with-option name="basename" select="$basename"/>
         <p:with-option name="html-subdir-name" select="$html-subdir-name"/>
         <p:with-option name="common-source-dir-elimination-regex" select="/*/@common-dir-elimination-regex">

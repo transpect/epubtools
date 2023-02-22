@@ -11,6 +11,7 @@
   <xsl:param name="restore-original-css-filenames" select="'true'"/>
   <xsl:param name="common-source-dir-elimination-regex" as="xs:string?"/>
   <xsl:param name="html-subdir-name" as="xs:string"/>
+  <xsl:param name="svg-scale-hack" as="xs:string"/>
   <xsl:variable name="html-prefix" select="if (normalize-space($html-subdir-name)) then concat($html-subdir-name, '/') else ''"/>
   <xsl:variable name="relative-prefix" as="xs:string" select="if (normalize-space($html-prefix)) then '../' else ''"/>
   <xsl:param name="debug" select="'no'"/>
@@ -51,6 +52,11 @@
                   <xsl:value-of select="base-uri(/*)"/>
                   <xsl:text>) */</xsl:text>
                 </comment>
+                <xsl:if test="$svg-scale-hack = ('yes', 'true')">
+                  <ruleset origin="epubtools/modules/html-splitter/xsl/per-spli-css.xsl">
+                    <raw-css>div.cover svg { max-height:97%; height:97vh; margin:0; }</raw-css>
+                  </ruleset>
+                </xsl:if>
               </xsl:if>
               <xsl:sequence select="$rulesets"/>
             </css:css>
