@@ -436,19 +436,20 @@
         <p:viewport match="*[@src | @href | @xlink:href | @poster]
                             [some $att in @*[local-name() = ('src', 'href', 'poster')] 
                              satisfies $att[starts-with(., 'http')]]" name="check-hrefs">
-              <p:variable name="actual-link-to-be-checked" select="for $u in /*/(@src | @href | @xlink:href | @poster)
-                                                          [if (normalize-space($never))
-                                                           then (every $n in tokenize($never, '(\||~)') 
-                                                                satisfies not(contains(., $n)))
-                                                           else true()]
-                                                          [if (normalize-space($only)) 
-                                                           then (some $o in tokenize($only, '(\||~)') 
-                                                                satisfies contains(., $o))
-                                                           else true()] 
-                                                       return $u">
-                <p:pipe port="current" step="check-hrefs"></p:pipe>
-              </p:variable>
-           <p:try name="fu2t">
+          <p:variable name="url" select="/*/(@src | @href | @xlink:href | @poster)"/>
+          <p:variable name="actual-link-to-be-checked" select="for $u in $url
+                                                      [if (normalize-space($never))
+                                                       then (every $n in tokenize($never, '(\||~)') 
+                                                            satisfies not(contains(., $n)))
+                                                       else true()]
+                                                      [if (normalize-space($only)) 
+                                                       then (some $o in tokenize($only, '(\||~)') 
+                                                            satisfies contains(., $o))
+                                                       else true()] 
+                                                   return $u">
+            <p:pipe port="current" step="check-hrefs"></p:pipe>
+          </p:variable>
+          <p:try name="fu2t">
             <p:group>
               <cx:message>
                 <!-- to determine which links need especially much time to be resolved -->
@@ -456,17 +457,32 @@
                   <p:pipe port="current" step="check-hrefs"></p:pipe>
                 </p:with-option>
               </cx:message>
-              <tr:file-uri fetch-http="false" check-http="true" name="fu2i" make-unique="false">
-                <p:with-option name="filename" select="resolve-uri(escape-html-uri($actual-link-to-be-checked), base-uri())">
-                  <p:documentation>If it is a relative URI, resolve it wrt the HTML source.</p:documentation>
-                </p:with-option>
-                <p:input port="resolver">
-                  <p:document href="http://transpect.io/xslt-util/xslt-based-catalog-resolver/xsl/resolve-uri-by-catalog.xsl"/>
-                </p:input>
-                <p:input port="catalog">
-                  <p:document href="http://this.transpect.io/xmlcatalog/catalog.xml"/>
-                </p:input>
-              </tr:file-uri>
+              <p:choose>
+                <p:when test="normalize-space($actual-link-to-be-checked)">
+                  <tr:file-uri fetch-http="false" check-http="true" name="fu2i" make-unique="false">
+                    <p:with-option name="filename" select="resolve-uri(escape-html-uri($actual-link-to-be-checked), base-uri())">
+                      <p:documentation>If it is a relative URI, resolve it wrt the HTML source.</p:documentation>
+                    </p:with-option>
+                    <p:input port="resolver">
+                      <p:document href="http://transpect.io/xslt-util/xslt-based-catalog-resolver/xsl/resolve-uri-by-catalog.xsl"/>
+                    </p:input>
+                    <p:input port="catalog">
+                      <p:document href="http://this.transpect.io/xmlcatalog/catalog.xml"/>
+                    </p:input>
+                  </tr:file-uri>    
+                </p:when>
+                <p:otherwise>
+                  <p:documentation>For performance reasons, we skip tr:file-uri altogether if no check required.
+                  Strangely, it took about a second per URL even with fetch-http="false" and check-http="false".
+                  </p:documentation>
+                  <p:add-attribute attribute-name="href" match="/*">
+                    <p:input port="source">
+                      <p:inline><c:result/></p:inline>
+                    </p:input>
+                    <p:with-option name="attribute-value" select="$url"/>
+                  </p:add-attribute>
+                </p:otherwise>
+              </p:choose>
             </p:group>
             <p:catch name="catch-fu2">
               <p:insert match="/*" position="first-child">
@@ -480,9 +496,7 @@
                 </p:input>
               </p:insert>
               <p:add-attribute attribute-name="href" match="/*">
-                <p:with-option name="attribute-value" select="/*/(@src | @href | @xlink:href | @poster)">
-                  <p:pipe port="current" step="check-hrefs"/>
-                </p:with-option>
+                <p:with-option name="attribute-value" select="$url"/>
               </p:add-attribute>
               <cx:message>
                 <!-- without this message, due to a Calabash bug, no error-status will be attached to the element: -->
