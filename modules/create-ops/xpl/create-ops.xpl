@@ -583,15 +583,26 @@
       <p:with-option name="base-uri" select="$debug-dir-uri" />
     </tr:store-debug>
     
-    <css:parse name="css-parse0">
-      <p:input port="stylesheet">
-        <p:pipe port="result" step="css-parser-xsl"/>
-      </p:input>
-      <p:with-option name="debug" select="$debug"/>
-      <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
-      <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
-      <p:with-option name="remove-comments" select="$css-remove-comments"/>
-    </css:parse>
+    <p:choose name="conditionally-parse-css">
+      <p:when test="$css-handling = 'unchanged'">
+        <p:identity>
+          <p:input port="source">
+            <p:inline><css xmlns="http://www.w3.org/1996/css"/></p:inline>
+          </p:input>
+        </p:identity>
+      </p:when>
+      <p:otherwise>
+        <css:parse name="css-parse0">
+          <p:input port="stylesheet">
+            <p:pipe port="result" step="css-parser-xsl"/>
+          </p:input>
+          <p:with-option name="debug" select="$debug"/>
+          <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+          <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
+          <p:with-option name="remove-comments" select="$css-remove-comments"/>
+        </css:parse>    
+      </p:otherwise>
+    </p:choose>
     
     <p:add-attribute match="/*" attribute-name="xml:base" name="css-parse1">
       <p:with-option name="attribute-value" select="concat( $targetdir, 'epub/OEBPS/styles/', $css-filename)"/>
@@ -625,7 +636,7 @@
 
     <p:sink name="sink3"/>
     
-     <p:choose name="conditionally-create-fontsubset">
+    <p:choose name="conditionally-create-fontsubset">
       <p:when test="$create-font-subset = 'true'">
         <tr:create-font-subset name="subset">
           <p:input port="source">
