@@ -479,7 +479,7 @@
     <xsl:sequence
       select="if( matches($in, '\.ncx$') ) 
                           then 'ncx' 
-                          else replace(replace(opf:strip-path($in), '\.', ''),'/', '__')"/>
+                          else replace(replace(opf:strip-path($in), '\.', ''),'[/~]', '__')"/>
   </xsl:function>
 
 </xsl:stylesheet>
