@@ -383,9 +383,16 @@
               <xsl:stylesheet version="2.0" xmlns:epub="http://www.idpf.org/2007/ops">
                 <xsl:import href="http://transpect.io/epubtools/modules/create-ops/xsl/functions.xsl"/>
                 
-                <xsl:template match="*[not(@role)]/@epub:type">
+                <xsl:template match="*[not(@role)]/@epub:type[. != 'cover']">
                   <xsl:copy-of select="."/>
                   <xsl:sequence select="epub:type2aria(., parent::*)"/>
+                </xsl:template>
+                
+                <xsl:template match="*:div[@epub:type = 'cover']/*:img[not(@role)]">
+                  <xsl:copy>
+                    <xsl:sequence select="epub:type2aria(parent::*:div/@epub:type, .)"/>
+                    <xsl:apply-templates select="@*, node()"/>
+                  </xsl:copy>
                 </xsl:template>
                 
                 <xsl:template match="@*|node()">
