@@ -80,8 +80,10 @@
             <xsl:if test="name() eq 'dc:identifier'">
               <xsl:choose>
                 <xsl:when test="$target = 'EPUB3'">
-                    <xsl:if test=". is ../dc:identifier[1]">
-                      <xsl:attribute name="id" select="(@opf:scheme, 'bookid')[1]"/>
+                    <xsl:if test=". is ../dc:identifier[1] or @opf:scheme or @id">
+                      <xsl:attribute name="id" select="if (. is ../dc:identifier[1]) 
+                                                       then (@opf:scheme, 'bookid')[1]
+                                                       else (@id, @opf:scheme)[1]"/>
                     </xsl:if>
                 </xsl:when>
                 <xsl:otherwise>
@@ -254,7 +256,7 @@
                  <!-- ensure that nav includes at least all the top-level headings ( should contain about more or same number as h1 in doc) -->
                 <meta property="schema:accessibilityFeature">tableOfContents</meta></xsl:if>
               <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'index']) 
-                            and $html-content[descendant::*[@epub:type= 'index']]">
+                            and $html-content[descendant::*[some $a in tokenize(@epub:type, '\s+') satisfies $a = 'index']]">
                 <meta property="schema:accessibilityFeature">index</meta>
               </xsl:if>
             </xsl:variable>
