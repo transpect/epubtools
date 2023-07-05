@@ -366,13 +366,16 @@
   <!-- MODE: SEMIFLATTEN
        Dissolve divs which contain more than a single heading (important for later grouping) -->
   <xsl:variable name="tr:dissolvable-for-semiflatten" as="element(*)*"
-    select="$root//*[local-name() = ('aside', 'div', 'nav', 'header', 'section', 
+    select="$root//*[local-name() = ('aside', 'div', 'nav', 'header', 'section', ('figure')[$tr:subheadings-in-figure],
                 ('table', 'tbody', 'tr', 'td', 'th')[$epub-config/@consider-headings-in-tables = 'true'
                                                      or $tr:subheadings-in-table])]"/>
 
   <xsl:variable name="tr:subheadings-in-table" as="xs:boolean" 
     select="exists(//html:tr[exists(.//*[tr:contains-token(@class, ('TOC_same', 'TOC_sub'))])])"/>
 
+  <xsl:variable name="tr:subheadings-in-figure" as="xs:boolean" 
+    select="exists(//html:figure[exists(.//*[tr:contains-token(@class, ('TOC_same', 'TOC_sub'))])])"/>
+  
   <xsl:template
     match="*[exists(. intersect $tr:dissolvable-for-semiflatten)][
                          (count(.//* intersect $candidates) gt 1)
@@ -1574,7 +1577,7 @@
             <xsl:message>Something's wrong (msg b): same level <xsl:value-of select="$level"/> at current group first item
                 <xsl:sequence select="."/> in <xsl:sequence select="(current-group() except .)[position() = (1 to 5)]"/>… 
               Possible issue: there are headings deeply nested in the markup above. 
-              A solution might be do add the nesting tags in the list of dissolvable
+              A solution might be to add the nesting tags in the list of dissolvable
               elements in tr:dissolvable-for-semiflatten(). </xsl:message>
           </xsl:if>
           <xsl:sequence
