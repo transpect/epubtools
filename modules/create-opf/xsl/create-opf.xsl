@@ -242,7 +242,7 @@
                             and 
                             exists($html-content//*[@role='doc-pagebreak']) 
                             and 
-                            (count($nav-html//*:nav[@epub:type='page-list']//*:li) = count($html-content//*[@role='doc-pagebreak']))">
+                            (count($nav-html//*:nav[@epub:type='page-list']//*:li) = count(collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')][not(matches(@xml:base, '\P{L}(ncx)', 'i'))]//*[@role='doc-pagebreak']))">
                 <meta property="schema:accessibilityFeature">printPageNumbers</meta>
               </xsl:if>
   
