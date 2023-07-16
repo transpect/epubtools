@@ -34,6 +34,9 @@
       Each split HTML file, with an additional link to the individual CSS file if there are
       per-split CSS rules. Also, all of the newly generated CSS, with a base URI that matches the corresponding
       HTML file’s, except for the file extension.
+      NCX and HTML outputs of this step have '/(debug|chunks)/' replaced with '/$1/new-uri/' because Saxon from 
+      version 10 on is very rigorous in not writing to a URI from which it previously had read. This needs to be fixed
+      before storing the files.
     </p:documentation>
   </p:output>
   

@@ -225,7 +225,12 @@
             * regarding their file extension and the output target
             * -->
       <p:for-each name="store-chunks" cx:depends-on="insert-amzn-region-magnification">
-        <p:output port="files">
+        <p:output port="files" sequence="true">
+          <p:documentation>sequence should be meaningless on a p:for-each output port. However,
+          Calabash 1.3.2 for Saxon 10 complains:
+[main] ERROR com.xmlcalabash.runtime.XAtomicStep - err:XD0006:Writing to files on store-chunks
+[main] ERROR com.xmlcalabash.drivers.Main - If sequence is not specified, or has the value false, then it is a dynamic error unless exactly one document appears on the declared port.
+          </p:documentation>
           <p:pipe port="result" step="collect-file-uri"/>
         </p:output>
         <p:output port="result" primary="true">
@@ -236,7 +241,11 @@
           <p:pipe port="result" step="insert-amzn-region-magnification"/>
         </p:iteration-source>
         
-        <p:variable name="chunk-file-uri" select="replace(base-uri(/*), 'chunks/', 'epub/OEBPS/')">
+        <p:variable name="chunk-file-uri" select="replace(
+                                                    replace(base-uri(/*), '/(debug|chunks)/new-uri/', '/$1/'), 
+                                                    'chunks/', 
+                                                    'epub/OEBPS/'
+                                                  )">
           <p:documentation>base-uri(/*) instead of base-uri() because we set the base uri of the primary CSS by adding
             an xml:base attribute.</p:documentation>
         </p:variable>

@@ -48,7 +48,7 @@
   
   <xsl:template match="html:html | ncx:ncx" priority="2">
     <!-- gotta alter the output uri in a non-problematic way because it must be different -->
-    <xsl:result-document href="{replace(base-uri(), '/(debug|chunks)/', '//$1/')}">
+    <xsl:result-document href="{replace(base-uri(), '/(debug|chunks)/', '/$1/new-uri/')}">
       <xsl:next-match/>
     </xsl:result-document>
   </xsl:template>

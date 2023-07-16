@@ -18,7 +18,7 @@
 
   <!-- Standalone Saxon invocation:
     First invoke an XProc-based conversion with debugging enabled. 
-    Then, from the project directory that contains the project’s catalog/catalog.xml:
+    Then, from the project directory that contains the project’s xmlcatalog/catalog.xml:
     saxon -xsl:epubtools/modules/html-splitter/xsl/html-splitter.xsl \
           -s:any.xml \
           collection-uri=file:/$(cygpath.exe -ma ../path/to/debug-dir/epubtools/html-splitter/base/splitter-input.catalog.xml) \
