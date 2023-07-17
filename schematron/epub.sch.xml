@@ -940,7 +940,7 @@
   
   <diagnostics>
     <diagnostic id="print-alt-texts_de" xml:lang="de">
-       Altarnativtext: '<value-of select="@alt"/>'.
+       Alternativtext: '<value-of select="@alt"/>'.
     </diagnostic>
     <diagnostic id="page_numbers_ncx-not-ascending_de" xml:lang="de">
       Eine Seitenzahl in der NCX-pageList, <xsl:value-of select="ncx:navLabel/ncx:text"/>, ist kleiner als die Vorgängerseitenzahl,
