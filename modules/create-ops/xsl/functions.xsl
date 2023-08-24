@@ -262,7 +262,7 @@
     <xsl:param name="epub-type" as="attribute(epub:type)"/>
     <xsl:param name="parent" as="element()"/>
     <xsl:variable name="mapping" as="xs:string?"
-                  select="$epub:aria-role-mapping[@epub:type eq $epub-type]
+                  select="$epub:aria-role-mapping[some $type in tokenize($epub-type, '\s+') satisfies $type eq @epub:type]
                                                  [   tokenize(@applicable, '\s') = $parent/local-name()
                                                   or tokenize($epub:any-aria-role-applicable, '\s') = $parent/local-name()]
                                                  [normalize-space(@aria-role)]
