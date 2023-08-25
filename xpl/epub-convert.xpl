@@ -121,6 +121,7 @@
   </p:option>
   <p:option name="create-svg-cover" select="'false'"  cx:type="xs:string" required="false"/>
   <p:option name="convert-svg-cover" select="'false'"  cx:type="xs:string" required="false"/>
+  <p:option name="pull-up-epub-type-to-body" select="'false'"  cx:type="xs:string" required="false"/>
   
   <!-- URIs are resolved by XML catalogs, which are located as default in xmlcatalog/catalog.xml -->
   
@@ -304,6 +305,7 @@
     </p:with-option>
     <p:with-option name="create-svg-cover" select="$create-svg-cover"/>
     <p:with-option name="convert-svg-cover" select="$convert-svg-cover"/>
+    <p:with-option name="pull-up-epub-type-to-body" select="$pull-up-epub-type-to-body"/>
   </epub:create-ops>
 
   <epub:create-opf name="create-opf">

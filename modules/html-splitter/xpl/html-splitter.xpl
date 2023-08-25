@@ -58,7 +58,8 @@
   <p:option name="target" select="'EPUB2'" cx:type="xsd:string"/>
   <p:option name="debug" select="'no'" cx:type="xsd:string"/>
   <p:option name="debug-dir-uri" select="'debug'" cx:type="xsd:string"/>
-
+  <p:option name="pull-up-epub-type-to-body" select="'false'" cx:type="xsd:string" required="false"/>
+  
   <p:import href="split-css.xpl"/>
   <p:import href="insert-amzn-region-magnification.xpl"/>
 

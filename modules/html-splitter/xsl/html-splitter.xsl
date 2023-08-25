@@ -76,6 +76,9 @@
   <xsl:param name="debug" select="'no'"/>
   <xsl:param name="debug-dir-uri" select="'debug'"/>
 
+  <xsl:param name="pull-up-epub-type-to-body" select="'false'" as="xs:string"/>
+  <xsl:param name="epub-types-for-pulling-to-body" select="('frontmatter', 'bodymatter', 'backmatter')" as="xs:string+"/>
+  
   <xsl:variable name="common-dir-elimination-regex" as="xs:string"
     select="replace($datadir, '/+', '/+')"/>
   <xsl:variable name="orig-filename" select="replace(base-uri(/*), '^.*/', '')"/>
@@ -1282,9 +1285,7 @@
             <xsl:apply-templates select="$toc-ncx/ncx:navMap" mode="nav-xhtml"/>
           </ol>
         </nav>
-        <xsl:call-template name="create-lof">
-          <xsl:with-param name="transform-lof-to-nav" as="xs:boolean"  select="true()" tunnel="yes"/>
-        </xsl:call-template>
+        <xsl:call-template name="create-lof"/>
         <xsl:if test="$pgl and not($final-pub-type = ('EPUB2'))">
           <xsl:call-template name="page-list-nav-inner"/>
         </xsl:if>
@@ -1292,22 +1293,26 @@
     </html>
   </xsl:template>
 
-
+  <xsl:template match="*[@epub:type = ('lof', 'lot')]
+                        [@class = 'as-nav']" mode="#all">
+    <xsl:param name="transform-lof-to-nav" as="xs:boolean?" tunnel="yes"/>
+    <xsl:if test="$transform-lof-to-nav">
+      <nav>
+          <xsl:apply-templates select="./@*, ./node()" mode="#current"/>
+        </nav>
+    </xsl:if>
+  </xsl:template>
 
   <xsl:template name="create-lof">
-    <xsl:param name="transform-lof-to-nav" as="xs:boolean?" tunnel="yes"/>
     <!-- if sections with @class="as-nav" → create nav elements and discard from content -->
-    <xsl:if test="$transform-lof-to-nav 
-                  and
-                  not($final-pub-type = ('EPUB2'))
+    <xsl:if test="not($final-pub-type = ('EPUB2'))
                   and
                   //*[@epub:type = ('lof', 'lot')]
                      [@class = 'as-nav']">
-      <xsl:for-each select="//*[@epub:type = ('lof', 'lot')][@class = 'as-nav']">
-        <nav>
-          <xsl:apply-templates select="./@*, ./node()" mode="#current"/>
-        </nav>
-      </xsl:for-each>
+      <xsl:apply-templates select="//*[@epub:type = ('lof', 'lot')]
+                                      [@class = 'as-nav']" mode="#current">
+        <xsl:with-param name="transform-lof-to-nav" as="xs:boolean"  select="true()" tunnel="yes"/>
+    </xsl:apply-templates>
     </xsl:if>
   </xsl:template>
   
@@ -1464,9 +1469,7 @@
       <xsl:with-param name="landmarks" select="$landmarks"/>
     </xsl:call-template>
     <xsl:next-match/>
-    <xsl:call-template name="create-lof">
-       <xsl:with-param name="transform-lof-to-nav" as="xs:boolean"  select="true()" tunnel="yes"/>
-    </xsl:call-template>
+    <xsl:call-template name="create-lof"/>
     <xsl:if test="$pgl and not($final-pub-type = ('EPUB2'))">
       <xsl:call-template name="page-list-nav-inner"/>
     </xsl:if>
@@ -1768,7 +1771,43 @@
   </xsl:function>
   
   <xsl:template match="html:body/text()[not(normalize-space())]" priority="2" mode="remove-surrounding-text remove-other-pub-type-content"/>
-
+ 
+  <xsl:function name="tr:epub-type-pullable" as="xs:boolean">
+    <xsl:param name="body" as="element(html:body)"/>
+      <xsl:variable name="epub-tokens-from-first-elt" select="tokenize($body/*[@epub:type][1]/@epub:type, '\s+')" as="xs:string*"/>
+    <!-- every child must contain the same epub:type that is to be pulled up -->
+    <xsl:sequence select="$pull-up-epub-type-to-body = ('true', 'yes') 
+                          and 
+                          (every $child in $body/* satisfies $child[@epub:type]
+                                                                  [some $epub-type-token 
+                                                                   in tokenize(@epub:type, '\s+') 
+                                                                   satisfies ($epub-type-token[. = $epub-types-for-pulling-to-body 
+                                                                                               and
+                                                                                               . = $epub-tokens-from-first-elt]
+                                                                              )
+                                                                   ]
+                          )"/>
+  </xsl:function>
+  
+  <xsl:template match="html:body[tr:epub-type-pullable(.)]" priority="2" mode="remove-surrounding-text">
+    <!-- pull up @epub:type for backmatter, bodymatter, frontmatter to body element-->
+    <xsl:copy>
+      <xsl:apply-templates select="@*" mode="#current"/>
+        <xsl:variable name="new-type" select="replace(*[1][tr:contains-token(@epub:type, $epub-types-for-pulling-to-body)]/@epub:type, 
+                                                      concat('^.*(',string-join($epub-types-for-pulling-to-body, '|'),').*$'), '$1')" as="xs:string"/>
+        <xsl:attribute name="epub:type" select="normalize-space($new-type)"/>
+      <xsl:apply-templates select="node()" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="html:body[tr:epub-type-pullable(.)]/*/@epub:type" priority="2" mode="remove-surrounding-text">
+   <!-- pull up @epub:type for backmatter, bodymatter, frontmatter to body element-->
+   <xsl:variable name="new-type" select="replace(., 
+                                                concat('(', string-join($epub-types-for-pulling-to-body, '|'), ')'),
+                                                '')" as="xs:string"/>
+   <xsl:if test="$new-type[normalize-space()]"><xsl:attribute name="{name()}" select="normalize-space($new-type)"/></xsl:if>
+  </xsl:template>
+  
   <!-- Save this invalid epub-type until the following template will dissolve it -->
   <xsl:template match="html:span/@epub:type[. eq 'dc:identifier']" mode="#all" priority="3">
     <xsl:copy/>

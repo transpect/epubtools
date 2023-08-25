@@ -79,7 +79,8 @@
   </p:option>
   <p:option name="create-svg-cover" select="'false'"  cx:type="xs:string" required="false"/>
   <p:option name="convert-svg-cover" select="'false'"  cx:type="xs:string" required="false"/>
-  
+  <p:option name="pull-up-epub-type-to-body" select="'false'"  cx:type="xs:string" required="false"/>
+ 
   <p:import href="../../html-splitter/xpl/html-splitter.xpl"/>
   <p:import href="../../fontsubsetter/xpl/fontsubsetter.xpl"/>
   
@@ -1002,6 +1003,7 @@
     <p:with-option name="target" select="$target"/>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+    <p:with-option name="pull-up-epub-type-to-body" select="$pull-up-epub-type-to-body"/>
   </epub:html-splitter>
 
   <p:viewport match="c:file[@media-type='application/xhtml+xml']" name="html-file-size">
