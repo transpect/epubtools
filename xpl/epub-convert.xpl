@@ -22,7 +22,7 @@
     <p>Note that it’s advisable to make all file inputs absolute URIs, by using <code>cygpath</code> on Cygwin or <code>readlink -f</code>
     on Unixy systems. For bash, this is, e.g., <code>source=file:/$(cygpath -ma sample/b978-3-646-92351-3.xhtml)</code> </p>
     <p>8/2023: new feature: if HTML contains a &gt;div>, &gt;section> or &gt;nav> element with <pre>@class="as-nav"</pre> and 
-      <pre>@epub:type="lof"</pre> (or "lot") that section is removed from content and moved into the navigation page as &gt;nav> element.
+      <pre>@epub:type="loi"</pre> (or "lot") that section is removed from content and moved into the navigation page as &gt;nav> element.
       This works not for EPUB2. Structure is expexted as &gt;ol>&gt;li>&gt;a href="link-to-fig">Fig 1: xyz&gt;/a>&gt;/li>&gt;/ol>.</p>
   </p:documentation>
 
@@ -121,7 +121,9 @@
   </p:option>
   <p:option name="create-svg-cover" select="'false'"  cx:type="xs:string" required="false"/>
   <p:option name="convert-svg-cover" select="'false'"  cx:type="xs:string" required="false"/>
-  <p:option name="pull-up-epub-type-to-body" select="'false'"  cx:type="xs:string" required="false"/>
+  <p:option name="pull-up-epub-type-to-body" select="'false'"  cx:type="xs:string" required="false">
+     <p:documentation>Pulls up some @epub:type attributes to parent body element. Momentarily only frontmatter, bodymatter and backmatter.</p:documentation>
+  </p:option>
   
   <!-- URIs are resolved by XML catalogs, which are located as default in xmlcatalog/catalog.xml -->
   

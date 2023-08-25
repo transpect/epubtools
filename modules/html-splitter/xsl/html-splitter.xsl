@@ -1293,7 +1293,7 @@
     </html>
   </xsl:template>
 
-  <xsl:template match="*[@epub:type = ('lof', 'lot')]
+  <xsl:template match="*[@epub:type = ('lof', 'loi')]
                         [@class = 'as-nav']" mode="#all">
     <xsl:param name="transform-lof-to-nav" as="xs:boolean?" tunnel="yes"/>
     <xsl:if test="$transform-lof-to-nav">
@@ -1307,9 +1307,9 @@
     <!-- if sections with @class="as-nav" → create nav elements and discard from content -->
     <xsl:if test="not($final-pub-type = ('EPUB2'))
                   and
-                  //*[@epub:type = ('lof', 'lot')]
+                  //*[@epub:type = ('loi', 'lot')]
                      [@class = 'as-nav']">
-      <xsl:apply-templates select="//*[@epub:type = ('lof', 'lot')]
+      <xsl:apply-templates select="//*[@epub:type = ('loi', 'lot')]
                                       [@class = 'as-nav']" mode="#current">
         <xsl:with-param name="transform-lof-to-nav" as="xs:boolean"  select="true()" tunnel="yes"/>
     </xsl:apply-templates>
