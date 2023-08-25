@@ -1282,6 +1282,9 @@
             <xsl:apply-templates select="$toc-ncx/ncx:navMap" mode="nav-xhtml"/>
           </ol>
         </nav>
+        <xsl:call-template name="create-lof">
+          <xsl:with-param name="transform-lof-to-nav" as="xs:boolean"  select="true()" tunnel="yes"/>
+        </xsl:call-template>
         <xsl:if test="$pgl and not($final-pub-type = ('EPUB2'))">
           <xsl:call-template name="page-list-nav-inner"/>
         </xsl:if>
@@ -1289,6 +1292,25 @@
     </html>
   </xsl:template>
 
+
+
+  <xsl:template name="create-lof">
+    <xsl:param name="transform-lof-to-nav" as="xs:boolean?" tunnel="yes"/>
+    <!-- if sections with @class="as-nav" → create nav elements and discard from content -->
+    <xsl:if test="$transform-lof-to-nav 
+                  and
+                  not($final-pub-type = ('EPUB2'))
+                  and
+                  //*[@epub:type = ('lof', 'lot')]
+                     [@class = 'as-nav']">
+      <xsl:for-each select="//*[@epub:type = ('lof', 'lot')][@class = 'as-nav']">
+        <nav>
+          <xsl:apply-templates select="./@*, ./node()" mode="#current"/>
+        </nav>
+      </xsl:for-each>
+    </xsl:if>
+  </xsl:template>
+  
   <xsl:variable name="toc-nav-id" select="'toc-navigation'" as="xs:string"/>
 
   <!-- only page-list-nav-inner seems to be used -->
@@ -1442,6 +1464,9 @@
       <xsl:with-param name="landmarks" select="$landmarks"/>
     </xsl:call-template>
     <xsl:next-match/>
+    <xsl:call-template name="create-lof">
+       <xsl:with-param name="transform-lof-to-nav" as="xs:boolean"  select="true()" tunnel="yes"/>
+    </xsl:call-template>
     <xsl:if test="$pgl and not($final-pub-type = ('EPUB2'))">
       <xsl:call-template name="page-list-nav-inner"/>
     </xsl:if>
