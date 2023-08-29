@@ -1293,24 +1293,25 @@
     </html>
   </xsl:template>
 
-  <xsl:template match="*[@epub:type = ('lof', 'loi')]
+  <xsl:template match="*[@epub:type = ('loi', 'lot')]
                         [@class = 'as-nav']" mode="#all">
     <xsl:param name="transform-lof-to-nav" as="xs:boolean?" tunnel="yes"/>
     <xsl:if test="$transform-lof-to-nav">
       <nav>
-          <xsl:apply-templates select="./@*, ./node()" mode="#current"/>
-        </nav>
+        <xsl:apply-templates select="@*, node()" mode="#current"/>
+      </nav>
     </xsl:if>
   </xsl:template>
 
   <xsl:template name="create-lof">
     <!-- if sections with @class="as-nav" → create nav elements and discard from content -->
+    
     <xsl:if test="not($final-pub-type = ('EPUB2'))
                   and
-                  //*[@epub:type = ('loi', 'lot')]
-                     [@class = 'as-nav']">
-      <xsl:apply-templates select="//*[@epub:type = ('loi', 'lot')]
-                                      [@class = 'as-nav']" mode="#current">
+                  exists((//*, $root//*)[@epub:type = ('loi', 'lot')]
+                            [@class = 'as-nav'])">
+      <xsl:apply-templates select="(//*, $root//*)[@epub:type = ('loi', 'lot')]
+                                                  [@class = 'as-nav']" mode="#current">
         <xsl:with-param name="transform-lof-to-nav" as="xs:boolean"  select="true()" tunnel="yes"/>
     </xsl:apply-templates>
     </xsl:if>
@@ -1770,7 +1771,7 @@
     </chunks>
   </xsl:function>
   
-  <xsl:template match="html:body/text()[not(normalize-space())]" priority="2" mode="remove-surrounding-text remove-other-pub-type-content"/>
+  <xsl:template match="html:body/text()[not(normalize-space())]" priority="2" mode="remove-surrounding-text remove-other-pub-type-content"></xsl:template>
  
   <xsl:function name="tr:epub-type-pullable" as="xs:boolean">
     <xsl:param name="body" as="element(html:body)"/>
@@ -1789,7 +1790,7 @@
                           )"/>
   </xsl:function>
   
-  <xsl:template match="html:body[tr:epub-type-pullable(.)]" priority="2" mode="remove-surrounding-text">
+  <xsl:template match="html:body[tr:epub-type-pullable(.)]" priority="2" mode="remove-surrounding-text remove-other-pub-type-content">
     <!-- pull up @epub:type for backmatter, bodymatter, frontmatter to body element-->
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
@@ -1800,7 +1801,7 @@
     </xsl:copy>
   </xsl:template>
   
-  <xsl:template match="html:body[tr:epub-type-pullable(.)]/*/@epub:type" priority="2" mode="remove-surrounding-text">
+  <xsl:template match="html:body[tr:epub-type-pullable(.)]/*/@epub:type" priority="2" mode="remove-surrounding-text remove-other-pub-type-content">
    <!-- pull up @epub:type for backmatter, bodymatter, frontmatter to body element-->
    <xsl:variable name="new-type" select="replace(., 
                                                 concat('(', string-join($epub-types-for-pulling-to-body, '|'), ')'),
