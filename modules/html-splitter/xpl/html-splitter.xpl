@@ -150,6 +150,7 @@
         <p:with-param name="datadir" select="$workdir"><p:empty/></p:with-param>
         <p:with-param name="basename" select="$basename"><p:empty/></p:with-param>
         <p:with-param name="html-subdir-name" select="$html-subdir-name"><p:empty/></p:with-param>
+        <p:with-param name="pull-up-epub-type-to-body" select="$pull-up-epub-type-to-body"><p:empty/></p:with-param>
         <p:input port="stylesheet">
           <p:document href="../xsl/html-splitter.xsl"/>
         </p:input>
