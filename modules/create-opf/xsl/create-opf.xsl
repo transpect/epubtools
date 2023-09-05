@@ -150,7 +150,7 @@
             <xsl:variable name="images" select="some $i in $html-content//*:body//* satisfies $i[self::*:img][not(matches(@src, 'logo|cover', 'i'))]
                                                                                                              [not(@role = 'presentation')]"/>
             <xsl:variable name="image-alts" select="exists($html-content//*:body//*:img) and (every $ia in $html-content//*:body//*:img satisfies $ia[@alt[string-length(normalize-space(.)) gt 5]
-                                                                                                                                                     [not(matches(substring-before($ia/@src, '.'), functx:escape-for-regex(substring-before(normalize-space(.), '.')), 'i'))]
+                                                                                                                                                     [not(matches(substring-before($ia/@src, '.'), functx:escape-for-regex(replace(normalize-space(.), '\.\p{L}+$', '')), 'i'))]
                                                                                                                                                       or @role = 'presentation'])"/>
             <xsl:if test="not(/epub-config/metadata/meta/@property = 'schema:accessMode')">
               <xsl:if test="$text"><meta property="schema:accessMode">textual</meta></xsl:if>
@@ -252,7 +252,7 @@
                             and
                             $html-content[descendant::*:h1]
                             and 
-                            (count($nav-html//*:nav[@epub:type='toc']/descendant::*:li) ge (count($html-content//*:h1)) - count($nav-html//*:nav[@epub:type='landmarks']//*:li))">
+                            (count($nav-html//*:nav[@epub:type='toc']/descendant::*:li) ge count($html-content//*:h1))">
                  <!-- ensure that nav includes at least all the top-level headings ( should contain about more or same number as h1 in doc) -->
                 <meta property="schema:accessibilityFeature">tableOfContents</meta></xsl:if>
               <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'index']) 
