@@ -77,7 +77,7 @@
   <xsl:param name="debug-dir-uri" select="'debug'"/>
 
   <xsl:param name="pull-up-epub-type-to-body" select="'false'" as="xs:string"/>
-  <xsl:param name="epub-types-for-pulling-to-body" select="('frontmatter', 'bodymatter', 'backmatter')" as="xs:string+"/>
+
   
   <xsl:variable name="common-dir-elimination-regex" as="xs:string"
     select="replace($datadir, '/+', '/+')"/>
@@ -88,6 +88,11 @@
   <xsl:variable name="heading-conf"
     select="(collection($collection-uri)/hierarchy, collection($collection-uri)/epub-config/hierarchy)[1]" as="element(hierarchy)"/>
   <xsl:variable name="metadata" select="$epub-config/metadata" as="element(metadata)"/>
+  <xsl:variable name="epub-types-for-pulling-to-body" select="if ($epub-config/types/@pull-up-types[normalize-space()]) 
+                                                              then tokenize($epub-config/types/@pull-up-types, '\s+') 
+                                                              else ('frontmatter', 'bodymatter', 'backmatter')" as="xs:string+">
+    <!-- you can add custom types to be pulles up in on the types element of the epub-config file -->
+  </xsl:variable>
 
   <!-- CATCH-ALL IDENTITY TEMPLATE -->
   <xsl:template match="node()|@*" mode="#all" priority="-0.9">
@@ -1771,12 +1776,12 @@
     </chunks>
   </xsl:function>
   
-  <xsl:template match="html:body/text()[not(normalize-space())]" priority="2" mode="remove-surrounding-text remove-other-pub-type-content"></xsl:template>
+  <xsl:template match="html:body/text()[not(normalize-space())]" priority="2" mode="remove-surrounding-text remove-other-pub-type-content"/>
  
   <xsl:function name="tr:epub-type-pullable" as="xs:boolean">
     <xsl:param name="body" as="element(html:body)"/>
       <xsl:variable name="epub-tokens-from-first-elt" select="tokenize($body/*[@epub:type][1]/@epub:type, '\s+')" as="xs:string*"/>
-    <!-- every child must contain the same epub:type that is to be pulled up -->
+    <!-- every child must contain the same epub:type(s) that is to be pulled up -->
     <xsl:sequence select="$pull-up-epub-type-to-body = ('true', 'yes') 
                           and 
                           (every $child in $body/* satisfies $child[@epub:type]
@@ -1794,19 +1799,22 @@
     <!-- pull up @epub:type for backmatter, bodymatter, frontmatter to body element-->
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
-        <xsl:variable name="new-type" select="replace(*[1][tr:contains-token(@epub:type, $epub-types-for-pulling-to-body)]/@epub:type, 
-                                                      concat('^.*(',string-join($epub-types-for-pulling-to-body, '|'),').*$'), '$1')" as="xs:string"/>
-        <xsl:attribute name="epub:type" select="normalize-space($new-type)"/>
-      <xsl:apply-templates select="node()" mode="#current"/>
+      <xsl:variable name="all-pullable-tokens" select="for $f in tokenize(*[1][@epub:type]/@epub:type, '\s+') return $f[. = $epub-types-for-pulling-to-body]" as="xs:string+"/>
+      <xsl:variable name="new-types" select="for $popo in $all-pullable-tokens return $popo[every $e in current()/* satisfies (. = tokenize($e/@epub:type, '\s+'))]" as="xs:string+"/>
+       <xsl:if test="some $s in $new-types satisfies $s[normalize-space()]">
+        <xsl:attribute name="epub:type" select="normalize-space(string-join($new-types, ' '))"/>
+       </xsl:if>
+      <xsl:apply-templates select="node()" mode="#current">
+        <xsl:with-param name="pull-up-types" select="$new-types" tunnel="yes" as="xs:string+"/>
+      </xsl:apply-templates>
     </xsl:copy>
   </xsl:template>
   
   <xsl:template match="html:body[tr:epub-type-pullable(.)]/*/@epub:type" priority="2" mode="remove-surrounding-text remove-other-pub-type-content">
+     <xsl:param name="pull-up-types" tunnel="yes" as="xs:string+"/>
    <!-- pull up @epub:type for backmatter, bodymatter, frontmatter to body element-->
-   <xsl:variable name="new-type" select="replace(., 
-                                                concat('(', string-join($epub-types-for-pulling-to-body, '|'), ')'),
-                                                '')" as="xs:string"/>
-   <xsl:if test="$new-type[normalize-space()]"><xsl:attribute name="{name()}" select="normalize-space($new-type)"/></xsl:if>
+    <xsl:variable name="new-type" select="tokenize(., '\s+')[not(. = $pull-up-types)]" as="xs:string*"/>
+   <xsl:if test="some $s in $new-type satisfies $s[normalize-space()]"><xsl:attribute name="{name()}" select="normalize-space(string-join($new-type, ' '))"/></xsl:if>
   </xsl:template>
   
   <!-- Save this invalid epub-type until the following template will dissolve it -->
