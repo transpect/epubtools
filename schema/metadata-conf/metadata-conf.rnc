@@ -252,6 +252,9 @@ types =
            "          the 3rd split chunk in the spine, use 3.5 for example."
          ]
     }?,
+    attribute pull-up-types{
+      list { (landmark-types)+ }
+    }?
     toc-type-element?,
     landmark-type-element?,
     plain-type-element*
