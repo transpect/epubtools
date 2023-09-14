@@ -1063,7 +1063,8 @@
     <diagnostic id="link-to-id_de" xml:lang="de">Die ID '<value-of select="$fragment-id"/>' in der Datei '<value-of 
       select="$normalized"/>' existiert nicht.</diagnostic>
     <diagnostic id="empty-img-alt_de" xml:lang="de">Das alt-Attribute bei Bild '<value-of select="replace(@src, '^.+/', '')"/>' 
-      sollte nicht leer sein.</diagnostic>
+      sollte nicht leer sein. Dies wird nur für dekorative Bilder empfohlen, die dem Inhalt keine Informationen 
+      hinzufügen und von barrierefreien Technologien wie Screenreadern ignoriert werden können.</diagnostic>
     <diagnostic id="paragraph-very-long_de" xml:lang="de">
       <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
       Dieser Absatz beinhaltet mehr als <value-of select="$para-max-string-length"/> Zeichen. 
