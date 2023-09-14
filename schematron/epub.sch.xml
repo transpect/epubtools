@@ -801,7 +801,7 @@
               test="exists(/c:wrap/epub-config/checks/check[@param = 'check-alt-texts']
                                                            [@value = ('true', 'yes')])">
          <span class="srcpath"><xsl:value-of select="for $s in @srcpath return concat($source-dir-uri, $s)"/></span>
-        Alt text: '<value-of select="@alt"/>'.
+        Alt text: <value-of select="if(normalize-space(@alt)) then concat('''', @alt, '''.') else ()"/>
       </report>
     </rule>
   </pattern>
