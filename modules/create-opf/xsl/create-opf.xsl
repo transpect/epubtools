@@ -149,11 +149,10 @@
             <xsl:variable name="text" select="some $t in $html-content//*:body satisfies $t[normalize-space()][string-length(.) gt 10]"/>
             <xsl:variable name="images" select="some $i in $html-content//*:body//* satisfies $i[self::*:img][not(matches(@src, 'logo|cover', 'i'))]
                                                                                                              [not(@role = 'presentation')]"/>
-            <xsl:variable name="image-alts" select="exists($html-content//*:body//*:img) and (every $ia in $html-content//*:body//*:img satisfies $ia[(@alt[string-length(normalize-space(.)) gt 5]
-                                                                                                                                                           [not(matches(substring-before($ia/@src, '.'), functx:escape-for-regex(replace(normalize-space(.), '\.\p{L}+$', '')), 'i'))]
-                                                                                                                                                       or @role = 'presentation')
-                                                                                                                                                       and not(matches($ia/@src, 'logo', 'i'))
-                                                                                                                                                      ])"/>
+            <xsl:variable name="image-alts" select="exists($html-content//*:body//*:img[not(matches(@src, 'logo', 'i'))]) and (every $ia in $html-content//*:body//*:img[not(matches(@src, 'logo', 'i'))] 
+                                                                                                                               satisfies $ia[@alt[string-length(normalize-space(.)) ge 3] or @role = 'presentation' ]
+                                                                                                                                            [not(matches(substring-before($ia/@src, '.'), functx:escape-for-regex(replace(normalize-space(@alt), '\.\p{L}+$', '')), 'i')) or @role = 'presentation']
+                                                                                                                               )"/>
             <xsl:if test="not(/epub-config/metadata/meta/@property = 'schema:accessMode')">
               <xsl:if test="$text"><meta property="schema:accessMode">textual</meta></xsl:if>
               <xsl:if test="$images or $video"><meta property="schema:accessMode">visual</meta></xsl:if>
