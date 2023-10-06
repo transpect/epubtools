@@ -1942,12 +1942,12 @@
   </xsl:template>
   
   <xsl:template
-    match="*[not(@id)][@epub:type]"
+    match="*[not(@id)][@epub:type[not(. = ('index-group', 'index-entry', 'index-entry-list', 'index-locator'))]]"
     priority="-0.65" mode="export-chunk-with-surroundings export-chunk-subtree mobi-htm">
     <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:choose>
-        <xsl:when test="local-name() = ('a', 'ul', 'dl', 'ol', 'table', 'tbody', 'tr', 'thead', 'tfoot', 'img', 'hgroup', 'pre')">
+        <xsl:when test="local-name() = ('a', 'ul', 'dl', 'ol', 'table', 'tbody', 'tr', 'thead', 'tfoot', 'img', 'hgroup', 'pre', 'nav')">
           <xsl:attribute name="id" select="generate-id()"/>
         </xsl:when>
         <xsl:otherwise>
@@ -1958,6 +1958,7 @@
       </xsl:choose>
       <xsl:apply-templates mode="#current"/>
     </xsl:copy>
+    <!-- what about sections? -->
   </xsl:template>
   
   <!-- audio spans will not be dealt with by above templates, but only by the following,
