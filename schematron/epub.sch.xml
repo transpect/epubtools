@@ -4,6 +4,7 @@
   xmlns:dbk="http://docbook.org/ns/docbook"
   xmlns:c="http://www.w3.org/ns/xproc-step"
   xmlns:tr="http://transpect.io"
+  xmlns:functx="http://www.functx.com"
   tr:rule-family="epubtools"
   queryBinding="xslt2">
   
@@ -18,6 +19,7 @@
   <ns prefix="svg" uri="http://www.w3.org/2000/svg"/>
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
   <ns prefix="ncx" uri="http://www.daisy.org/z3986/2005/ncx/"/>
+  <ns prefix="functx" uri="http://www.functx.com"/>
 
   <let name="opf-package" value="/c:wrap/opf:package"/>
 
@@ -31,7 +33,8 @@
   <xsl:include href="http://transpect.io/xslt-util/resolve-uri/xsl/resolve-uri.xsl"/>
   <xsl:include href="http://transpect.io/xslt-util/isbn/xsl/isbncheck.xsl"/>
   <xsl:include href="http://transpect.io/xslt-util/num/xsl/num.xsl"/>
-  
+  <xsl:include href="http://transpect.io/xslt-util/functx/xsl/functx.xsl"/>
+
   <include href="http://transpect.io/xslt-util/isbn/sch/check-isbn.sch.xml"/>
   
   <let name="oebps-paths" value="/c:wrap/cx:document[@name = 'wrap-file-uris']/c:file/@oebps-name"/>
@@ -806,6 +809,34 @@
     </rule>
   </pattern>
 
+  <pattern id="check-alt-texts2">
+    <rule context="/c:wrap/cx:document[@name = 'wrap-chunks']//html:img">
+      <report role="warning" id="missing-alt-text" diagnostics="missing-alt-text_de" 
+              test="exists(/c:wrap/epub-config/checks/check[@param = 'check-alt-texts']
+                                                           [@value = ('true', 'yes')])
+                    and
+                    ( not(@alt) 
+                      or
+                      (string-length(normalize-space(@alt)) le 3 and normalize-space(@alt)(:if empty other rule matches:))
+                      or
+                      matches(substring-before(@src, '.'), 
+                              concat( '^', 
+                                      functx:escape-for-regex(replace(normalize-space(@alt), '\.\p{L}+$', '')), 
+                                      '$'
+                                     ),
+                               'i')
+                                                                            
+                  )">
+         <span class="srcpath"><xsl:value-of select="for $s in @srcpath return concat($source-dir-uri, $s)"/></span>
+         Alternative text '<value-of select="@alt"/>' is <value-of select="if (not(@alt)) 
+                                                                           then 'missing' 
+                                                                           else if(string-length(@alt) le 3) 
+                                                                                then 'too short' 
+                                                                                else 'the same as image name'"/>.
+      </report>
+    </rule>
+  </pattern>
+
   <pattern id="metadata-title">
     <rule context="opf:package/opf:metadata/dc:title">
       <report test="matches(., '^[\p{Zs}\s]*$')" role="error" id="empty-title" diagnostics="empty-title_de">
@@ -941,6 +972,13 @@
   <diagnostics>
     <diagnostic id="print-alt-texts_de" xml:lang="de">
        Alternativtext: '<value-of select="@alt"/>'.
+    </diagnostic>
+    <diagnostic id="missing-alt-text_de" xml:lang="de">
+       Alternativtext '<value-of select="@alt"/>' ist <value-of select="if (not(@alt)) 
+                                                                        then 'nicht vorhanden' 
+                                                                        else if(string-length(@alt) le 3) 
+                                                                             then 'zu kurz' 
+                                                                             else 'gleich dem Bildnamen'"/>.
     </diagnostic>
     <diagnostic id="page_numbers_ncx-not-ascending_de" xml:lang="de">
       Eine Seitenzahl in der NCX-pageList, <xsl:value-of select="ncx:navLabel/ncx:text"/>, ist kleiner als die Vorgängerseitenzahl,
