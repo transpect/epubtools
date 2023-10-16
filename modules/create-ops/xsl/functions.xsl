@@ -261,14 +261,18 @@
   <xsl:function name="epub:type2aria" as="attribute(role)?">
     <xsl:param name="epub-type" as="attribute(epub:type)"/>
     <xsl:param name="parent" as="element()"/>
-    <xsl:variable name="mapping" as="xs:string?"
+    <xsl:variable name="mapping" as="xs:string*"
                   select="$epub:aria-role-mapping[some $type in tokenize($epub-type, '\s+') satisfies $type eq @epub:type]
                                                  [   tokenize(@applicable, '\s') = $parent/local-name()
                                                   or tokenize($epub:any-aria-role-applicable, '\s') = $parent/local-name()]
                                                  [normalize-space(@aria-role)]
                                                  /@aria-role"/>
     <xsl:if test="exists($mapping)">
-      <xsl:attribute name="role" select="$mapping"/>
+      <!-- several role attributes may exist comma separated but if a digital publishing role is mapped there 
+           may only be one https://idpf.github.io/epub-guides/epub-aria-authoring/ (2.) +  fallback from ARIA 1.1 -->
+      <xsl:attribute name="role" select="if (some $m in $mapping satisfies starts-with($m, 'doc-'))
+                                         then ($mapping[starts-with(., 'doc-')][not(. = 'doc-appendix')], $mapping[. = 'doc-appendix'](:prefer more specific role :))[1]
+                                         else $mapping[1]"/>
     </xsl:if>
   </xsl:function>
   
