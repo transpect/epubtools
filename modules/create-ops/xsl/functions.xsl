@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:cat="urn:oasis:names:tc:entity:xmlns:xml:catalog"
@@ -141,7 +141,7 @@
     <entry epub:type="assessments" aria-role="" applicable=""/>
     <entry epub:type="backmatter" aria-role="" applicable=""/>
     <entry epub:type="balloon" aria-role="" applicable=""/>
-    <entry epub:type="biblioentry" aria-role="doc-biblioentry" applicable="li"/>
+    <entry epub:type="biblioentry" aria-role="" applicable=""/>
     <entry epub:type="bibliography" aria-role="doc-bibliography" applicable="section"/>
     <entry epub:type="biblioref" aria-role="doc-biblioref" applicable="a"/>
     <entry epub:type="bodymatter" aria-role="" applicable=""/>
