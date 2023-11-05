@@ -1345,7 +1345,10 @@
       <ol>
         <xsl:for-each select="$pgl/html:page[normalize-space(@name)]">
           <li>
-            <a href="{concat($html-prefix, @href)}" srcpath="pgl_{generate-id()}">
+            <a srcpath="pgl_{generate-id()}">
+              <xsl:apply-templates select="@href" mode="resolve-refs">
+                <xsl:with-param name="element" select="."/>
+              </xsl:apply-templates>
               <xsl:value-of select="@name"/>
             </a>
           </li>
