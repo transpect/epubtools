@@ -1215,6 +1215,7 @@
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:if test="$final-pub-type eq 'EPUB3'">
         <xsl:attribute name="epub:type" select="'pagebreak'"/>
+        <xsl:attribute name="role" select="'doc-pagebreak'"/>
         <xsl:attribute name="title" select="replace(@id, '^page_?', '')"/>
       </xsl:if>
       <xsl:apply-templates select="node()" mode="#current"/>
