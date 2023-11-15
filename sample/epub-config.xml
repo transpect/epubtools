@@ -34,7 +34,7 @@
 	  Support for external SVG files yet to be implemented.-->
   <cover href="images/cover.png" svg="true" svg-scale-hack="true"/>
 	
-	<types>
+	<types nav-spine-pos="3.5">
     <!-- A mapping from epub:type attribute values to generated
       headings or list entries (type/@heading attribute) or export
       file base names (type/@file) for the typed items. -->
@@ -42,7 +42,10 @@
     You can control its appearance in the spine content with the hidden attribute.
     If there is already a toc in the content, hidden is always interpreted as 'false'.
     Is that what you want? Our thinking was along the lines: if you include a rendered
-    toc in your HTML, you want to show it to the world. 
+    toc in your HTML, you want to show it to the world.
+    
+    The default for @nav-spine-pos is 1.5. The file with the generated navs will then be 
+    put right after the cover. Applies only to EPUB3.
     
     Please note that due to limitations of Relax NG (or of the schema designer),
     the required order of type declarations is toc, landmarks, everything else.
@@ -60,7 +63,7 @@
       will be considered when generating the landmarks. 
 	    fallback-id-for-landmark: See the embedded documentation in the Relax NG schema. 
 	  --> 
-    <type name="landmarks" heading="Übersicht" hidden="true" types="bodymatter toc"/>
+    <type name="landmarks" heading="Übersicht" hidden="true" types="cover bodymatter toc"/>
     <type name="cover" heading="Cover" file="cover" guide-type="text"/>
     <type name="frontmatter" heading="Vorspann"/>
     <type name="bodymatter" heading="Hauptteil"/>
