@@ -250,12 +250,13 @@
               <!-- is not yet included, only proposed-->
               <!--<xsl:if test="$nav-html//*:nav[@epub:type='page-list']"><meta property="schema:accessibilityFeature">pageNavigation</meta></xsl:if>-->
   
-              <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'printPageNumbers']) 
+              <xsl:if test="not(   /epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'printPageNumbers']
+                                or /epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'pageBreakMarkers']) 
                             and 
                             exists($html-content//*[@role='doc-pagebreak']) 
                             and 
                             (count($nav-html//*:nav[@epub:type='page-list']//*:li) = count(collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')][not(matches(@xml:base, '\P{L}(ncx)', 'i'))]//*[@role='doc-pagebreak']))">
-                <meta property="schema:accessibilityFeature">printPageNumbers</meta>
+                <meta property="schema:accessibilityFeature">pageBreakMarkers</meta>
               </xsl:if>
   
               <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'tableOfContents']) 
