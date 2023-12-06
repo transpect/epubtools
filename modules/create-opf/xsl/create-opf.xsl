@@ -246,9 +246,12 @@
                             and $image-alts">
                 <meta property="schema:accessibilityFeature">alternativeText</meta>
               </xsl:if>
-  
-              <!-- is not yet included, only proposed-->
-              <!--<xsl:if test="$nav-html//*:nav[@epub:type='page-list']"><meta property="schema:accessibilityFeature">pageNavigation</meta></xsl:if>-->
+              
+              <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'pageNavigation'])
+                            and 
+                            $nav-html//*:nav[@epub:type='page-list']">
+                <meta property="schema:accessibilityFeature">pageNavigation</meta>
+              </xsl:if>
   
               <xsl:if test="not(   /epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'printPageNumbers']
                                 or /epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'pageBreakMarkers']) 
