@@ -370,8 +370,8 @@
       <spine toc="ncx">
         <xsl:for-each
           select="collection()//c:file[matches(@name, '\.x?html$')]
-                                                  [not(@spine = 'false')]
-                                                  [not($target = ('EPUB2', 'KF8') and matches(@name, 'nav\.xhtml'))]">
+                                      [not(@spine = 'false')]
+                                      [not($target = ('EPUB2', 'KF8') and matches(@name, 'nav\.xhtml'))]">
           <xsl:sort select="number(@sequence)" data-type="number"/>
           <xsl:variable name="strip-path" select="replace(@name, 'OEBPS/', '')"/>
           <xsl:variable name="id" select="replace(replace($strip-path, '\.', ''),'/', '__')"/>
@@ -382,7 +382,10 @@
           </itemref>
         </xsl:for-each>
       </spine>
-      <xsl:apply-templates select="collection()[$target = ('KF8', 'EPUB2')]/cx:document/html:html/html:body//html:nav[@epub:type = 'landmarks']"/>
+      <!-- Although the OPF <guide> was marked as deprecated with EPUB 3.1, it was reintroduced as "legacy feature" 
+           with EPUB 3.2. Older EPUB readers such as 1st gen Kindles have issues with rendering the navigation without <guide>.
+           <xsl:apply-templates select="collection()[$target = ('KF8', 'EPUB2')]/cx:document/html:html/html:body//html:nav[@epub:type = 'landmarks']"/>-->
+      <xsl:apply-templates select="collection()/cx:document/html:html/html:body//html:nav[@epub:type = 'landmarks']"/>
     </package>
   </xsl:template>
   
