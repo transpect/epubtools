@@ -168,7 +168,7 @@
     <entry epub:type="feedback" aria-role="" applicable=""/>
     <entry epub:type="figure" aria-role="" applicable=""/>
     <entry epub:type="fill-in-the-blank-problem" aria-role="" applicable=""/>
-    <entry epub:type="footnote" aria-role="" applicable="aside footer header"/>
+    <entry epub:type="footnote" aria-role="doc-footnote" applicable="aside footer header"/>
     <entry epub:type="footnotes" aria-role="doc-endnotes" applicable="section"/>
     <entry epub:type="foreword" aria-role="doc-foreword" applicable="section"/>
     <entry epub:type="frontmatter" aria-role="" applicable=""/>
