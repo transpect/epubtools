@@ -487,7 +487,7 @@
 
   <xsl:function name="opf:normalize-id" as="xs:string">
     <xsl:param name="input" as="xs:string"/>
-    <xsl:sequence select="replace($input, '^(\I)', '_$1')"/>
+    <xsl:sequence select="translate(replace($input, '^(\I)', '_$1'), ',', '_')"/>
   </xsl:function>
 
   <xsl:function name="opf:strip-path" as="xs:string">
@@ -500,7 +500,7 @@
     <xsl:sequence
       select="if( matches($in, '\.ncx$') ) 
                           then 'ncx' 
-                          else replace(replace(opf:strip-path($in), '\.', ''),'[/~]', '__')"/>
+                          else replace(replace(opf:strip-path($in), '\.', ''),'[/~,]', '__')"/>
   </xsl:function>
 
 </xsl:stylesheet>
