@@ -1343,6 +1343,9 @@
   
   <xsl:template name="page-list-nav-inner">
     <nav epub:type="page-list" id="page-list-navigation" hidden="hidden">
+      <xsl:if test="$final-pub-type eq 'EPUB3'">
+        <xsl:attribute name="role" select="'doc-pagelist'"/>
+      </xsl:if>
       <ol>
         <xsl:for-each select="$pgl/html:page[normalize-space(@name)]">
           <li>
