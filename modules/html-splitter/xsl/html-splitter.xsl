@@ -2001,7 +2001,10 @@
     <xsl:choose>
       <xsl:when test="count($target-chunk) ge 1">
         <xsl:choose>
-          <xsl:when test="$this-chunk is $target-chunk[1]">
+          <xsl:when test="($this-chunk is $target-chunk[1]) 
+                          and 
+                          not(key('by-id', replace(., '^#', ''), $chunks)[ancestor-or-self::html:nav[contains(@epub:type,'toc')]])">
+            <!-- it is a problem if the nav is linked within the nav without its filename: href="nav.xhtml#toc" is ok href="#toc" isn't -->
             <xsl:copy-of select="."/>
           </xsl:when>
           <xsl:otherwise>
