@@ -36,7 +36,7 @@
   <p:variable name="layout" select="(/epub-config/@layout, 'reflowable')[1]" cx:type="xs:string">
     <p:pipe port="meta" step="create-ocf"/>
   </p:variable>
-  
+
   <p:group name="basic-files">
     <p:output port="result">
       <p:pipe port="result" step="which-files"/>
@@ -106,7 +106,7 @@
   
   <p:sink/>
   
-    <p:group name="create">
+    <p:group name="create" cx:depends-on="right-options">
       <p:output port="result" sequence="true">
         <p:pipe port="result" step="fixed"/>
       </p:output>
@@ -114,18 +114,44 @@
       <!--  *
             * p:identity is necessary because cxf:delete sometimes doesn't work without p:identity 
             * -->
-      
+       
       <p:identity name="report">
         <p:input port="source"><p:empty/></p:input>
       </p:identity>
-      
-      <cxf:delete recursive="true" fail-on-error="false" name="del" cx:depends-on="right-options">
-        <p:with-option name="href" select="concat($workdir, 'epub')"/>
-      </cxf:delete>
+
+      <p:try name="clean">
+        <p:group>
+          <p:identity name="clean-input">
+            <p:input port="source">
+              <p:empty/>
+            </p:input>
+          </p:identity>
+          
+          <cxf:delete recursive="true" fail-on-error="false" name="del">
+            <p:with-option name="href" select="concat($workdir, 'epub')"/>
+          </cxf:delete>
+        </p:group>
+        
+        <p:catch>
+          <p:identity name="clean-error">
+            <p:input port="source">
+              <p:inline>
+                <c:error>Deleting EPUB directory failed</c:error>
+              </p:inline>
+            </p:input>
+          </p:identity>
+          <cx:message>
+            <p:with-option name="message" select="'[ERROR:] Could not delete: ', concat($workdir, 'epub')"></p:with-option>
+          </cx:message>
+          <p:sink/>
+        </p:catch>
+      </p:try>
+
+
       <!--  *
             * create OCF directories
             * -->
-      <cxf:mkdir name="mkdir1" cx:depends-on="right-options">
+      <cxf:mkdir name="mkdir1" cx:depends-on="clean">
         <p:with-option name="href" select="concat($workdir, 'epub')"/>
       </cxf:mkdir>
 
