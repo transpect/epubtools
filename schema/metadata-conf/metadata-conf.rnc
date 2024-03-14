@@ -21,6 +21,7 @@ epub-config-attributes =
   & indent?
   & remove-scripts?
   & subset?
+  & obfuscate?
   & variant?
   & css-handling?
   & css-parser?
@@ -48,6 +49,10 @@ subset =
   ## Use only a subset that covers the characters that are displayed
   ##       with that font. Requires https://github.com/transpect/epub-font-subsetter and Python
   attribute font-subset { "true" | "false" }
+obfuscate =
+  
+  ## Obfuscates fonts with the EPUB font obfuscation algorithm.
+  attribute font-obfuscate { "true" | "false" }
 layout = attribute layout { "reflowable" | "fixed" }
 
 ## Space-separated names of arbitrary layout/format variants that may or may not
@@ -245,16 +250,18 @@ types =
   ##       namespace prefix. Their namespace must be declared.
   element types {
     global-atts,
-    attribute nav-spine-pos {
-      xsd:decimal
-      >> a:documentation [
-           "Defaults to 1.5, the cover typically gets 1. If you want to sort nav.xhtml after \x{a}" ~
-           "          the 3rd split chunk in the spine, use 3.5 for example."
-         ]
-    }?,
-    attribute pull-up-types{
-      list { (landmark-types)+ }
-    }?
+    (attribute nav-spine-pos {
+       xsd:decimal
+       >> a:documentation [
+            "Defaults to 1.5, the cover typically gets 1. If you want to sort nav.xhtml after \x{a}" ~
+            "              the 3rd split chunk in the spine, use 3.5 for example."
+          ]
+     }?
+     & 
+       ## space separated list of epub:type values that will be pulled from secton/div to surrounding body
+       attribute pull-up-types {
+         list { (landmark-types | "toc")+ }
+       }?),
     toc-type-element?,
     landmark-type-element?,
     plain-type-element*

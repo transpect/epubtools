@@ -83,6 +83,7 @@
  
   <p:import href="../../html-splitter/xpl/html-splitter.xpl"/>
   <p:import href="../../fontsubsetter/xpl/fontsubsetter.xpl"/>
+  <p:import href="../../font-obfuscate/xpl/font-obfuscate.xpl"/>
   
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
   <p:import href="http://transpect.io/calabash-extensions/image-props-extension/image-identify-declaration.xpl"/>
@@ -667,6 +668,42 @@
       </p:otherwise>
     </p:choose>
     
+    <p:choose name="conditionally-font-obfuscate">
+      <p:when test="/epub-config/@font-obfuscate = 'true'">
+        <p:xpath-context>
+          <p:pipe port="meta" step="create-ops"/>
+        </p:xpath-context>
+        <p:output port="result" sequence="true"/>
+        
+        <tr:font-obfuscate name="obfuscate">
+          <p:input port="source">
+            <p:pipe port="result" step="resolve-resource-uris"/>
+          </p:input>
+          <p:input port="meta">
+            <p:pipe port="meta" step="create-ops"/>
+          </p:input>
+          <p:with-option name="targetdir" select="$targetdir"/>
+          <p:with-option name="debug" select="$debug"/>
+          <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+        </tr:font-obfuscate>
+        
+      </p:when>
+      <p:otherwise>
+        <p:output port="result" sequence="true">
+          <p:empty/>
+        </p:output>
+        
+        <p:identity>
+          <p:input port="source">
+            <p:pipe port="source" step="create-ops"/>
+          </p:input>
+        </p:identity>
+        
+        <p:sink/>
+        
+      </p:otherwise>
+    </p:choose>
+    
     <p:sink/>
 
     <!-- extract file list from html @src and @poster attributes (and from @xlink:href in case of SVG) 
@@ -697,10 +734,16 @@
                             replace="concat(.,'.subset')"/>
       </p:when>
      <p:otherwise>
-         <p:output port="result" primary="true"/>
+       <p:output port="result" primary="true"/>
        <p:identity/>
      </p:otherwise>
     </p:choose>
+    
+    <p:insert match="/cx:document" name="insert-encryption-xml" position="first-child">
+      <p:input port="insertion">
+        <p:pipe port="result" step="conditionally-font-obfuscate"/>
+      </p:input>
+    </p:insert>
     
     <tr:store-debug pipeline-step="epubtools/create-ops/filelist">
       <p:with-option name="active" select="$debug" />
@@ -712,7 +755,7 @@
     <p:xslt name="css-parse">
       <p:input port="source">
         <p:pipe port="result" step="resolve-resource-uris"/>
-        <p:pipe port="result" step="conditionally-change-font-subset-name"/>
+        <p:pipe port="result" step="insert-encryption-xml"/>
       </p:input>
       <p:input port="parameters"><p:empty/></p:input>
       <p:input port="stylesheet">
@@ -730,7 +773,7 @@
     <!-- copy resources -->
     <p:viewport match="c:file" name="file-iteration">
       <p:viewport-source>
-        <p:pipe port="result" step="conditionally-change-font-subset-name"/>
+        <p:pipe port="result" step="insert-encryption-xml"/>
       </p:viewport-source>
       <p:output port="result" primary="true">
         <p:pipe port="result" step="http-or-file"/>

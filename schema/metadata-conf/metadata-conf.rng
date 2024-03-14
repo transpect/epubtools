@@ -54,6 +54,9 @@
         <ref name="subset"/>
       </optional>
       <optional>
+        <ref name="obfuscate"/>
+      </optional>
+      <optional>
         <ref name="variant"/>
       </optional>
       <optional>
@@ -133,6 +136,16 @@
     <attribute name="font-subset">
       <a:documentation>Use only a subset that covers the characters that are displayed
       with that font. Requires https://github.com/transpect/epub-font-subsetter and Python</a:documentation>
+      <choice>
+        <value>true</value>
+        <value>false</value>
+      </choice>
+    </attribute>
+  </define>
+  
+  <define name="obfuscate">
+    <attribute name="font-obfuscate">
+      <a:documentation>Obfuscates fonts with the EPUB font obfuscation algorithm.</a:documentation>
       <choice>
         <value>true</value>
         <value>false</value>
