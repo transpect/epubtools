@@ -1351,11 +1351,13 @@
       </xsl:if>
       <ol>
         <xsl:for-each select="$pgl/html:page[normalize-space(@name)]">
+          <xsl:variable name="resolved-href" as="xs:string">
+            <xsl:apply-templates select="@href" mode="resolve-refs">
+              <xsl:with-param name="element" select="."/>
+            </xsl:apply-templates>
+          </xsl:variable>
           <li>
-            <a srcpath="pgl_{generate-id()}">
-              <xsl:apply-templates select="@href" mode="resolve-refs">
-                <xsl:with-param name="element" select="."/>
-              </xsl:apply-templates>
+            <a href="{concat($html-prefix, $resolved-href)}" srcpath="pgl_{generate-id()}">
               <xsl:value-of select="@name"/>
             </a>
           </li>
