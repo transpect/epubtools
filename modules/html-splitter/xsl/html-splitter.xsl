@@ -1863,14 +1863,14 @@
     <xsl:value-of select="replace(., concat('\s*', $newline-regex, '\s*'), '&#x20;')"/>
   </xsl:template>
 
-  <xsl:template match="html:body//html:*[matches(local-name(), '^(h\d|p|div|section|aside|nav|figure|img|footer|blockquote|header|ol|ul|li|dd|dt|dl|td|th|table|tfoot|hr)$')][$indent = 'selective']" 
+  <xsl:template match="html:body//html:*[matches(local-name(), '^(h\d|p|div|section|aside|nav|figure|img|footer|blockquote|header|hgroup|ol|ul|li|dd|dt|dl|td|th|table|tfoot|hr)$')][$indent = 'selective']" 
     mode="remove-surrounding-text remove-other-pub-type-content add-selective-indent" priority="2">
     <xsl:text>&#xa;</xsl:text>
     <xsl:sequence select="string-join(for $i in 0 to count(ancestor::*) return '  ', '')"/>
     <xsl:next-match/>
   </xsl:template>
 
-  <xsl:template match="html:body//html:*[matches(local-name(), '^(body|div|section|aside|nav|figure|footer|blockquote|header|ol|ul|dl|table|tfoot)$')][$indent = 'selective']"
+  <xsl:template match="html:body//html:*[matches(local-name(), '^(body|div|section|aside|nav|figure|footer|blockquote|header|hgroup|ol|ul|dl|table|tfoot)$')][$indent = 'selective']"
     mode="remove-surrounding-text remove-other-pub-type-content add-selective-indent">
     <xsl:copy>
       <xsl:apply-templates select="@*, node()" mode="#current"/>
