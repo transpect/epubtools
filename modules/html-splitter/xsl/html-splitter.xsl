@@ -1345,6 +1345,8 @@
   </xsl:template>
   
   <xsl:template name="page-list-nav-inner">
+    <xsl:variable name="nav" as="element(html:chunk)?" 
+                  select="ancestor::html:chunk"/>
     <nav epub:type="page-list" id="page-list-navigation" hidden="hidden">
       <xsl:if test="$final-pub-type eq 'EPUB3'">
         <xsl:attribute name="role" select="'doc-pagelist'"/>
@@ -1357,7 +1359,11 @@
             </xsl:apply-templates>
           </xsl:variable>
           <li>
-            <a href="{concat($html-prefix, $resolved-href)}" srcpath="pgl_{generate-id()}">
+            <!-- if <nav> is stored in $html-subdir-name dir rather than OEBPS/nav.xhtml,
+                 this conditional fixes the path -->
+            <a href="{if(replace($nav/@file, '^.+/(.+?)/.+$', '$1') = replace($html-prefix, '/', ''))
+                      then $resolved-href
+                      else concat($html-prefix, $resolved-href)}" srcpath="pgl_{generate-id()}">
               <xsl:value-of select="@name"/>
             </a>
           </li>
