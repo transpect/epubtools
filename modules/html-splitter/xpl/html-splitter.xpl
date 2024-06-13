@@ -256,10 +256,11 @@
           <p:when test="$target = 'EPUB3' 
                         and matches(base-uri(), 'nav\.xhtml$') 
                         and (normalize-space($html-subdir-name))">
-            <p:documentation>Brute force link correction for the generated landmarks nav that will be stored to OEBPS
-              even when the remainder of the HTML is stored to a subdir.</p:documentation>
-            <p:viewport match="html:nav[@epub:type = 'landmarks']//html:a">
-              <p:add-attribute match="html:a[not(starts-with(@href, '#'))]" attribute-name="href">
+            <p:documentation>Brute force link correction for the generated landmarks nav that will be 
+              stored to OEBPS even when the remainder of the HTML is stored to a subdir. Links to nav.xhtml 
+              itself and internal links are excluded.</p:documentation>
+            <p:viewport match="html:nav[@epub:type = 'landmarks']//html:a[not(matches(@href, '^(#|nav.xhtml)'))]">
+              <p:add-attribute match="html:a" attribute-name="href">
                 <p:with-option name="attribute-value" select="concat($html-subdir-name, '/', /*/@href)"/>
               </p:add-attribute>
             </p:viewport>
