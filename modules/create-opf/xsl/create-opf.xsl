@@ -449,11 +449,16 @@
 
   <xsl:template match="html:a/@href" mode="guide">
     <xsl:choose>
-      <xsl:when test="matches(base-uri(), concat('/chunks/', $html-subdir-name, '/'))
-                      or (normalize-space($html-subdir-name) 
-                          and
-                          (not(starts-with(., concat($html-subdir-name, '/'))))
-                         )">
+      <xsl:when test="(
+                       matches(base-uri(), concat('/chunks/', $html-subdir-name, '/'))
+                       or (
+                           normalize-space($html-subdir-name) 
+                           and
+                           (not(starts-with(., concat($html-subdir-name, '/'))))
+                           )
+                      )
+                      and 
+                      not(matches(., '^nav.xhtml'))">
         <xsl:attribute name="href" select="concat($html-subdir-name, '/', .)"/>
       </xsl:when>
       <xsl:otherwise>
