@@ -1211,7 +1211,9 @@
   </xsl:template>
 
   <!-- add @epub:type="pagebreak" to page anchors (normally, these a elements should be renamed to span)
-       see http://www.idpf.org/accessibility/guidelines/content/xhtml/pagenum.php
+       see
+       https://www.w3.org/TR/dpub-aria-1.0/#doc-pagebreak
+       http://kb.daisy.org/publishing/docs/html/dpub-aria/doc-pagebreak.html
   -->
   <xsl:template match="html:a[starts-with(@id, 'page_')]" mode="remove-surrounding-text">
     <xsl:copy>
@@ -1220,6 +1222,7 @@
         <xsl:attribute name="epub:type" select="'pagebreak'"/>
         <xsl:attribute name="role" select="'doc-pagebreak'"/>
         <xsl:attribute name="title" select="replace(@id, '^page_?', '')"/>
+        <xsl:attribute name="aria-label" select="replace(@id, '^page_?', '')"/>
       </xsl:if>
       <xsl:apply-templates select="node()" mode="#current"/>
     </xsl:copy>
