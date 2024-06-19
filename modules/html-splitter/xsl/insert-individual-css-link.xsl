@@ -98,13 +98,13 @@
       <xsl:text>&#xa;    </xsl:text>
       <xsl:choose>
         <xsl:when test="ends-with($html-base-uri, '/chunks/nav.xhtml')">
-          <link href="{replace(., '^../', '')}" type="text/css" rel="stylesheet"/>
+          <link href="{replace(., '^\.\./', '')}" type="text/css" rel="stylesheet"/>
         </xsl:when>
         <xsl:when test="normalize-space($html-prefix)">
-          <link href="{concat(replace(., '^../', $relative-prefix, ''), .)}" type="text/css" rel="stylesheet"/>
+          <link href="{.}" type="text/css" rel="stylesheet"/>
         </xsl:when>
         <xsl:otherwise>
-          <link href="{.}" type="text/css" rel="stylesheet"/>
+          <link href="{replace(., '^\.\./', '')}" type="text/css" rel="stylesheet"/>
         </xsl:otherwise>
       </xsl:choose>
     </xsl:for-each>
