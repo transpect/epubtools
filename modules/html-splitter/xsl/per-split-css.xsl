@@ -131,8 +131,12 @@
       <xsl:for-each-group select="$remaining-rules union css:comment" group-by="css:relative-result-filename(@origin, $common-source-dir-elimination-regex)">
         <xsl:result-document href="{concat($new-base-uri, $style-dir-name, '/', current-grouping-key())}">
           <css xmlns="http://www.w3.org/1996/css">
-            <xsl:attribute name="relative-name" select="concat('../', $style-dir-name, '/', current-grouping-key())"/>
-            <xsl:attribute name="xml:base" select="concat($new-base-uri, $style-dir-name, '/', current-grouping-key())"/>
+            <xsl:attribute name="relative-name" select="if(matches(current-grouping-key(), '^.+?/')) 
+                                                        then concat('../', current-grouping-key())
+                                                        else concat('../', $style-dir-name, '/', current-grouping-key())"/>
+            <xsl:attribute name="xml:base" select="if(matches(current-grouping-key(), '^.+?/')) 
+                                                   then concat($new-base-uri, current-grouping-key())
+                                                   else concat($new-base-uri, $style-dir-name, '/', current-grouping-key())"/>
             <xsl:attribute name="common" select="'true'"/>
             <!--<xsl:apply-templates select="current-group()/self::css:atrule[@type = 'charset']"/>-->
             <!-- Everything will be serialized as UTF-8 ayway, so no need to retain the initial declaration.
