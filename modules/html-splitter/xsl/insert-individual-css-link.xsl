@@ -101,7 +101,7 @@
           <link href="{replace(., '^../', '')}" type="text/css" rel="stylesheet"/>
         </xsl:when>
         <xsl:when test="normalize-space($html-prefix)">
-          <link href="{concat($relative-prefix, .)}" type="text/css" rel="stylesheet"/>
+          <link href="{concat(replace(., '^../', $relative-prefix, ''), .)}" type="text/css" rel="stylesheet"/>
         </xsl:when>
         <xsl:otherwise>
           <link href="{.}" type="text/css" rel="stylesheet"/>
