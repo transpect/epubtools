@@ -42,7 +42,11 @@
       <xsl:variable name="smil-file-uri" as="xs:string" select="replace(html:html/base-uri(), '\.x?html$', '.raw.smil', 'i')"/>
       <xsl:variable name="fileref-elements"
         select="  collection()//html:*[local-name() = ('img', 'video', 'audio', 'source', 'script', 'object')]
-                | collection()/html:html/html:head/html:link[@href][$css-handling = 'unchanged' or not(@type eq 'text/css')]
+                | collection()/html:html/html:head/html:link[@href]
+                                                            [   $css-handling = 'unchanged' 
+                                                             or not(   @type eq 'text/css' 
+                                                                    or matches(@href, '\.css$', 'i')
+                                                                    )]
                 | collection()/html:html/html:body//svg:svg//svg:image
                 | collection()/html:html/html:body//mml:math
                 | (if (doc-available($smil-file-uri)) 
