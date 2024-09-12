@@ -487,6 +487,7 @@
           select="( $corresponding-conf-items[name() = 'heading']/@level,
                    tr:index-of($heading-conf/heading, $corresponding-conf-items[name() = 'heading']) )[1]"
         />
+        <xsl:message select="'cci:', $corresponding-conf-items, '$heading-conf', $heading-conf"/>
       </xsl:if>
       <xsl:if test="$corresponding-conf-items/name() = 'conditional-split'">
         <xsl:attribute name="tr-heading-level"
@@ -1551,7 +1552,7 @@
         <xsl:when test="xs:integer(@tr-heading-level) = $level">
           <xsl:variable name="actual-heading"
             select="if (@tr-split-for) then key('by-genid', @tr-split-for, $root) else ." as="element()"/>
-          <xsl:if test="not(tr:contains-token($actual-heading/@class, '_notoc'))">
+            <xsl:if test="not(tr:contains-token($actual-heading/@class, '_notoc'))">
             <navPoint id="" class="default" playOrder="{replace(@tr-generated-id, '^.+?(\d+)$', '$1')}"
               xmlns="http://www.daisy.org/z3986/2005/ncx/">
               <navLabel xmlns="http://www.daisy.org/z3986/2005/ncx/">
@@ -1624,6 +1625,7 @@
                                                       [tr:contains-token(@class, 'TOC_same')]"
                                  mode="raw-ncx"/>
           </xsl:if>
+
         </xsl:when>
         <xsl:when test="current-group()//@tr-heading-level[not(../@tr-split-delegation-to)][not(../@tr-exclude-from-nav)]">
           <!-- lower level (i.e., higher integer number – may occur in 1st group) -->
