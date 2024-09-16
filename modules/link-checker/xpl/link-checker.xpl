@@ -99,18 +99,19 @@
               <p:input port="source">
                 <p:inline>
                   <c:messages>
-                    <c:message xml:lang="en">////////// Check <file/>   \\\\\\\\\\</c:message>
-                    <c:message xml:lang="de">////////// Prüfe <file/>   \\\\\\\\\\</c:message>
+                    <c:message xml:lang="en">[info] - Check <file/></c:message>
+                    <c:message xml:lang="de">[Info] - Prüfe <file/></c:message>
                   </c:messages>
                 </p:inline>
               </p:input>    
             </p:string-replace>
             
-            <tr:simple-progress-msg name="check-actual" file="current-link-check.txt">
+            <tr:simple-progress-msg name="check-actual">
               <p:input port="msgs">
                 <p:pipe port="result" step="link-check-url-msg"/>
               </p:input>
               <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
+              <p:with-option name="file" select="concat('linkcheck-', generate-id(), '.txt')"/>
             </tr:simple-progress-msg>
             
             <tr:file-uri fetch-http="false" check-http="true" name="fu2i" make-unique="false">
