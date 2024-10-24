@@ -24,7 +24,7 @@
       <xsl:result-document href="{base-uri()}.new">
         <xsl:apply-templates>
           <xsl:with-param name="more-specific-patterns" as="xs:string*" tunnel="yes" 
-                          select="collection()[position() gt $pos]//*:pattern/@id"/>
+                          select="$filtered-collection[position() gt $pos]//*:pattern/@id"/>
         </xsl:apply-templates>
       </xsl:result-document>
     </xsl:for-each>
