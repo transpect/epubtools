@@ -462,38 +462,7 @@
       <p:empty/>
     </p:input>
     <p:input port="stylesheet">
-      <p:inline>
-        <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
-          <xsl:template match="* | @*">
-            <xsl:copy>
-              <xsl:apply-templates select="@*, node()"/>
-            </xsl:copy>
-          </xsl:template>
-
-          <xsl:template match="/">
-            <xsl:for-each select="collection()">
-              <xsl:variable name="pos" select="position()" as="xs:integer"/>
-              <xsl:result-document href="{base-uri()}.new">
-                <xsl:apply-templates>
-                  <xsl:with-param name="more-specific-patterns" as="xs:string*" tunnel="yes"
-                    select="collection()[position() gt $pos]//*:pattern/@id"/>
-                </xsl:apply-templates>
-              </xsl:result-document>
-            </xsl:for-each>
-            <noout/>
-          </xsl:template>
-
-          <xsl:template match="*:pattern">
-            <xsl:param name="more-specific-patterns" as="xs:string*" tunnel="yes"/>
-            <xsl:choose>
-              <xsl:when test="$more-specific-patterns = (@id, @is-a)"/>
-              <xsl:otherwise>
-                <xsl:next-match/>
-              </xsl:otherwise>
-            </xsl:choose>
-          </xsl:template>
-        </xsl:stylesheet>
-      </p:inline>
+      <p:document href="../xsl/filter-schematron.xsl"/>
     </p:input>
   </p:xslt>
   
