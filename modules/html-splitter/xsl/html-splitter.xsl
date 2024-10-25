@@ -1323,8 +1323,8 @@
                   and
                   exists((//*, $root//*)[@epub:type = ('loi', 'lot')]
                             [@class = 'as-nav'])">
-      <xsl:apply-templates select="(//*, $root//*)[@epub:type = ('loi', 'lot')]
-                                                  [@class = 'as-nav']" mode="#current">
+      <xsl:apply-templates select="(//*, $root//*)[@epub:type = ('loi')][@class = 'as-nav'][1] |
+                                   (//*, $root//*)[@epub:type = ('lot')][@class = 'as-nav'][1]" mode="resolve-refs">
         <xsl:with-param name="transform-lof-to-nav" as="xs:boolean"  select="true()" tunnel="yes"/>
     </xsl:apply-templates>
     </xsl:if>
