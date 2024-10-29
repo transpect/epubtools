@@ -264,7 +264,7 @@
       select="$chunks/html:chunks/html:chunk//*[@id | @tr-generated-id][tr:contains-token(@epub:type, $landmark-types)]"/>-->
 
     <xsl:variable name="landmarks" as="element(*)*">
-      <xsl:for-each-group select="$chunks/html:chunks/html:chunk//*[@id | @tr-generated-id | .[empty(@id)]/html:a/@id]
+      <xsl:for-each-group select="$chunks/html:chunks/html:chunk//*[@id | @tr-generated-id | .[empty(@id)]/html:a/@id | .[empty(@id)]/html:section[1]/@id]
                                                                    [tr:contains-token(@epub:type, $landmark-types)]"
                           group-by="@epub:type">
         <!-- index, preface, … may occur multiple times. Use only the first item of a kind 
@@ -1446,7 +1446,6 @@
           <xsl:sequence select="$prelim[descendant::*:a/@epub:type[index-of($orig-type-order, .) lt $toc-pos]],
                                 $toc-link, 
                                 $prelim[descendant::*:a/@epub:type[index-of($orig-type-order, .) gt $toc-pos]]"/>
-        <xsl:message select="index-of($orig-type-order, 'toc')"/>
           </xsl:when>
           <xsl:otherwise>
             <!-- if generated toc is not contained in landmarks/@types and no types/@nav-spine-pos is set, insert it directly after Cover -->
@@ -1467,7 +1466,7 @@
       <a srcpath="landmarks-{generate-id()}">
         <xsl:attribute name="epub:type" select="string-join($landmark-type, ' ')"/>
         <xsl:variable name="unresolved-href" as="attribute(href)">
-          <xsl:attribute name="href" select="concat('#', (@id, @tr-generated-id, .[empty(@id)]/html:a/@id)[1])"/>
+          <xsl:attribute name="href" select="concat('#', (@id, @tr-generated-id, .[empty(@id)]/html:a/@id), .[empty(@id)]/html:section[1]/@id)[1])"/>
         </xsl:variable>
         <xsl:apply-templates select="$unresolved-href" mode="resolve-refs">
           <xsl:with-param name="element" select="."/>
@@ -1823,7 +1822,7 @@
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:variable name="all-pullable-tokens" select="for $f in tokenize(*[1][@epub:type]/@epub:type, '\s+') return $f[. = $epub-types-for-pulling-to-body]" as="xs:string+"/>
-      <xsl:variable name="new-types" select="for $popo in $all-pullable-tokens return $popo[every $e in current()/* satisfies (. = tokenize($e/@epub:type, '\s+'))]" as="xs:string+"/>
+      <xsl:variable name="new-types" select="for $pt in $all-pullable-tokens return $pt[every $e in current()/* satisfies (. = tokenize($e/@epub:type, '\s+'))]" as="xs:string+"/>
        <xsl:if test="some $s in $new-types satisfies $s[normalize-space()]">
         <xsl:attribute name="epub:type" select="normalize-space(string-join($new-types, ' '))"/>
        </xsl:if>
