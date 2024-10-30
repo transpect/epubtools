@@ -191,6 +191,14 @@
             then tokenize($epub-config/types/type[@name = 'landmarks']/@types, '\s+')
             else $epub3-landmark-types"/>
 
+
+  <xsl:variable name="epub3-publisher-roles" as="xs:string+"
+     select="('doc-abstract', 'doc-acknowledgments', 'doc-afterword', 'doc-appendix', 'doc-backlink', 'doc-biblioentry', 'doc-bibliography', 
+              'doc-biblioref', 'doc-chapter', 'doc-colophon', 'doc-conclusion', 'doc-cover', 'doc-credit', 'doc-credits', 'doc-dedication', 
+              'doc-endnote', 'doc-endnotes', 'doc-epigraph', 'doc-epilogue', 'doc-errata', 'doc-example', 'doc-footnote', 'doc-foreword', 'doc-glossary', 
+              'doc-glossref', 'doc-index', 'doc-introduction', 'doc-noteref', 'doc-notice', 'doc-pagebreak', 'doc-pagelist', 'doc-part', 'doc-preface', 
+              'doc-prologue', 'doc-pullquote', 'doc-qna', 'doc-subtitle', 'doc-tip', 'doc-toc')"/>
+
   <xsl:template name="main">
     <xsl:if test="not($heading-conf)">
       <xsl:message terminate="yes">Cannot access the heading configuration XML file. A URI to a proper heading conf must be
@@ -487,7 +495,7 @@
           select="( $corresponding-conf-items[name() = 'heading']/@level,
                    tr:index-of($heading-conf/heading, $corresponding-conf-items[name() = 'heading']) )[1]"
         />
-        <xsl:message select="'cci:', $corresponding-conf-items, '$heading-conf', $heading-conf"/>
+        <!--<xsl:message select="'cci:', $corresponding-conf-items, '$heading-conf', $heading-conf"/>-->
       </xsl:if>
       <xsl:if test="$corresponding-conf-items/name() = 'conditional-split'">
         <xsl:attribute name="tr-heading-level"
@@ -516,6 +524,7 @@
       <xsl:attribute name="tr-generated-id" select="generate-id()"/>
       <!-- Just in case that there is no epub:type here but on a dissolved ancestor, we transform the 
         ancestor’s epub:type, too. -->
+<!--      <xsl:apply-templates select="ancestor::*[@epub:type][1]/(@epub:type|@role), (@epub:type|@role)" mode="#current"/>-->
       <xsl:apply-templates select="ancestor::*[@epub:type][1]/@epub:type, @epub:type" mode="#current"/>
       <xsl:if test="not(@id)">
         <xsl:attribute name="id" select="generate-id()"/>
@@ -592,7 +601,7 @@
   <xsl:template match="*" mode="semiflatten">
     <xsl:copy copy-namespaces="no">
       <xsl:copy-of select="@*"/>
-      <xsl:apply-templates select="@epub:type" mode="#current"/>
+      <xsl:apply-templates select="@epub:type|@role" mode="#current"/>
       <xsl:attribute name="tr-generated-id" select="generate-id()"/>
       <xsl:apply-templates mode="#current"/>
     </xsl:copy>
@@ -606,6 +615,18 @@
     <xsl:attribute name="tr-epub-type" select="if (exists($non-landmarks)) then $non-landmarks else $landmarks"/>
     <xsl:if test="exists($non-landmarks) and exists($landmarks)">
       <xsl:attribute name="tr-epub-extra-landmark-type" select="$landmarks"/>
+    </xsl:if>
+  </xsl:template>
+  
+  
+  <xsl:template match="@role" mode="semiflatten" priority="2">
+    <xsl:copy/>
+    <xsl:variable name="tokenized" select="tokenize(., '\s+')" as="xs:string+"/>
+    <xsl:variable name="roles" select="$tokenized[. = $epub3-publisher-roles]" as="xs:string*"/>
+    <xsl:variable name="non-roles" select="$tokenized[not(. = $epub3-publisher-roles)]" as="xs:string*"/>
+    <xsl:attribute name="tr-role" select="if (exists($non-roles)) then $non-roles else $roles"/>
+    <xsl:if test="exists($non-roles) and exists($roles)">
+      <xsl:attribute name="tr-epub-extra-role-type" select="$roles"/>
     </xsl:if>
   </xsl:template>
 
@@ -624,13 +645,13 @@
        options may be applied to the content items they pertain to. -->
   <xsl:function name="tr:signature-from-conf" as="xs:string+">
     <xsl:param name="conf-item" as="element()"/>
-    <xsl:if test="not($conf-item/@attr = ('class', 'epub:type', 'id'))">
+    <xsl:if test="not($conf-item/@attr = ('class', 'epub:type', 'id', 'role'))">
       <xsl:choose>
         <!-- the current specification is generic, and there is another specification for the same element, but with a specific class: -->
         <xsl:when
           test="some $otheritem in ($conf-item/preceding-sibling::* union $conf-item/following-sibling::*)[name() eq $conf-item/name()]
                     [if ($conf-item/@elt) then @elt = $conf-item/@elt else true()] 
-                  satisfies ($otheritem/@attr = ('class', 'epub:type', 'id'))"/>
+                  satisfies ($otheritem/@attr = ('class', 'epub:type', 'id', 'role'))"/>
         <xsl:otherwise>
           <!-- the current item is generic, and there is no other specification for the same element, but with a specific class: -->
           <xsl:sequence select="$conf-item/@elt"/>
@@ -641,7 +662,7 @@
     <xsl:sequence select="string-join((if ($conf-item/@elt) 
                                        then concat('elt=', $conf-item/@elt) 
                                        else (), 
-                                       $conf-item[@attr = ('class', 'epub:type', 'id')]/(@attr, @attval)
+                                       $conf-item[@attr = ('class', 'epub:type', 'id', 'role')]/(@attr, @attval)
                                       ),
                                       '__'
                                      )"/>
@@ -649,7 +670,7 @@
 
   <xsl:function name="tr:signature-from-doc" as="xs:string+">
     <xsl:param name="elt" as="element()"/>
-    <xsl:for-each select="$elt/(@class, @epub:type, @id)">
+    <xsl:for-each select="$elt/(@class, @epub:type, @id, @role)">
       <xsl:variable name="att" select="." as="attribute()"/>
       <xsl:for-each select="tokenize(., '\s+')">
         <xsl:sequence select="string-join((name($att), .), '__')"/>
@@ -1466,7 +1487,7 @@
       <a srcpath="landmarks-{generate-id()}">
         <xsl:attribute name="epub:type" select="string-join($landmark-type, ' ')"/>
         <xsl:variable name="unresolved-href" as="attribute(href)">
-          <xsl:attribute name="href" select="concat('#', (@id, @tr-generated-id, .[empty(@id)]/html:a/@id), .[empty(@id)]/html:section[1]/@id)[1])"/>
+          <xsl:attribute name="href" select="concat('#', (@id, @tr-generated-id, .[empty(@id)]/html:a/@id, .[empty(@id)]/html:section[1]/@id)[1])"/>
         </xsl:variable>
         <xsl:apply-templates select="$unresolved-href" mode="resolve-refs">
           <xsl:with-param name="element" select="."/>
@@ -1781,7 +1802,8 @@
             <xsl:with-param name="ancestor-genids" select="for $n in $local-nodes/ancestor::* return generate-id($n)"
               tunnel="yes"/>
           </xsl:apply-templates>
-        </xsl:variable>
+        </xsl:variable><!-- prelim already consists of ancestor sections -->
+       <xsl:if test="$split-genids[current()] = 'd26e14588'"><xsl:message select="'###', string-join($prelim-export//*:body/*[1]/@role, '-')"/></xsl:if>
         <xsl:variable name="remove-surrounding-text" as="element(html:html)">
           <xsl:apply-templates select="$prelim-export" mode="remove-surrounding-text"/>
         </xsl:variable>
@@ -2074,6 +2096,15 @@
                       |mml:math/@altimg[normalize-space($html-prefix)][not(matches(., '^#'))]"
     mode="resolve-refs">
     <xsl:attribute name="{name()}" select="concat('../', .)"/>
+  </xsl:template>
+  
+  <xsl:key match="*[@aria-label]" use="@aria-label" name="epub:elts-with-aria-label"/>
+    
+
+  <xsl:template match="@aria-label[normalize-space()]" mode="resolve-refs">
+    <xsl:attribute name="{name()}" select="if (count(key('epub:elts-with-aria-label', ., root(.))) gt 1) 
+                                           then string-join((., count(preceding::*[@aria-label]/@aria-label = current())), ' ')
+                                           else ."/>
   </xsl:template>
 
   <xsl:template match="@xml:base" mode="resolve-refs"/>
