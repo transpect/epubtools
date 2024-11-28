@@ -32,7 +32,7 @@
       unique-identifier="{((epub-config/metadata/dc:identifier[1]/@opf:scheme)[$target = 'EPUB3'], 'bookid')[1]}">
       
       <xsl:if test="$target eq 'EPUB3'">
-        <xsl:attribute name="prefix" select="'ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/ rendition: http://www.idpf.org/vocab/rendition/#'"/> 
+        <xsl:attribute name="prefix" select="'ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/ rendition: http://www.idpf.org/vocab/rendition/# tdm: http://www.w3.org/ns/tdmrep#'"/> 
       </xsl:if>
 
       <xsl:if test="$target = 'EPUB3'
