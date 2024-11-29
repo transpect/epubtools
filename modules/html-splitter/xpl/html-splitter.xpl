@@ -84,7 +84,7 @@
   </p:variable>
 
   <p:identity name="strip-leading-non-elements">
-    <p:documentation>Strip spurious text-only document nodes that sometimes occured before the HTML
+    <p:documentation>Strip spurious text-only document nodes that sometimes occurred before the HTML
       document.</p:documentation>
     <p:input port="source" select="/html:html">
       <p:pipe port="source" step="html-splitter"/>

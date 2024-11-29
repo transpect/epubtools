@@ -170,7 +170,7 @@
           <p:input port="source">
             <p:documentation>This stylesheet overwrites certain css:expand templates or variables.
               This is done because CSS3 isn't supported completely. In that stylesheet
-              text-decoration and other porperties can be changed to supported values. When CSS3 is
+              text-decoration and other properties can be changed to supported values. When CSS3 is
               supported it might be necessary to use this input port dynamically.</p:documentation>
             <p:document href="http://transpect.io/css-tools/xsl/css2-1-parser.xsl"/>
           </p:input>
