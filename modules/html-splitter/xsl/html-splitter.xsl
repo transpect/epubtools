@@ -1001,7 +1001,7 @@
     <xsl:variable name="type-index" as="xs:integer" select="tr:index-of($same-type, ../@tr-epub-type)"/>
     <xsl:variable name="looked-up-name-component" select="$epub-config/types/type[@name = tr:epub-type(current()/../@tr-epub-type)]/(@file, @name)[1]" as="xs:string*"/>
     <xsl:if test="count($looked-up-name-component) gt 1">
-      <xsl:message select="concat('[WARNING] more than one occurence of epub type ', string-join($epub-config/types/type[@name = tr:epub-type(current()/../@tr-epub-type)][1]/@name, ''),   ' in config. First occurence is used for file name extraction.')"/>
+      <xsl:message select="concat('[WARNING] more than one occurrence of epub type ', string-join($epub-config/types/type[@name = tr:epub-type(current()/../@tr-epub-type)][1]/@name, ''),   ' in config. First occurrence is used for file name extraction.')"/>
     </xsl:if>
     <xsl:variable name="normalized" select="if ($looked-up-name-component[1]) 
                                             then $looked-up-name-component[1] 
