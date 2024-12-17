@@ -274,10 +274,10 @@
     <xsl:variable name="landmarks" as="element(*)*">
       <xsl:for-each-group select="$chunks/html:chunks/html:chunk//*[@id | @tr-generated-id | .[empty(@id)]/html:a/@id | .[empty(@id)]/html:section[1]/@id]
                                                                    [tr:contains-token(@epub:type, $landmark-types)]"
-                          group-by="@epub:type">
+                          group-by="tokenize(@epub:type, '\s+')[. = $landmark-types]">
         <!-- index, preface, … may occur multiple times. Use only the first item of a kind 
-          (also in order to avoid kindlegen warnings). --> 
-        <xsl:sequence select="."/>
+          (also in order to avoid kindlegen warnings). -->
+        <xsl:sequence select="current-group()[1]"/>
       </xsl:for-each-group>
     </xsl:variable>
 
