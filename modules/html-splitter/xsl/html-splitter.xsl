@@ -277,7 +277,12 @@
                           group-by="tokenize(@epub:type, '\s+')[. = $landmark-types]">
         <!-- index, preface, … may occur multiple times. Use only the first item of a kind 
           (also in order to avoid kindlegen warnings). -->
-        <xsl:sequence select="current-group()[1]"/>
+        <!-- modify epub-type to allow selection of correct @heading if several types match. -->
+        <xsl:element name="{current-group()[1]/name()}">
+          <xsl:copy-of select="current-group()[1]/@*"/>
+          <xsl:attribute name="epub:type" select="current-grouping-key()"/>
+          <xsl:copy-of select="current-group()[1]/node()"/>
+        </xsl:element>
       </xsl:for-each-group>
     </xsl:variable>
 
