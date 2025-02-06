@@ -73,7 +73,7 @@
         </elements>
       </xsl:for-each>
     </xsl:variable>
-    <xsl:for-each select="$per-split-rulesets/self::css:css">
+    <xsl:for-each select="$per-split-rulesets/self::css:css[not(matches(@xml:base, 'nav.x?html$'))]">
       <xsl:result-document href="{@xml:base}">
         <xsl:copy-of select="."/>
       </xsl:result-document>
