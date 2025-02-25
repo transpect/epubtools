@@ -303,19 +303,19 @@
       </metadata>
 
       <manifest xmlns:opf="http://www.idpf.org/2007/opf">
+        <xsl:variable name="nav" as="element(c:file)?" 
+                      select="collection()//c:file[@nav eq 'true' or opf:strip-path(@name) eq 'nav.xhtml'][1]"/>
         <xsl:for-each-group select="collection()//c:file[not($target = ('EPUB2', 'KF8') and matches(@name, 'nav\.xhtml'))]"
                             group-by="@name">
-
           <xsl:variable name="strip-path" select="opf:strip-path(@name)"/>
           <xsl:variable name="id" select="opf:id-from-filename(@name)"/>
           <xsl:variable name="matching-media-overlay-id" 
                         select="for $i in collection()//c:file[matches(@name, '\.smil$')]
                                                               [replace(@name, '\.smil$', '') = replace($strip-path, '\.x?html$', '')]
                                 return opf:id-from-filename($i/@name)" as="xs:string*"/>
-
           <item href="{$strip-path}" media-type="{@media-type}" id="{opf:normalize-id($id)}">
             <xsl:variable name="properties" as="xs:string*">
-              <xsl:if test="@nav eq 'true' or $strip-path eq 'nav.xhtml'">
+              <xsl:if test="@name = $nav/@name">
                 <xsl:value-of select="'nav'"/>
               </xsl:if>
               <xsl:if test="@svg eq 'true'">
