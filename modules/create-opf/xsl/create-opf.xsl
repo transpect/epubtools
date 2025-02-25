@@ -385,7 +385,13 @@
       <!-- Although the OPF <guide> was marked as deprecated with EPUB 3.1, it was reintroduced as "legacy feature" 
            with EPUB 3.2. Older EPUB readers such as 1st gen Kindles have issues with rendering the navigation without <guide>.
            <xsl:apply-templates select="collection()[$target = ('KF8', 'EPUB2')]/cx:document/html:html/html:body//html:nav[@epub:type = 'landmarks']"/>-->
-      <xsl:apply-templates select="collection()/cx:document/html:html/html:body//html:nav[@epub:type = 'landmarks']"/>
+      <xsl:for-each select="collection()/cx:document/html:html/html:body//html:nav[@epub:type = 'landmarks']">
+        <xsl:if test="position() = 1">
+          <guide>
+            <xsl:apply-templates select="html:ol/html:li/html:a/@epub:type"/>
+          </guide>
+        </xsl:if>
+      </xsl:for-each>
     </package>
   </xsl:template>
   
@@ -407,12 +413,6 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:function>
-
-  <xsl:template match="html:nav">
-    <guide>
-      <xsl:apply-templates select="html:ol/html:li/html:a/@epub:type"/>
-    </guide>
-  </xsl:template>
 
   <xsl:key name="type" match="type" use="@name"/>
 
