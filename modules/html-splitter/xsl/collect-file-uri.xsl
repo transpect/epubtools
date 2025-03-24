@@ -48,6 +48,11 @@
     <xsl:apply-templates select="*" mode="#current"/>
   </xsl:template>
 
+  <xsl:template match="html:html[html:body[every $elt in * satisfies $elt[@hidden = 'hidden']]]/html:head" mode="props" priority="5">
+    <xsl:attribute name="spine" select="'false'"/>
+    <xsl:next-match/>
+  </xsl:template>
+  
   <xsl:template match="html:html/html:head/html:meta[@name = ('linear', 'spine', 'sequence')]" mode="props">
     <xsl:attribute name="{@name}" select="@content"/>
     <xsl:next-match/>

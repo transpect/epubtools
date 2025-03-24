@@ -1565,7 +1565,6 @@
     </a>
   </xsl:template>
 
-
   <xsl:function name="tr:group-for-ncx" as="element()*">
     <xsl:param name="nodes" as="element()*"/>
     <xsl:param name="level" as="xs:integer"/>
@@ -1573,6 +1572,7 @@
     <xsl:for-each-group select="$nodes" 
       group-starting-with="*[@tr-heading-level[not(../@tr-exclude-from-nav)]][xs:integer(@tr-heading-level) = $level][not(@dissolved-for-semiflatten eq 'true')]">
       <xsl:choose>
+        <xsl:when test="current-group()[@hidden = 'hidden']"/>
         <xsl:when test="xs:integer(@tr-heading-level) = $level">
           <xsl:variable name="actual-heading"
             select="if (@tr-split-for) then key('by-genid', @tr-split-for, $root) else ." as="element()"/>
