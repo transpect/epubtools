@@ -231,17 +231,17 @@ cover =
   element cover {
     global-atts,
     attribute href { xsd:anyURI },
-    
-    ## Whether the generated cover HTML should use svg to wrap the cover image. Should be
-    ##           assumed false if omitted.
-    attribute svg { "true" | "false" }?,
-    
-    ## Adds a line of CSS to fix cover scaling for some reading systems.
-    attribute svg-scale-hack { "true" | "false" }?,
-    
-    ## If an alt attribute shall be added to Cover img or svg/title. If not set, 
-    ##            the default value is epub-cover-image or "Cover for {dc:title}/'EPUB'"
-    attribute alt { text }?
+    ((
+      ## Whether the generated cover HTML should use svg to wrap the cover image. Should be
+      ##                 assumed false if omitted.
+      attribute svg { "true" | "false" }
+      & 
+        ## Adds a line of CSS to fix cover scaling for some reading systems.
+        attribute svg-scale-hack { "true" | "false" })
+     | 
+       ## If an alt attribute shall be added to Cover img or svg/title. If not set, 
+       ##               the default value is epub-cover-image or "Cover for {dc:title}/'EPUB'"
+       attribute alt { text })?
   }
 types =
   
