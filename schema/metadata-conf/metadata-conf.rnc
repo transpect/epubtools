@@ -229,19 +229,19 @@ cover =
   ##         a cover HTML file will be generated from the PNG or JPEG image with the given href. 
   ##         (Could be another file type, but not implemented yet)
   element cover {
-    global-atts,
-    attribute href { xsd:anyURI },
-    ((
+    global-atts
+    & attribute href { xsd:anyURI }
+    & 
       ## Whether the generated cover HTML should use svg to wrap the cover image. Should be
-      ##                 assumed false if omitted.
+      ##             assumed false if omitted.
       attribute svg { "true" | "false" }
-      & 
-        ## Adds a line of CSS to fix cover scaling for some reading systems.
-        attribute svg-scale-hack { "true" | "false" })
-     | 
-       ## If an alt attribute shall be added to Cover img or svg/title. If not set, 
-       ##               the default value is epub-cover-image or "Cover for {dc:title}/'EPUB'"
-       attribute alt { text })?
+    & 
+      ## Adds a line of CSS to fix cover scaling for some reading systems.
+      attribute svg-scale-hack { "true" | "false" }
+    & 
+      ## If an alt attribute shall be added to Cover img or svg/title. If not set, 
+      ##               the default value is epub-cover-image or "Cover for {dc:title}/'EPUB'"
+      attribute alt { text }?
   }
 types =
   

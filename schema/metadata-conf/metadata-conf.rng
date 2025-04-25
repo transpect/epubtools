@@ -397,35 +397,33 @@
       <a:documentation>If no *[@epub:type='cover'] or div[@id = 'epub-cover-image-container'] is included in the source, 
         a cover HTML file will be generated from the PNG or JPEG image with the given href. 
         (Could be another file type, but not implemented yet)</a:documentation>
-      <ref name="global-atts"/>
-      <attribute name="href">
-        <data type="anyURI"/>
-      </attribute>
-      <optional>
-        <choice>
-          <interleave>
-            <attribute name="svg">
-              <a:documentation>Whether the generated cover HTML should use svg to wrap the cover image. Should be
-                assumed false if omitted.</a:documentation>
-              <choice>
-                <value>true</value>
-                <value>false</value>
-              </choice>
-            </attribute>    
-            <attribute name="svg-scale-hack">
-              <a:documentation>Adds a line of CSS to fix cover scaling for some reading systems.</a:documentation>
-              <choice>
-                <value>true</value>
-                <value>false</value>
-              </choice>
-            </attribute>
-          </interleave>
+      <interleave>
+        <ref name="global-atts"/>
+        <attribute name="href">
+          <data type="anyURI"/>
+        </attribute>
+        <attribute name="svg">
+          <a:documentation>Whether the generated cover HTML should use svg to wrap the cover image. Should be
+            assumed false if omitted.</a:documentation>
+          <choice>
+            <value>true</value>
+            <value>false</value>
+          </choice>
+        </attribute>            
+        <attribute name="svg-scale-hack">
+          <a:documentation>Adds a line of CSS to fix cover scaling for some reading systems.</a:documentation>
+            <choice>
+              <value>true</value>
+              <value>false</value>
+            </choice>
+        </attribute>
+        <optional>
           <attribute name="alt">
             <a:documentation>If an alt attribute shall be added to Cover img or svg/title. If not set, 
               the default value is epub-cover-image or "Cover for {dc:title}/'EPUB'"</a:documentation>
           </attribute>
-        </choice>
-      </optional>
+        </optional>  
+      </interleave>
     </element>
   </define>
 
