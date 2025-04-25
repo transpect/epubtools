@@ -402,21 +402,35 @@
         <attribute name="href">
           <data type="anyURI"/>
         </attribute>
-        <attribute name="svg">
-          <a:documentation>Whether the generated cover HTML should use svg to wrap the cover image. Should be
-            assumed false if omitted.</a:documentation>
-          <choice>
-            <value>true</value>
-            <value>false</value>
-          </choice>
-        </attribute>            
-        <attribute name="svg-scale-hack">
-          <a:documentation>Adds a line of CSS to fix cover scaling for some reading systems.</a:documentation>
-            <choice>
-              <value>true</value>
-              <value>false</value>
-            </choice>
-        </attribute>
+        <choice>
+          <optional>
+            <attribute name="svg">
+              <a:documentation>Whether the generated cover HTML should use svg to wrap the cover image. Should be
+                assumed false if omitted.</a:documentation>
+              <choice>
+                <value>true</value>
+              </choice>
+            </attribute>
+            <optional>
+              <attribute name="svg-scale-hack">
+                <a:documentation>Adds a line of CSS to fix cover scaling for some reading systems.</a:documentation>
+                <choice>
+                  <value>true</value>
+                  <value>false</value>
+                </choice>
+              </attribute>
+            </optional>
+          </optional>
+          <optional>
+            <attribute name="svg">
+              <a:documentation>Whether the generated cover HTML should use svg to wrap the cover image. Should be
+                assumed false if omitted.</a:documentation>
+              <choice>
+                <value>false</value>
+              </choice>
+            </attribute>
+          </optional>
+        </choice>
         <optional>
           <attribute name="alt">
             <a:documentation>If an alt attribute shall be added to Cover img or svg/title. If not set, 
