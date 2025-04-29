@@ -28,6 +28,7 @@
   </p:output>
 
   <p:option name="base-uri" required="true" cx:type="xsd:anyURI"/>
+  <p:option name="target-zip-uri" select="'_unset_'"/>
   <p:option name="debug" select="'no'"/>
   <p:option name="debug-dir-uri" select="'debug'"/>
 
@@ -103,9 +104,15 @@
 
   <p:group>
     <p:variable name="zip-file-uri"
-      select="replace($base-uri, 
-                          '^(.+/)([^./]+)\.(xhtml|html|xml)$', 
-                          concat('$1', if (normalize-space(/epub-config/@out-file-basename)) then /epub-config/@out-file-basename else '$2', '.epub'))">
+      select="(
+                $target-zip-uri, 
+                replace($base-uri, 
+                        '^(.+/)([^./]+)\.(xhtml|html|xml)$', 
+                        concat('$1', if (normalize-space(/epub-config/@out-file-basename)) 
+                                     then /epub-config/@out-file-basename 
+                                     else '$2', 
+                        '.epub'))
+              )[not(. = '_unset_')][1]">
       <p:pipe port="meta" step="zip-package"/>
     </p:variable>
 

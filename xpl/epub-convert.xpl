@@ -105,6 +105,9 @@
     <p:documentation>Whether to erase the target directory prior to splitting etc. Otherwise,
     files from previous conversions might be included in the resulting zip file.</p:documentation>
   </p:option>
+  <p:option name="target-zip-uri" select="'_unset_'" cx:type="xs:string">
+    <p:documentation>Overwrite epubtools default behaviour for epub target zip file. Absolute path, starts with 'file:'.</p:documentation>
+  </p:option>
   <p:option name="debug" select="'no'" cx:type="xs:string"/>
   <p:option name="use-svg" select="''" cx:type="xs:string" required="false"/>
   <p:option name="create-a11y-meta" select="'yes'" cx:type="xs:string" required="false">
@@ -391,6 +394,7 @@
     <p:with-option name="base-uri" select="/c:result/@local-href">
       <p:pipe port="result" step="base-uri"/>
     </p:with-option>
+    <p:with-option name="target-zip-uri" select="$target-zip-uri"><p:empty/></p:with-option>
     <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
     <p:with-option name="debug-dir-uri" select="replace($debug-dir-uri, '^(.+)\?.*$', '$1')"><p:empty/></p:with-option>
   </epub:zip-package>
