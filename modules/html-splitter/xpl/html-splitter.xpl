@@ -127,6 +127,10 @@
         <p:pipe port="meta" step="html-splitter"/>
       </p:variable>
 
+      <cx:message>
+        <p:with-option name="message" select="concat('[INFO] split of input basename=', $basename, ' in workdir: ', $workdir)"/>
+      </cx:message>
+
       <p:identity name="splitter-xsl-source">
         <p:input port="source">
           <p:pipe port="result" step="strip-leading-non-elements"/>
