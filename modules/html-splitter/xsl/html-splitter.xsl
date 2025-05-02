@@ -82,7 +82,7 @@
   <xsl:variable name="common-dir-elimination-regex" as="xs:string"
     select="replace($datadir, '/+', '/+')"/>
   <xsl:variable name="orig-filename" select="replace(base-uri(/*), '^.*/', '')"/>
-  <xsl:variable name="raw-smil-filename" select="replace(base-uri(/*), '[.]\w+$', '.raw.smil')"/>
+  <xsl:variable name="raw-smil-filename" select="concat(replace(base-uri(/*), '[.]\w+$', ''), '.raw.smil')"/>
   <xsl:variable name="epub-config" select="collection($collection-uri)/epub-config" as="element(epub-config)"/>
   <!-- If heading conf is submitted in a separate file, it will have precedence. It may be submitted as /epub-config/hierarchy -->
   <xsl:variable name="heading-conf"
