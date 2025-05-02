@@ -168,7 +168,7 @@
     <p:documentation>
       The output files are stored relative to the base-uri of the document on the primary input port.
     </p:documentation>
-    <p:with-option name="filename" select="(base-uri(/*), concat(static-base-uri(), '.html'))[1]">
+    <p:with-option name="filename" select="($target-zip-uri[not(. = '_unset_')], base-uri(/*), concat(static-base-uri(), '.html'))[1]">
       <p:pipe port="source" step="epub-convert"/>
     </p:with-option>
   </tr:file-uri>
