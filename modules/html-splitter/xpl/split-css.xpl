@@ -11,7 +11,7 @@
   
   <p:documentation xmlns="http://www.w3.org/1999/xhtml">
     This pipeline is used to split the CSS based on the submitted value of the option <code>css-handling</code>.
-    With the value <code>regenerated-per-split</code>, the CSS is analyzed and splitted for each HTML chunk. Commonly 
+    With the value <code>regenerated-per-split</code>, the CSS is analyzed and split for each HTML chunk. Commonly 
     used CSS properties are stored to a global CSS stylesheet, whereas unused CSS properties are filtered.
     With the value <code>unchanged</code> CSS and HTML remain unchanged.
     Per default, a new CSS stylesheet is generated from the CSS XML representation.

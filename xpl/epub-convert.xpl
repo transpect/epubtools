@@ -23,7 +23,7 @@
     on Unixy systems. For bash, this is, e.g., <code>source=file:/$(cygpath -ma sample/b978-3-646-92351-3.xhtml)</code> </p>
     <p>8/2023: new feature: if HTML contains a &gt;div>, &gt;section> or &gt;nav> element with <pre>@class="as-nav"</pre> and 
       <pre>@epub:type="loi"</pre> (or "lot") that section is removed from content and moved into the navigation page as &gt;nav> element.
-      This works not for EPUB2. Structure is expexted as &gt;ol>&gt;li>&gt;a href="link-to-fig">Fig 1: xyz&gt;/a>&gt;/li>&gt;/ol>.</p>
+      This works not for EPUB2. Structure is expected as &gt;ol>&gt;li>&gt;a href="link-to-fig">Fig 1: xyz&gt;/a>&gt;/li>&gt;/ol>.</p>
   </p:documentation>
 
   <p:serialization port="result" method="xml" encoding="UTF-8" indent="true" omit-xml-declaration="false"/>
