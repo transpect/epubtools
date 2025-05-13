@@ -68,7 +68,8 @@
     </attribute>
   </define>
   <define name="title">
-    <a:documentation>Currently not supported by the splitter.</a:documentation>
+    <a:documentation>Currently not supported by the splitter.
+    Note/see also: the 'title' attribute value of your configured heading element is used as the list item text in the resulting navigation.</a:documentation>
     <attribute name="title">
       <text/>
     </attribute>
