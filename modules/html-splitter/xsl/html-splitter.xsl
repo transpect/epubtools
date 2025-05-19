@@ -1528,7 +1528,7 @@
     </xsl:if>
   </xsl:template>
   
-  <xsl:template match="@error-message|@aria-labelledby[empty(key('chunk-by-id', ., ancestor::html:chunk))]" mode="resolve-refs"/>
+  <xsl:template match="@error-message|@aria-labelledby[every $token in tokenize(., '\s+') satisfies empty(key('chunk-by-id', $token, ancestor::html:chunk))]" mode="resolve-refs"/>
 
   <xsl:template match="ncx:ncx | ncx:navMap | ncx:navLabel | ncx:text" mode="nav-xhtml">
     <xsl:apply-templates mode="#current"/>
