@@ -212,6 +212,7 @@
             </xsl:if>
             <xsl:variable name="css-styles" select="string-join($html-content//*:body//@style, ' ')" as="xs:string?"/>
             <xsl:variable name="css" select="string-join((collection()/cx:document[@name='wrap-chunks']/c:data[ends-with(@xml:base, '.css')], $css-styles), ' ')" as="xs:string?"/>
+            <xsl:variable name="aria-roles" select="$html-content//@role[starts-with(.,'doc-') or starts-with(.,'aria')]" as="attribute(role)*"/>
   
             <!-- accessibilityFeature -->
 
@@ -219,6 +220,11 @@
             <!-- To DO: constain check on font-sizes, otherwise box borders prevent feature. 
                  allowing to change fonts should be checked as well -->
             <xsl:variable name="accessibilityFeatures" as="element(*)*">
+              <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'ARIA']) 
+                            and 
+                            count($aria-roles) ge 3">
+                <meta property="schema:accessibilityFeature">ARIA</meta>
+              </xsl:if>
               <xsl:if test="not(/epub-config/metadata/meta[@property = 'schema:accessibilityFeature'][normalize-space(.) = 'displayTransformability']) 
                             and 
                             not(matches($css, '[\d\s](px|pt|cm|Q|in|pc)[\s;\}]'))">
