@@ -388,7 +388,7 @@
        Dissolve divs which contain more than a single heading (important for later grouping) -->
   <xsl:variable name="tr:dissolvable-for-semiflatten" as="element(*)*"
     select="$root//*[local-name() = ('aside', 'div', 'nav', 'header', 'hgroup', 'section', ('figure')[$tr:subheadings-in-figure],
-                ('table', 'tbody', 'tr', 'td', 'th')[$epub-config/@consider-headings-in-tables = 'true'
+                ('table', 'tbody', 'thead', 'tr', 'td', 'th')[$epub-config/@consider-headings-in-tables = 'true'
                                                      or $tr:subheadings-in-table])]"/>
 
   <xsl:variable name="tr:subheadings-in-table" as="xs:boolean" 
