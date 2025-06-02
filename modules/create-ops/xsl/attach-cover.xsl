@@ -44,7 +44,8 @@
               </xsl:if>
               <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="100%"
                 height="100%" viewBox="0 0 {$w} {$h}" id="epub-cover-svg-container">
-                <title><xsl:value-of select="if (collection()/epub-config/cover[@alt[normalize-space()]]) 
+                <xsl:if test="$target = 'EPUB3'"><xsl:attribute name="aria-describedby" select="'cover-title-id'"/></xsl:if>
+                <title id="cover-title-id"><xsl:value-of select="if (collection()/epub-config/cover[@alt[normalize-space()]]) 
                                              then collection()/epub-config/cover/@alt
                                              else concat ('Cover for ', (collection()/epub-config/dc:title[normalize-space()], 'EPUB')[1])"/>
                 </title>
