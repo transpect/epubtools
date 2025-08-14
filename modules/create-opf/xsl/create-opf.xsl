@@ -111,10 +111,6 @@
             />
           </dc:date>
         </xsl:if>
-        <xsl:if test="exists(collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')]//*:a[matches(@id,'page_')])">
-          <dc:source id="src-id">urn:isbn:<xsl:value-of select="/epub-config/metadata/dc:identifier[1]"/></dc:source>
-          <meta refines="#src-id" property="source-of">pagination</meta>
-        </xsl:if>
         <xsl:if test="$target eq 'EPUB3'">
           <xsl:if test="not(/epub-config/metadata/meta/@property = 'dcterms:modified')">
             <meta property="dcterms:modified">
