@@ -457,7 +457,7 @@
         </optional>
         <optional>
           <attribute name="pull-up-types">
-            <a:documentation>space separated list of epub:type values that will be pulled from secton/div to surrounding body</a:documentation>
+            <a:documentation>space separated list of epub:type values that will be pulled from section/div to surrounding body</a:documentation>
             <list>
               <oneOrMore>
                 <choice>

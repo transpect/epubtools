@@ -262,7 +262,7 @@ types =
           ]
      }?
      & 
-       ## space separated list of epub:type values that will be pulled from secton/div to surrounding body
+       ## space separated list of epub:type values that will be pulled from section/div to surrounding body
        attribute pull-up-types {
          list { (landmark-types | "toc")+ }
        }?),
