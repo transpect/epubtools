@@ -406,7 +406,7 @@
                          )
                          or exists(.//*[tr:contains-token(@class, ('TOC_same', 'TOC_sub'))])
                        ]"
-    mode="semiflatten">
+    mode="semiflatten"  priority="1.5">
     <xsl:processing-instruction name="origin" select="'A'"/>
     <xsl:apply-templates mode="#current"/>
   </xsl:template>
@@ -500,11 +500,12 @@
           select="( $corresponding-conf-items[name() = 'heading']/@level,
                    tr:index-of($heading-conf/heading, $corresponding-conf-items[name() = 'heading']) )[1]"
         />
-        <!--<xsl:message select="'cci:', $corresponding-conf-items, '$heading-conf', $heading-conf"/>-->
+        <!--<xsl:message select="'+++++cci:', $corresponding-conf-items, '$heading-conf', $heading-conf, '//', $corresponding-conf-items[name() = 'heading']"/>-->
       </xsl:if>
       <xsl:if test="$corresponding-conf-items/name() = 'conditional-split'">
         <xsl:attribute name="tr-heading-level"
           select="( $corresponding-conf-items[name() = 'conditional-split'][1]/@level,
+                    $corresponding-conf-items[name() = 'heading'][1]/@level (:if there is a heading item contained in unconditional item, take it heading level :),
                    100 + tr:index-of($heading-conf/conditional-split, $corresponding-conf-items[name() = 'conditional-split'][1]) )[1]"
         /><!-- 100 is important for a distinction, see below (we could have used other element names, but that’s the way
           we implemented it) -->
@@ -1576,6 +1577,7 @@
         <xsl:when test="xs:integer(@tr-heading-level) = $level">
           <xsl:variable name="actual-heading"
             select="if (@tr-split-for) then key('by-genid', @tr-split-for, $root) else ." as="element()"/>
+          <!--<xsl:message select="'111gfncx:', $level, '##', string(@tr-heading-level), '-\-\-\-'"/>-->
             <xsl:if test="not(tr:contains-token($actual-heading/@class, '_notoc'))">
             <navPoint id="" class="default" playOrder="{replace(@tr-generated-id, '^.+?(\d+)$', '$1')}"
               xmlns="http://www.daisy.org/z3986/2005/ncx/">
@@ -1649,18 +1651,17 @@
                                                       [tr:contains-token(@class, 'TOC_same')]"
                                  mode="raw-ncx"/>
           </xsl:if>
-
         </xsl:when>
         <xsl:when test="current-group()//@tr-heading-level[not(../@tr-split-delegation-to)][not(../@tr-exclude-from-nav)]">
           <!-- lower level (i.e., higher integer number – may occur in 1st group) -->
-          <!--<xsl:message select="'nl2 level ', $level, ', ', min(current-group()//@tr-heading-level)"></xsl:message>-->
+         <!--<xsl:message select="'nl2 level ', $level, '##', min(current-group()//@tr-heading-level), string-join(current-group()//@tr-heading-level[not(../@tr-split-delegation-to)][not(../@tr-exclude-from-nav)])"></xsl:message>-->
           <xsl:if test="min(current-group()//@tr-heading-level[not(../@tr-split-delegation-to)][not(../@tr-exclude-from-nav)]) = $level">
             <xsl:message>Something's wrong (msg b): same level <xsl:value-of select="$level"/> at current group first item
                 <xsl:sequence select="."/> in <xsl:sequence select="(current-group() except .)[position() = (1 to 5)]"/>… 
               Possible issue: there are headings deeply nested in the markup above. 
               A solution might be to add the nesting tags in the list of dissolvable
               elements in tr:dissolvable-for-semiflatten(). </xsl:message>
-          </xsl:if>
+          </xsl:if><!--<xsl:message select="'222 gfncx:', xs:integer(min(current-group()//@tr-heading-level)), '//', string(@tr-heading-level), '-\-\-\-', current-group()[1]"/>-->
           <xsl:sequence
             select="tr:group-for-ncx(current-group(), xs:integer(min(current-group()//@tr-heading-level)), false())"/>
         </xsl:when>
@@ -1675,7 +1676,7 @@
                         )
                         and 
                         not(string-join(current-group(), '') = string-join(current-group()//svg:svg/svg:title, ''))">
-          <!-- generic front matter nav point before first actual split point -->
+          <!-- generic front matter nav point before first actual split point --><xsl:message select="'333gfncx'"/>
           <navPoint id="" class="default" playOrder="0" xmlns="http://www.daisy.org/z3986/2005/ncx/">
             <navLabel>
               <text>
