@@ -484,6 +484,12 @@
           <xsl:when test="tr:contains-token(current()/@class, '_nosplit')">
             <xsl:sequence select="'conditional'"/>
           </xsl:when>
+          <!-- <div class="section-title-group"><h2 class="index-subject-heading _nosplit">B</h2>/div> 
+                -> if section-title-group is not in conf, but <h2 class="index-subject-heading"> is: dont't ignore '_nosplit'-->
+          <xsl:when test="tr:contains-token($contained-candidate/@class, '_nosplit') 
+                          and empty($corresponding-conf-items-for-current)">
+            <xsl:sequence select="'conditional'"/>
+          </xsl:when>
           <xsl:when test="$corresponding-conf-items/name() = 'unconditional-split'">
             <xsl:sequence select="'unconditional'"/>
           </xsl:when>
