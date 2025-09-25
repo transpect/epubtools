@@ -1682,7 +1682,7 @@
                         )
                         and 
                         not(string-join(current-group(), '') = string-join(current-group()//svg:svg/svg:title, ''))">
-          <!-- generic front matter nav point before first actual split point --><xsl:message select="'333gfncx'"/>
+          <!-- generic front matter nav point before first actual split point -->
           <navPoint id="" class="default" playOrder="0" xmlns="http://www.daisy.org/z3986/2005/ncx/">
             <navLabel>
               <text>
