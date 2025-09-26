@@ -436,7 +436,12 @@
             <a:documentation>If an alt attribute shall be added to Cover img or svg/title. If not set, 
               the default value is epub-cover-image or "Cover for {dc:title}/'EPUB'"</a:documentation>
           </attribute>
-        </optional>  
+        </optional>
+        <optional>
+          <attribute name="opf-id">
+            <a:documentation>The opf-id attribute allows customizing the cover ID in the OPF document.</a:documentation>
+          </attribute>
+        </optional>
       </interleave>
     </element>
   </define>

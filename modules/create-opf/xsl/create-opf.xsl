@@ -297,13 +297,16 @@
           <!-- This fails to match the cover file id. Exclude it for EPUB3 since there are other mechanisms?
                Or fix it? -->
           <meta name="cover"
-            content="{opf:normalize-id(
+                content="{opf:normalize-id(
+                            if(normalize-space(collection()/epub-config/cover[1]/@opf-id))
+                            then 
+                              collection()/epub-config/cover[1]/@opf-id
+                            else
                               concat(
                                 'idcover_', 
                                 opf:id-from-filename(replace(collection()/epub-config/cover/@href, '^.+/', ''))
                               )
-                            )}"
-          />
+                            )}"/>
         </xsl:if>
       </metadata>
 
@@ -355,12 +358,16 @@
             <xsl:if test="replace($strip-path, '^.+/', '') eq $cover-nondir">
               <!-- rewrite id attribute: same as in metadata/meta[@name eq 'cover']/@content-->
               <xsl:attribute name="id"
-                select="opf:normalize-id(
-                                  concat(
-                                    'idcover_', 
-                                    opf:id-from-filename($cover-nondir)
-                                  )
-                                )"/>
+                             select="opf:normalize-id(
+                                       if(normalize-space(collection()/epub-config/cover[1]/@opf-id))
+                                       then 
+                                         collection()/epub-config/cover[1]/@opf-id
+                                       else
+                                         concat(
+                                           'idcover_', 
+                                           opf:id-from-filename(replace(collection()/epub-config/cover/@href, '^.+/', ''))
+                                         )
+                                       )"/>
               <xsl:if test="$target eq 'EPUB3'">
                 <xsl:attribute name="properties" select="'cover-image'"/>
               </xsl:if>
@@ -435,9 +442,9 @@
     <xsl:variable name="context" select=".." as="element(html:a)"/>
     <xsl:for-each select="tokenize(., '\s+')">
       <xsl:variable name="guide-type" as="attribute(guide-type)?"
-        select="key('type', ., collection()/epub-config)/@guide-type"/>
+                    select="key('type', ., collection()/epub-config)/@guide-type"/>
       <xsl:variable name="guide-types" as="xs:string*"
-        select="if ($guide-type) then tokenize($guide-type, '\s+') else ."/>
+                    select="if ($guide-type) then tokenize($guide-type, '\s+') else ."/>
       <xsl:for-each select="$guide-types">
         <reference type="{epub:guide-type(.)}" title="{$context}">
           <xsl:apply-templates select="$context/@href" mode="guide"/>

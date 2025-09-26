@@ -246,6 +246,9 @@ cover =
       ## If an alt attribute shall be added to Cover img or svg/title. If not set, 
       ##               the default value is epub-cover-image or "Cover for {dc:title}/'EPUB'"
       attribute alt { text }?
+    & 
+      ## The opf-id attribute allows customizing the cover ID in the OPF document.
+      attribute opf-id { text }?
   }
 types =
   
