@@ -272,7 +272,7 @@
       select="$chunks/html:chunks/html:chunk//*[@id | @tr-generated-id][tr:contains-token(@epub:type, $landmark-types)]"/>-->
 
     <xsl:variable name="landmarks" as="element(*)*">
-      <xsl:for-each-group select="$chunks/html:chunks/html:chunk//*[@id | @tr-generated-id | .[empty(@id)]/html:a/@id | .[empty(@id)]/html:section[1]/@id]
+      <xsl:for-each-group select="$chunks/html:chunks/html:chunk//*[@id | @tr-generated-id | .[empty(@id)]/html:a/@id | .[empty(@id)]/html:section[1]/@id | .[empty(@id)]/html:section[1][empty(@id)]/html:a[1]/@id]
                                                                    [tr:contains-token(@epub:type, $landmark-types)]"
                           group-by="tokenize(@epub:type, '\s+')[. = $landmark-types]">
         <!-- index, preface, … may occur multiple times. Use only the first item of a kind 
@@ -1499,7 +1499,7 @@
       <a srcpath="landmarks-{generate-id()}">
         <xsl:attribute name="epub:type" select="string-join($landmark-type, ' ')"/>
         <xsl:variable name="unresolved-href" as="attribute(href)">
-          <xsl:attribute name="href" select="concat('#', (@id, @tr-generated-id, .[empty(@id)]/html:a/@id, .[empty(@id)]/html:section[1]/@id)[1])"/>
+          <xsl:attribute name="href" select="concat('#', (@id, @tr-generated-id, .[empty(@id)]/html:a/@id, .[empty(@id)]/html:section[1]/@id, .[empty(@id)]/html:section[1]/html:a[1]/@id)[1])"/>
         </xsl:variable>
         <xsl:apply-templates select="$unresolved-href" mode="resolve-refs">
           <xsl:with-param name="element" select="."/>
@@ -1583,7 +1583,7 @@
         <xsl:when test="xs:integer(@tr-heading-level) = $level">
           <xsl:variable name="actual-heading"
             select="if (@tr-split-for) then key('by-genid', @tr-split-for, $root) else ." as="element()"/>
-          <!--<xsl:message select="'111gfncx:', $level, '##', string(@tr-heading-level), '-\-\-\-'"/>-->
+            <!--  <xsl:message select="'111gfncx:', $level, '##', string(@tr-heading-level), '-\-\-\-'"/>-->
             <xsl:if test="not(tr:contains-token($actual-heading/@class, '_notoc'))">
             <navPoint id="" class="default" playOrder="{replace(@tr-generated-id, '^.+?(\d+)$', '$1')}"
               xmlns="http://www.daisy.org/z3986/2005/ncx/">
