@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <p:declare-step xmlns:p="http://www.w3.org/ns/xproc" 
   xmlns:c="http://www.w3.org/ns/xproc-step"
   xmlns:cx="http://xmlcalabash.com/ns/extensions" 
@@ -58,8 +59,11 @@
   <p:option name="target" select="'EPUB2'" cx:type="xsd:string"/>
   <p:option name="debug" select="'no'" cx:type="xsd:string"/>
   <p:option name="debug-dir-uri" select="'debug'" cx:type="xsd:string"/>
+  <p:option name="cwd"/>
+  <p:option name="os"/>
   <p:option name="pull-up-epub-type-to-body" select="'false'" cx:type="xsd:string" required="false"/>
   
+  <p:import href="add-doctype.xpl"/>
   <p:import href="split-css.xpl"/>
   <p:import href="insert-amzn-region-magnification.xpl"/>
 
@@ -276,7 +280,7 @@
 
         <p:identity name="postprocessing"/>
 
-        <p:delete match="@srcpath | @source-dir-uri"/>
+        <p:delete match="@srcpath | @source-dir-uri" name="delete-srcpath"/>
 
         <p:choose xmlns:epub="http://www.idpf.org/2007/ops">
           <!--  *
@@ -314,15 +318,23 @@
             </p:store>
           </p:when>
           <!--  *
-                * nav document
+                * nav document and XHTML5 files for EPUB3 format
                 * -->
           <p:when test="$target = 'EPUB3' 
                         and matches(base-uri(), 'nav\.xhtml$') 
                         and (normalize-space($html-subdir-name))">
-            <p:store include-content-type="false" name="store-chunk" omit-xml-declaration="false" method="xhtml">
+            
+            <p:store name="store-nav-chunk" include-content-type="false" omit-xml-declaration="true" method="xhtml">
               <p:with-option name="indent" select="if ($indent = 'true') then 'true' else 'false'"/>
               <p:with-option name="href" select="$chunk-file-uri"/>
             </p:store>
+            
+            <tr:add-doctype name="add-doctype" cx:depends-on="store-nav-chunk">
+              <p:with-option name="os" select="$os"/>
+              <p:with-option name="cwd" select="$cwd"/>
+              <p:with-option name="file-uri" select="$chunk-file-uri"/>
+            </tr:add-doctype>
+            
           </p:when>
           <!--  *
                 * store as XHTML5 files for EPUB3 format
@@ -330,10 +342,16 @@
           <p:when test="$target eq 'EPUB3'">
             <p:delete match="html:meta[@name = 'sequence']"/>
             
-              <p:store include-content-type="false" name="store-chunk" omit-xml-declaration="false" method="xhtml">
-                <p:with-option name="indent" select="if ($indent = 'true') then 'true' else 'false'"/>
-                <p:with-option name="href" select="$chunk-file-uri"/>
-              </p:store>            
+            <p:store name="store-chunk" include-content-type="false" omit-xml-declaration="true" method="xhtml">
+              <p:with-option name="indent" select="if ($indent = 'true') then 'true' else 'false'"/>
+              <p:with-option name="href" select="$chunk-file-uri"/>
+            </p:store>
+            
+            <tr:add-doctype name="add-doctype" cx:depends-on="store-chunk">
+              <p:with-option name="os" select="$os"/>
+              <p:with-option name="cwd" select="$cwd"/>
+              <p:with-option name="file-uri" select="$chunk-file-uri"/>
+            </tr:add-doctype>
             
           </p:when>
           <p:when test="$target = ('EPUB2', 'KF8') 
@@ -351,7 +369,7 @@
             <p:rename match="html:nav" new-name="div" new-namespace="http://www.w3.org/1999/xhtml"/>
             
             <p:store include-content-type="true" name="store-chunk" omit-xml-declaration="false" method="xhtml"
-              doctype-public="-//W3C//DTD XHTML 1.1//EN" doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+                     doctype-public="-//W3C//DTD XHTML 1.1//EN" doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
               <p:with-option name="indent" select="if ($indent = 'true') then 'true' else 'false'"/>
               <p:with-option name="href" select="$chunk-file-uri"/>
             </p:store>

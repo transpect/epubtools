@@ -10,6 +10,7 @@
   xmlns:opf="http://www.idpf.org/2007/opf" 
   xmlns:dc="http://purl.org/dc/elements/1.1/"
   xmlns:ops="http://www.idpf.org/2007/ops" 
+  xmlns:pos="http://exproc.org/proposed/steps/os"
   version="1.0"
   type="epub:convert"
   name="epub-convert">
@@ -162,6 +163,15 @@
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
   </tr:simple-progress-msg>
   
+  <p:sink name="sink0"/>
+  
+  <pos:info name="os-info"/>
+  
+  <tr:store-debug pipeline-step="epubtools/os-info" extension="xml">
+    <p:with-option name="active" select="$debug"/>
+    <p:with-option name="base-uri" select="$debug-dir-uri"/>
+  </tr:store-debug>
+  
   <p:sink name="sink1"/>
 	
   <tr:file-uri name="base-uri">
@@ -299,9 +309,15 @@
     <p:with-option name="use-svg" select="$wrap-cover-in-svg"/>
     <p:with-option name="create-a11y-meta" select="$create-a11y-meta"/>
     <p:with-option name="terminate-on-error" select="$terminate-on-error"/>
-    <p:with-option name="debug" select="$debug"><p:empty/></p:with-option>
-    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"><p:empty/></p:with-option>
-    <p:with-option name="status-dir-uri" select="$status-dir-uri"><p:empty/></p:with-option>
+    <p:with-option name="debug" select="$debug"/>
+    <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
+    <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
+    <p:with-option name="cwd" select="/c:result/@cwd">
+      <p:pipe port="result" step="base-uri"/>
+    </p:with-option>
+    <p:with-option name="os" select="/c:result/@os-name">
+      <p:pipe port="result" step="os-info"/>
+    </p:with-option>
     <p:with-option name="create-font-subset" select="(/epub-config/@font-subset, 'false')[1]">
       <p:pipe port="meta" step="epub-convert"/>
     </p:with-option>
