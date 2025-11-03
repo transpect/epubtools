@@ -21,7 +21,7 @@
                              then '/epubtools/scripts/add-doctype.bat' 
                              else '/epubtools/scripts/add-doctype.sh'
                            )"/>
-    <p:with-option name="args" select="replace($file-uri, '^(file:|file:///)', '')"/>
+    <p:with-option name="args" select="replace($file-uri, '^(file:///|file:)', '')"/>
     <p:input port="source">
       <p:empty/>
     </p:input>

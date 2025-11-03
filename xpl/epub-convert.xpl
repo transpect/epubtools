@@ -172,6 +172,15 @@
     <p:with-option name="base-uri" select="$debug-dir-uri"/>
   </tr:store-debug>
   
+  <tr:file-uri name="cwd-info">
+    <p:with-option name="filename" select="resolve-uri('../../')"/>
+  </tr:file-uri>
+  
+  <tr:store-debug pipeline-step="epubtools/cwd-info">
+    <p:with-option name="active" select="$debug"/>
+    <p:with-option name="base-uri" select="$debug-dir-uri"/>
+  </tr:store-debug>
+  
   <p:sink name="sink1"/>
 	
   <tr:file-uri name="base-uri">
@@ -312,8 +321,8 @@
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
     <p:with-option name="status-dir-uri" select="$status-dir-uri"/>
-    <p:with-option name="cwd" select="/c:result/@cwd">
-      <p:pipe port="result" step="base-uri"/>
+    <p:with-option name="cwd" select="/c:result/@os-path">
+      <p:pipe port="result" step="cwd-info"/>
     </p:with-option>
     <p:with-option name="os" select="/c:result/@os-name">
       <p:pipe port="result" step="os-info"/>
