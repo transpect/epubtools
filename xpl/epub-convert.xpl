@@ -114,6 +114,10 @@
   <p:option name="create-a11y-meta" select="'yes'" cx:type="xs:string" required="false">
     <p:documentation>Default is yes. Will create accessibility meta tags in EPUB3 if set to 'yes' or 'true' or true(). </p:documentation>
   </p:option>
+  <p:option name="drop-epub-types-without-matching-aria-role" select="'false'">
+    <p:documentation>When set to yes, epub:type attributes are removed if 
+      no corresponding aria:role can be found.</p:documentation>
+  </p:option>
   <p:option name="debug-dir-uri" select="'debug'" cx:type="xs:string"/>
   <p:option name="status-dir-uri" select="'status'" cx:type="xs:string"/>
   <p:option name="id-in-report-heading" select="'false'">
@@ -317,6 +321,8 @@
     <p:with-option name="target" select="$target-format"/>
     <p:with-option name="use-svg" select="$wrap-cover-in-svg"/>
     <p:with-option name="create-a11y-meta" select="$create-a11y-meta"/>
+    <p:with-option name="drop-epub-types-without-matching-aria-role" 
+                   select="$drop-epub-types-without-matching-aria-role"/>
     <p:with-option name="terminate-on-error" select="$terminate-on-error"/>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>

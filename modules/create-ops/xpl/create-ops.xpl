@@ -63,6 +63,7 @@
       attribute a matching ARIA @role attribute.
     </p:documentation>
   </p:option>
+  <p:option name="drop-epub-types-without-matching-aria-role" select="'false'"/>
   <p:option name="create-font-subset" select="'false'"  cx:type="xs:string" required="false">
     <p:documentation>
       With this option set to 'true', all fonts will be subsetted. Of each font a 
@@ -387,10 +388,17 @@
             <p:inline>
               <xsl:stylesheet version="2.0" xmlns:epub="http://www.idpf.org/2007/ops">
                 <xsl:import href="http://transpect.io/epubtools/modules/create-ops/xsl/functions.xsl"/>
+                <xsl:param name="drop-epub-types-without-matching-aria-role" as="xs:string"/>
                 
                 <xsl:template match="*[not(@role)]/@epub:type[. != 'cover']">
                   <xsl:variable name="aria-role" as="attribute(role)?" select="epub:type2aria(., parent::*)"/>
                   <xsl:if test="exists($aria-role)">
+                    <xsl:copy-of select="."/>
+                  </xsl:if>
+                  <xsl:sequence select="$aria-role"/>
+                  <xsl:variable name="aria-role" as="attribute(role)?" select="epub:type2aria(., parent::*)"/>
+                  <xsl:if test="   exists($aria-role) 
+                                or $drop-epub-types-without-matching-aria-role = ('no', 'false')">
                     <xsl:copy-of select="."/>
                   </xsl:if>
                   <xsl:sequence select="$aria-role"/>
@@ -411,9 +419,8 @@
               </xsl:stylesheet>
             </p:inline>
           </p:input>
-          <p:input port="parameters">
-            <p:empty/>
-          </p:input>
+          <p:with-param name="drop-epub-types-without-matching-aria-role" 
+                        select="$drop-epub-types-without-matching-aria-role"/>
         </p:xslt>
       </p:when>
       <p:otherwise>
