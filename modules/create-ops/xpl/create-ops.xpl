@@ -389,8 +389,11 @@
                 <xsl:import href="http://transpect.io/epubtools/modules/create-ops/xsl/functions.xsl"/>
                 
                 <xsl:template match="*[not(@role)]/@epub:type[. != 'cover']">
-                  <xsl:copy-of select="."/>
-                  <xsl:sequence select="epub:type2aria(., parent::*)"/>
+                  <xsl:variable name="aria-role" as="attribute(role)?" select="epub:type2aria(., parent::*)"/>
+                  <xsl:if test="exists($aria-role)">
+                    <xsl:copy-of select="."/>
+                  </xsl:if>
+                  <xsl:sequence select="$aria-role"/>
                 </xsl:template>
                 
                 <xsl:template match="*:div[@epub:type = 'cover']/*:img[not(@role)]">
