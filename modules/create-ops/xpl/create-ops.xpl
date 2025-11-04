@@ -392,7 +392,7 @@
                 
                 <xsl:template match="*[not(@role)]/@epub:type[. != 'cover']">
                   <xsl:variable name="aria-role" as="attribute(role)?" select="epub:type2aria(., parent::*)"/>
-                  <xsl:if test="exists($aria-role)">
+                  <xsl:if test="exists($aria-role) and $drop-epub-types-without-matching-aria-role = ('yes', 'true')">
                     <xsl:copy-of select="."/>
                   </xsl:if>
                   <xsl:sequence select="$aria-role"/>
