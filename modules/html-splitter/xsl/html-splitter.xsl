@@ -30,7 +30,7 @@
     any.xml means that the source file given in splitter-input.catalog.xml has precedence and you can supply any XML file as source.
     Instead of using cygpath, you can use readlink -f on GNU systems, or you can compute URIs yourself. -->
 
-  <xsl:import href="http://transpect.io/epubtools/modules/create-ops/xsl/functions.xsl"/>
+  <xsl:import href="../../create-ops/xsl/functions.xsl"/>
 
 	<!-- create references between smil and html chunks -->
 	<xsl:include href="media-overlay.xsl"/>
