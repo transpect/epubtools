@@ -30,6 +30,8 @@
     any.xml means that the source file given in splitter-input.catalog.xml has precedence and you can supply any XML file as source.
     Instead of using cygpath, you can use readlink -f on GNU systems, or you can compute URIs yourself. -->
 
+  <xsl:import href="http://transpect.io/epubtools/modules/create-ops/xsl/functions.xsl"/>
+
 	<!-- create references between smil and html chunks -->
 	<xsl:include href="media-overlay.xsl"/>
 
@@ -73,6 +75,8 @@
   <xsl:param name="html-subdir-name" select="''" as="xs:string"/>
   <xsl:variable name="html-prefix" select="if (normalize-space($html-subdir-name)) then concat($html-subdir-name, '/') else ''"/>
   <!-- debug params -->
+  <xsl:param name="create-a11y-meta" select="'true'" as="xs:string?"/>
+  <xsl:param name="drop-epub-types-without-matching-aria-role" select="'false'" as="xs:string?"/>
   <xsl:param name="debug" select="'no'"/>
   <xsl:param name="debug-dir-uri" select="'debug'"/>
 
@@ -2084,7 +2088,7 @@
                       |html:audio/@src[matches(., '^(file|https?):')]
                       |html:source/@src[matches(., '^(file|https?):')]
                       |mml:math/@altimg[matches(., '^(file|https?):')]"
-    mode="resolve-refs" priority="2">
+                mode="resolve-refs" priority="2">
     <xsl:variable name="hopefully-relative" as="xs:string" select="replace(., $common-dir-elimination-regex, '')"/>
     <xsl:choose>
       <xsl:when test="matches($hopefully-relative, '^(https?|file)')">
@@ -2105,17 +2109,36 @@
                       |html:audio/@src[normalize-space($html-prefix)][not(matches(., '^#'))]
                       |html:source/@src[normalize-space($html-prefix)][not(matches(., '^#'))]
                       |mml:math/@altimg[normalize-space($html-prefix)][not(matches(., '^#'))]"
-    mode="resolve-refs">
+                mode="resolve-refs">
     <xsl:attribute name="{name()}" select="concat('../', .)"/>
   </xsl:template>
   
   <xsl:key match="*[@aria-label]" use="@aria-label" name="epub:elts-with-aria-label"/>
-    
 
   <xsl:template match="@aria-label[normalize-space()]" mode="resolve-refs">
     <xsl:attribute name="{name()}" select="if (count(key('epub:elts-with-aria-label', ., root(.))) gt 1) 
                                            then string-join((., count(preceding::*[@aria-label]/@aria-label = current())), ' ')
                                            else ."/>
+  </xsl:template>
+  
+  <!-- aria roles -->
+  
+  <xsl:template match="*[not(@role)]/@epub:type[. != 'cover']
+                                               [$create-a11y-meta = ('true', 'yes')]" mode="resolve-refs">
+    <xsl:variable name="aria-role" as="attribute(role)?" select="epub:type2aria(., parent::*)"/>
+    <xsl:if test="   exists($aria-role) 
+                  or not($drop-epub-types-without-matching-aria-role = ('true', 'yes'))">
+      <xsl:copy-of select="."/>
+    </xsl:if>
+    <xsl:sequence select="$aria-role"/>
+  </xsl:template>
+  
+  <xsl:template match="*:div[@epub:type = 'cover']/*:img[not(@role)]
+                                                        [$create-a11y-meta = ('true', 'yes')]" mode="resolve-refs">
+    <xsl:copy>
+      <xsl:sequence select="epub:type2aria(parent::*:div/@epub:type, .)"/>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </xsl:copy>
   </xsl:template>
 
   <xsl:template match="@xml:base" mode="resolve-refs"/>
@@ -2131,7 +2154,6 @@
       <xsl:apply-templates mode="#current"/>
     </xsl:copy>
   </xsl:template>
-  
   
   <!-- should be self::html:nav[@epub:type = 'toc'] but people are using other stuff in EPUB2 production -->
   <xsl:template match="html:body[count(*/@epub:type) = 1][*[1][@epub:type][not(self::html:section|self::html:div)]]/*[@epub:type][not(self::*[@epub:type = 'toc'])]" mode="resolve-refs">

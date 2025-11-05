@@ -59,6 +59,8 @@
   <p:option name="target" select="'EPUB2'" cx:type="xsd:string"/>
   <p:option name="debug" select="'no'" cx:type="xsd:string"/>
   <p:option name="debug-dir-uri" select="'debug'" cx:type="xsd:string"/>
+  <p:option name="create-a11y-meta" select="'false'"/>
+  <p:option name="drop-epub-types-without-matching-aria-role" select="'false'"/>
   <p:option name="cwd"/>
   <p:option name="os"/>
   <p:option name="pull-up-epub-type-to-body" select="'false'" cx:type="xsd:string" required="false"/>
@@ -159,6 +161,8 @@
         <p:with-param name="basename" select="$basename"><p:empty/></p:with-param>
         <p:with-param name="html-subdir-name" select="$html-subdir-name"><p:empty/></p:with-param>
         <p:with-param name="pull-up-epub-type-to-body" select="$pull-up-epub-type-to-body"><p:empty/></p:with-param>
+        <p:with-param name="create-a11y-meta" select="$create-a11y-meta"><p:empty/></p:with-param>
+        <p:with-param name="drop-epub-types-without-matching-aria-role" select="$drop-epub-types-without-matching-aria-role"><p:empty/></p:with-param>
         <p:input port="stylesheet">
           <p:document href="../xsl/html-splitter.xsl"/>
         </p:input>
@@ -477,7 +481,7 @@
       </tr:store-debug>
       
     </p:group>
-
+    
     <p:catch name="split-failed">
       <p:output port="files" primary="false">
         <p:pipe port="result" step="strip-leading-non-elements"/>

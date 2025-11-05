@@ -57,7 +57,7 @@
   <p:option name="debug" required="false" select="'no'"/>
   <p:option name="debug-dir-uri" required="false" select="'debug'"/>
   <p:option name="status-dir-uri" select="'status'" cx:type="xs:string"/>
-  <p:option name="create-a11y-meta" select="'yes'" cx:type="xs:string">
+  <p:option name="create-a11y-meta" select="'true'" cx:type="xs:string">
     <p:documentation>
       In the context of tr:create-ops, this adds to elements with @epub:type 
       attribute a matching ARIA @role attribute.
@@ -380,53 +380,6 @@
     <p:delete match="/html:html/@version | /html:html/html:head/@profile" name="delete-dtd-artifacts">
       <p:documentation>Possible DTD parsing artifacts</p:documentation>
     </p:delete>
-    
-    <p:choose name="epub-type2aria-role">
-      <p:when test="($create-a11y-meta = ('yes', 'true')) and $target eq 'EPUB3'">
-        <p:xslt>
-          <p:input port="stylesheet">
-            <p:inline>
-              <xsl:stylesheet version="2.0" xmlns:epub="http://www.idpf.org/2007/ops">
-                <xsl:import href="http://transpect.io/epubtools/modules/create-ops/xsl/functions.xsl"/>
-                <xsl:param name="drop-epub-types-without-matching-aria-role" as="xs:string"/>
-                
-                <xsl:template match="*[not(@role)]/@epub:type[. != 'cover']">
-                  <xsl:variable name="aria-role" as="attribute(role)?" select="epub:type2aria(., parent::*)"/>
-                  <xsl:if test="exists($aria-role) and $drop-epub-types-without-matching-aria-role = ('yes', 'true')">
-                    <xsl:copy-of select="."/>
-                  </xsl:if>
-                  <xsl:sequence select="$aria-role"/>
-                  <xsl:variable name="aria-role" as="attribute(role)?" select="epub:type2aria(., parent::*)"/>
-                  <xsl:if test="   exists($aria-role) 
-                                or $drop-epub-types-without-matching-aria-role = ('no', 'false')">
-                    <xsl:copy-of select="."/>
-                  </xsl:if>
-                  <xsl:sequence select="$aria-role"/>
-                </xsl:template>
-                
-                <xsl:template match="*:div[@epub:type = 'cover']/*:img[not(@role)]">
-                  <xsl:copy>
-                    <xsl:sequence select="epub:type2aria(parent::*:div/@epub:type, .)"/>
-                    <xsl:apply-templates select="@*, node()"/>
-                  </xsl:copy>
-                </xsl:template>
-                
-                <xsl:template match="@*|node()">
-                  <xsl:copy>
-                    <xsl:apply-templates select="@*, node()"/>
-                  </xsl:copy>
-                </xsl:template>
-              </xsl:stylesheet>
-            </p:inline>
-          </p:input>
-          <p:with-param name="drop-epub-types-without-matching-aria-role" 
-                        select="$drop-epub-types-without-matching-aria-role"/>
-        </p:xslt>
-      </p:when>
-      <p:otherwise>
-        <p:identity/>
-      </p:otherwise>
-    </p:choose>
     
     <p:choose name="conditionally-check-hrefs">
       <p:xpath-context>
@@ -935,6 +888,9 @@
     </p:input>
     <p:with-option name="base-uri" select="$base-uri"/>
     <p:with-option name="target" select="$target"/>
+    <p:with-option name="create-a11y-meta" select="$create-a11y-meta"/>
+    <p:with-option name="drop-epub-types-without-matching-aria-role" 
+                   select="$drop-epub-types-without-matching-aria-role"/>
     <p:with-option name="debug" select="$debug"/>
     <p:with-option name="debug-dir-uri" select="$debug-dir-uri"/>
     <p:with-option name="cwd" select="$cwd"/>
