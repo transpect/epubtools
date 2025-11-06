@@ -381,6 +381,46 @@
       <p:documentation>Possible DTD parsing artifacts</p:documentation>
     </p:delete>
     
+    <p:choose name="epub-type2aria-role">
+      <p:when test="($create-a11y-meta = ('yes', 'true')) and $target eq 'EPUB3'">
+        <p:xslt>
+          <p:input port="stylesheet">
+            <p:inline>
+              <xsl:stylesheet version="2.0" xmlns:epub="http://www.idpf.org/2007/ops">
+                <xsl:import href="../xsl/functions.xsl"/>
+                
+                <xsl:template match="*[not(@role)]/@epub:type[. != 'cover']">
+                  <xsl:variable name="aria-role" as="attribute(role)?" select="epub:type2aria(., parent::*)"/>
+                  <xsl:copy-of select="."/>
+                  <xsl:sequence select="$aria-role"/>
+                </xsl:template>
+                
+                <xsl:template match="*:div[@epub:type = 'cover']/*:img[not(@role)]">
+                  <xsl:copy>
+                    <xsl:sequence select="epub:type2aria(parent::*:div/@epub:type, .)"/>
+                    <xsl:apply-templates select="@*, node()"/>
+                  </xsl:copy>
+                </xsl:template>
+                
+                <xsl:template match="@*|node()">
+                  <xsl:copy>
+                    <xsl:apply-templates select="@*, node()"/>
+                  </xsl:copy>
+                </xsl:template>
+                
+              </xsl:stylesheet>
+            </p:inline>
+          </p:input>
+          <p:input port="parameters">
+            <p:empty/>
+          </p:input>
+        </p:xslt>
+      </p:when>
+      <p:otherwise>
+        <p:identity/>
+      </p:otherwise>
+    </p:choose>
+    
     <p:choose name="conditionally-check-hrefs">
       <p:xpath-context>
         <p:pipe port="meta" step="create-ops"/>
@@ -888,7 +928,6 @@
     </p:input>
     <p:with-option name="base-uri" select="$base-uri"/>
     <p:with-option name="target" select="$target"/>
-    <p:with-option name="create-a11y-meta" select="$create-a11y-meta"/>
     <p:with-option name="drop-epub-types-without-matching-aria-role" 
                    select="$drop-epub-types-without-matching-aria-role"/>
     <p:with-option name="debug" select="$debug"/>

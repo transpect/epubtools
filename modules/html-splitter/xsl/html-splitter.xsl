@@ -30,8 +30,6 @@
     any.xml means that the source file given in splitter-input.catalog.xml has precedence and you can supply any XML file as source.
     Instead of using cygpath, you can use readlink -f on GNU systems, or you can compute URIs yourself. -->
 
-  <xsl:import href="../../create-ops/xsl/functions.xsl"/>
-
 	<!-- create references between smil and html chunks -->
 	<xsl:include href="media-overlay.xsl"/>
 
@@ -75,7 +73,6 @@
   <xsl:param name="html-subdir-name" select="''" as="xs:string"/>
   <xsl:variable name="html-prefix" select="if (normalize-space($html-subdir-name)) then concat($html-subdir-name, '/') else ''"/>
   <!-- debug params -->
-  <xsl:param name="create-a11y-meta" select="'true'" as="xs:string?"/>
   <xsl:param name="drop-epub-types-without-matching-aria-role" select="'false'" as="xs:string?"/>
   <xsl:param name="debug" select="'no'"/>
   <xsl:param name="debug-dir-uri" select="'debug'"/>
@@ -2121,25 +2118,21 @@
                                            else ."/>
   </xsl:template>
   
-  <!-- aria roles -->
+  <!-- remove epub:types that are not applicable as aria roles -->
   
-  <xsl:template match="*[not(@role)]/@epub:type[. != 'cover']
-                                               [$create-a11y-meta = ('true', 'yes')]" mode="resolve-refs">
-    <xsl:variable name="aria-role" as="attribute(role)?" select="epub:type2aria(., parent::*)"/>
-    <xsl:if test="   exists($aria-role) 
-                  or not($drop-epub-types-without-matching-aria-role = ('true', 'yes'))">
-      <xsl:copy-of select="."/>
-    </xsl:if>
-    <xsl:sequence select="$aria-role"/>
-  </xsl:template>
+  <xsl:variable name="reserved-epub-types" as="xs:string+" 
+                select="('cover', 
+                         'toc', 
+                         'landmarks', 
+                         'page-list',
+                         if(//html:html/html:nav[@epub:type = 'landmarks']) 
+                         then $landmark-types 
+                         else ()
+                         )"/>
   
-  <xsl:template match="*:div[@epub:type = 'cover']/*:img[not(@role)]
-                                                        [$create-a11y-meta = ('true', 'yes')]" mode="resolve-refs">
-    <xsl:copy>
-      <xsl:sequence select="epub:type2aria(parent::*:div/@epub:type, .)"/>
-      <xsl:apply-templates select="@*, node()" mode="#current"/>
-    </xsl:copy>
-  </xsl:template>
+  <xsl:template match="*[@epub:type[. != $reserved-epub-types]]
+                        [not(@role)]
+                        [$drop-epub-types-without-matching-aria-role = ('true', 'yes')]/@epub:type" mode="resolve-refs"/>
 
   <xsl:template match="@xml:base" mode="resolve-refs"/>
 
