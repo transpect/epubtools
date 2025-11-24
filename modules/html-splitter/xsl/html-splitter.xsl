@@ -187,10 +187,13 @@
                                                                      'titlepage', 
                                                                      'toc' 
                                                                      )"/>
-  <xsl:variable name="landmark-types" as="xs:string+" 
-    select="if (normalize-space($epub-config/types/type[@name = 'landmarks']/@types))
+  <xsl:variable name="landmark-types" as="xs:string+">
+    <xsl:variable name="select-lmts" select="if (normalize-space($epub-config/types/type[@name = 'landmarks']/@types))
             then tokenize($epub-config/types/type[@name = 'landmarks']/@types, '\s+')
             else $epub3-landmark-types"/>
+    <xsl:sequence select="$select-lmts[not(. = $epub-config/types/type[@hidden=('hidden', 'true')]/@name)]"/>
+  </xsl:variable> 
+    
 
 
   <xsl:variable name="epub3-publisher-roles" as="xs:string+"
@@ -471,6 +474,8 @@
                 union
                 $corresponding-conf-items-for-candidates"
         as="element()+"/>
+       <!--<xsl:message select="'###',string-join(., ''), string-join((current(), $contained-candidate)/@class, ' '), '|', 
+        $dont-split, $corresponding-conf-items-for-current, '++', $corresponding-conf-items, ' cc: ', $contained-candidate"/>-->
       <xsl:for-each select="$corresponding-conf-items/@max-text-length">
         <xsl:attribute name="tr-max-text-length" select="."/>
       </xsl:for-each>
@@ -1980,10 +1985,27 @@
   
   <!-- This special ancestor is allowed to carry his brother html:head with him: -->
   <xsl:template match="html:body" mode="export-chunk-with-surroundings" priority="-0.6">
-    <xsl:apply-templates select="preceding::html:head"/>
+    <xsl:apply-templates select="preceding::html:head">
+      <xsl:with-param name="first-heading" select="(.//*[self::html:h1|self::html:h2|self::html:h3|self::html:h4|self::html:h5])[1]" as="element()?"/>
+      <xsl:with-param name="type" select="descendant-or-self::*[@epub:type][1]/@epub:type" as="xs:string?"/>
+    </xsl:apply-templates>
     <xsl:text>&#xa;    </xsl:text>
     <xsl:next-match/>
   </xsl:template>
+  
+   <xsl:template match="html:head/html:title" mode="#default export-chunk-with-surroundings" priority="3">
+     <xsl:param name="first-heading" as="element()?"/>
+     <xsl:param name="type" as="attribute()?"/>
+     <xsl:variable name="title-addition" as="xs:string?">
+       <xsl:choose>
+         <xsl:when test="$type/@title"><xsl:value-of select="$type/@title"/></xsl:when>
+         <xsl:when test="exists($first-heading)"><xsl:value-of select="$first-heading/@title"/></xsl:when>
+       </xsl:choose>
+     </xsl:variable>
+     <xsl:copy>
+      <xsl:sequence select="string-join(($title-addition[normalize-space()], .), '')"/>
+     </xsl:copy>
+   </xsl:template>
 
   <!-- priority has to be lower than default priority for match="*" (which is -0.5), 
        but higher than the catch-all priority specified above -->
