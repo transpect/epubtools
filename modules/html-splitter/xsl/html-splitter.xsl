@@ -1420,83 +1420,85 @@
     <!-- If this exists ⇒ The toc is already in the content -->
     <xsl:variable name="content-toc-id" as="attribute()?"
       select="($landmarks[tr:contains-token(@epub:type, 'toc')]/(@id, @tr-generated-id))[1]"/>
-    <nav epub:type="landmarks" id="landmarks-navigation">
-      <xsl:if test="$epub-config/types/type[@name = 'landmarks']/@hidden = 'true'">
-        <xsl:attribute name="hidden" select="'hidden'"/>
-      </xsl:if>
-      <xsl:if test="not($epub-config/types/type[@name = 'landmarks']/@heading = '')">
-        <h1>
-          <xsl:value-of select="($epub-config/types/type[@name = 'landmarks']/@heading, 'Guide')[1]"/>
-        </h1>
-      </xsl:if>
-      <ol>
-        <xsl:variable name="rendered-toc" as="element(*)?"
-          select="key('by-id', $epub-config/types/type[@name = 'toc']/@fallback-id-for-landmark)"/>
-        <xsl:variable name="toc-link" as="element(html:li)?">
+    <xsl:if test="not(empty($landmarks))">      
+      <nav epub:type="landmarks" id="landmarks-navigation">
+        <xsl:if test="$epub-config/types/type[@name = 'landmarks']/@hidden = 'true'">
+          <xsl:attribute name="hidden" select="'hidden'"/>
+        </xsl:if>
+        <xsl:if test="not($epub-config/types/type[@name = 'landmarks']/@heading = '')">
+          <h1>
+            <xsl:value-of select="($epub-config/types/type[@name = 'landmarks']/@heading, 'Guide')[1]"/>
+          </h1>
+        </xsl:if>
+        <ol>
+          <xsl:variable name="rendered-toc" as="element(*)?"
+            select="key('by-id', $epub-config/types/type[@name = 'toc']/@fallback-id-for-landmark)"/>
+          <xsl:variable name="toc-link" as="element(html:li)?">
+            <xsl:choose>
+              <xsl:when test="not($content-toc-id) and 
+                              not($epub-config/types/type[@name = 'toc']/@hidden = 'true')">
+                <!-- nav doc is not already in spine, but generated toc will be.
+                  Link to generated toc. 
+                  Otherwise, don’t link to generated because it is not allowed to link to non-spine items -->
+                <li>
+                  <a epub:type="toc" href="{concat(if (not($final-pub-type = 'EPUB2'))
+                                                   then concat(($epub-config/types/type[@name = 'toc']/@file[normalize-space()], 'nav')[1], '.xhtml') 
+                                                   else (), 
+                                                   '#', 
+                                                   $toc-nav-id
+                                             )}" srcpath="landmarks-link-to-toc">
+                    <xsl:value-of select="($epub-config/types/type[@name = 'toc']/@heading, 'Table of Contents')[1]"/>
+                  </a>
+                </li>
+              </xsl:when>
+              <xsl:when test="$epub-config/types/type[@name = 'toc']/@hidden = 'true'
+                                                  and
+                                                  exists($rendered-toc)">
+                <xsl:variable name="unresolved-href" as="attribute(href)">
+                  <xsl:attribute name="href" select="concat('#', $epub-config/types/type[@name = 'toc']/@fallback-id-for-landmark)"/>
+                </xsl:variable>
+                <li>
+                  <a epub:type="toc" srcpath="landmarks-link-to-toc">
+                    <xsl:apply-templates select="$unresolved-href" mode="resolve-refs">
+                      <xsl:with-param name="element" select="$rendered-toc"/>
+                    </xsl:apply-templates>
+                    <xsl:value-of select="($epub-config/types/type[@name = 'toc']/@heading, 'Table of Contents')[1]"/>
+                  </a>
+                </li>
+              </xsl:when>
+            </xsl:choose>
+          </xsl:variable>
+          <xsl:variable name="prelim" as="element(html:li)*">
+            <xsl:apply-templates select="$landmarks" mode="nav-landmarks"/>
+          </xsl:variable>
+          <!-- sorting entries to avoid that toc is always rendered first if not in content -->
+          <xsl:variable name="orig-type-order" as="xs:string*" select="tokenize($epub-config/types/type[@name = 'landmarks']/@types, ' ')"/>
+          <xsl:variable name="toc-pos" as="xs:integer?" select="index-of($orig-type-order, 'toc')"/>
           <xsl:choose>
-            <xsl:when test="not($content-toc-id) and 
-                            not($epub-config/types/type[@name = 'toc']/@hidden = 'true')">
-              <!-- nav doc is not already in spine, but generated toc will be.
-                Link to generated toc. 
-                Otherwise, don’t link to generated because it is not allowed to link to non-spine items -->
-              <li>
-                <a epub:type="toc" href="{concat(if (not($final-pub-type = 'EPUB2'))
-                                                 then concat(($epub-config/types/type[@name = 'toc']/@file[normalize-space()], 'nav')[1], '.xhtml') 
-                                                 else (), 
-                                                 '#', 
-                                                 $toc-nav-id
-                                           )}" srcpath="landmarks-link-to-toc">
-                  <xsl:value-of select="($epub-config/types/type[@name = 'toc']/@heading, 'Table of Contents')[1]"/>
-                </a>
-              </li>
+            <xsl:when test="empty($toc-link)">
+            <!-- if toc already exists, render it where it was -->
+            <xsl:sequence select="$prelim"/>
             </xsl:when>
-            <xsl:when test="$epub-config/types/type[@name = 'toc']/@hidden = 'true'
-                                                and
-                                                exists($rendered-toc)">
-              <xsl:variable name="unresolved-href" as="attribute(href)">
-                <xsl:attribute name="href" select="concat('#', $epub-config/types/type[@name = 'toc']/@fallback-id-for-landmark)"/>
-              </xsl:variable>
-              <li>
-                <a epub:type="toc" srcpath="landmarks-link-to-toc">
-                  <xsl:apply-templates select="$unresolved-href" mode="resolve-refs">
-                    <xsl:with-param name="element" select="$rendered-toc"/>
-                  </xsl:apply-templates>
-                  <xsl:value-of select="($epub-config/types/type[@name = 'toc']/@heading, 'Table of Contents')[1]"/>
-                </a>
-              </li>
+            <xsl:when test="(some $token in $orig-type-order satisfies $token = 'toc') 
+                            and 
+                            $epub-config/types/@nav-spine-pos" >
+            <!-- insert generated toc where it is located in   <type name="landmarks" types=""/> -->
+            <xsl:sequence select="$prelim[descendant::*:a/@epub:type[index-of($orig-type-order, .) lt $toc-pos]],
+                                  $toc-link, 
+                                  $prelim[descendant::*:a/@epub:type[index-of($orig-type-order, .) gt $toc-pos]]"/>
             </xsl:when>
+            <xsl:otherwise>
+              <!-- if generated toc is not contained in landmarks/@types and no types/@nav-spine-pos is set, insert it directly after Cover -->
+              <xsl:sequence select="$prelim[descendant::*:a/@epub:type = 'cover'], $toc-link, $prelim[not(descendant::*:a/@epub:type = 'cover')]"/>
+            </xsl:otherwise>
           </xsl:choose>
-        </xsl:variable>
-        <xsl:variable name="prelim" as="element(html:li)*">
-          <xsl:apply-templates select="$landmarks" mode="nav-landmarks"/>
-        </xsl:variable>
-        <!-- sorting entries to avoid that toc is always rendered first if not in content -->
-        <xsl:variable name="orig-type-order" as="xs:string*" select="tokenize($epub-config/types/type[@name = 'landmarks']/@types, ' ')"/>
-        <xsl:variable name="toc-pos" as="xs:integer?" select="index-of($orig-type-order, 'toc')"/>
-        <xsl:choose>
-          <xsl:when test="empty($toc-link)">
-          <!-- if toc already exists, render it where it was -->
-          <xsl:sequence select="$prelim"/>
-          </xsl:when>
-          <xsl:when test="(some $token in $orig-type-order satisfies $token = 'toc') 
-                          and 
-                          $epub-config/types/@nav-spine-pos" >
-          <!-- insert generated toc where it is located in   <type name="landmarks" types=""/> -->
-          <xsl:sequence select="$prelim[descendant::*:a/@epub:type[index-of($orig-type-order, .) lt $toc-pos]],
-                                $toc-link, 
-                                $prelim[descendant::*:a/@epub:type[index-of($orig-type-order, .) gt $toc-pos]]"/>
-          </xsl:when>
-          <xsl:otherwise>
-            <!-- if generated toc is not contained in landmarks/@types and no types/@nav-spine-pos is set, insert it directly after Cover -->
-            <xsl:sequence select="$prelim[descendant::*:a/@epub:type = 'cover'], $toc-link, $prelim[not(descendant::*:a/@epub:type = 'cover')]"/>
-          </xsl:otherwise>
-        </xsl:choose>
-        <!-- That would discard an index landmark in a backmatter chunk: --> 
-        <!--<xsl:for-each-group select="$prelim" group-by="replace(html:a/@href, '#.+$', '')">
-          <xsl:sequence select="."/>
-        </xsl:for-each-group>-->
-      </ol>
-    </nav>
+          <!-- That would discard an index landmark in a backmatter chunk: --> 
+          <!--<xsl:for-each-group select="$prelim" group-by="replace(html:a/@href, '#.+$', '')">
+            <xsl:sequence select="."/>
+          </xsl:for-each-group>-->
+        </ol>
+      </nav>
+    </xsl:if>
   </xsl:template>
 
   <xsl:template match="*" mode="nav-landmarks">
