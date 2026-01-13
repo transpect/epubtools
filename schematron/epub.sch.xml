@@ -460,9 +460,9 @@
   <pattern id="cmyk">
     <rule context="opf:item[@media-type = 'image/jpeg']">
       <extends rule="file-calc"/>      
-      <report test="$colorspace = 'CMYK'" id="cmyk-image" diagnostics="cmyk-image_de" role="warning">
+      <report test="$colorspace = ('CMYK', 'YCCK')" id="cmyk-image" diagnostics="cmyk-image_de" role="warning">
         <span class="srcpath"><xsl:value-of select="for $s in $srcpath return concat($source-dir-uri, $s)"/></span>
-        Image '<value-of select="@href"/>' is CMYK. This is not supported by every reading system.
+        Image '<value-of select="@href"/>' is <value-of select="$colorspace"/>. This is not supported by every reading system.
       </report>
     </rule>
   </pattern>
