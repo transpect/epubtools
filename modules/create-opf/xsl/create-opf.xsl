@@ -31,8 +31,17 @@
       version="{if($target = 'EPUB3') then '3.0' else '2.0'}"
       unique-identifier="{((epub-config/metadata/dc:identifier[1]/@opf:scheme)[$target = 'EPUB3'], 'bookid')[1]}">
       
+      <!-- https://www.w3.org/TR/epub-33/#sec-prefix-attr -->
+      
       <xsl:if test="$target eq 'EPUB3'">
-        <xsl:attribute name="prefix" select="'ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/ rendition: http://www.idpf.org/vocab/rendition/# tdm: http://www.w3.org/ns/tdmrep#'"/> 
+        <xsl:attribute name="prefix" 
+                       select="(epub-config/@prefix,
+                                string-join(
+                                  (
+                                  'ibooks:',    'http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/', 
+                                  'tdm:',       'http://www.w3.org/ns/tdmrep#'
+                                  ), ' ')
+                                )[1]"/> 
       </xsl:if>
 
       <xsl:if test="$target = 'EPUB3'

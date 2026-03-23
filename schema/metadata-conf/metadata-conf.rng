@@ -77,6 +77,9 @@
       <optional>
         <ref name="consider-headings-in-tables"/>
       </optional>
+      <optional>
+        <ref name="prefix"/>
+      </optional>
     </interleave>
   </define>
   
@@ -242,6 +245,16 @@
         If this option is true, this may slow down the splitting of large documents 
         with many tables.</a:documentation>
       <data type="boolean"/>
+    </attribute>
+  </define>
+  
+  <define name="prefix">
+    <attribute name="prefix">
+      <a:documentation>Define reserved prefixes in attributes that expect a property 
+        value, e.g. "@epub:type". For more detailed information about reserved 
+        prefixes, refer to the EPUB spec:
+        https://www.w3.org/TR/epub-33/#sec-prefix-attr</a:documentation>
+      <text/>
     </attribute>
   </define>
 

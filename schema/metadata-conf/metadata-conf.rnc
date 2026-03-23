@@ -29,6 +29,7 @@ epub-config-attributes =
   & html-subdir-name?
   & out-file-basename?
   & consider-headings-in-tables?
+  & prefix?
 global-atts =
   attribute xml:lang { text }?,
   attribute xml:base { xsd:anyURI }?,
@@ -107,6 +108,13 @@ consider-headings-in-tables =
   ##         If this option is true, this may slow down the splitting of large documents 
   ##         with many tables.
   attribute consider-headings-in-tables { xsd:boolean }
+prefix =
+  
+  ## Define reserved prefixes in attributes that expect a property 
+  ##         value, e.g. "@epub:type". For more detailed information about reserved 
+  ##         prefixes, refer to the EPUB spec:
+  ##         https://www.w3.org/TR/epub-33/#sec-prefix-attr
+  attribute prefix { text }
 
 ## https://www.w3.org/TR/epub-ssv-11/
 landmark-types =

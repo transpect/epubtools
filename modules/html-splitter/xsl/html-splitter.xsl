@@ -1838,6 +1838,33 @@
     </chunks>
   </xsl:function>
   
+  <!-- https://www.w3.org/TR/epub-33/#sec-prefix-attr -->
+  
+  <xsl:variable name="non-native-prefixes-regex" as="xs:string" 
+                select="'^(a11y|dcterms|marc|media|msv|onix|prism|rendition|schema|xsd):'"/>
+  
+  <xsl:template match="html:html[html:body//@epub:type[$final-pub-type eq 'EPUB3']
+                                                      [normalize-space($epub-config/@prefix)]
+                                                      [matches(., '^[a-z]+:')]]
+                                                      [not(matches(., $non-native-prefixes-regex))]" mode="export-chunk-with-surroundings">
+    <xsl:variable name="non-native-prefixes" as="xs:string*"
+                  select="html:body//@epub:type[matches(., '^[a-z]+:')]
+                                               [not(matches(., $non-native-prefixes-regex))]/substring-before(., ':')"/>
+    <xsl:copy>
+      <xsl:attribute name="epub:prefix" 
+                     select="string-join(
+                               for $prefix in $non-native-prefixes 
+                               return 
+                                replace(
+                                  $epub-config/@prefix, 
+                                  concat('.*?(', $prefix, '):\s(.+?)((\s.+?$)|($))'), 
+                                  concat($prefix, ': $2')
+                                ), ' '
+                              )"/>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
   <xsl:template match="html:body/text()[not(normalize-space())]" priority="2" mode="remove-surrounding-text remove-other-pub-type-content"/>
  
   <xsl:function name="tr:epub-type-pullable" as="xs:boolean">
