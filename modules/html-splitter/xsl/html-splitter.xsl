@@ -1346,7 +1346,7 @@
   </xsl:template>
 
   <xsl:template match="*[@epub:type = ('loi', 'lot')]
-                        [@class = 'as-nav']" mode="#all">
+                        [@class = 'as-nav']" mode="#all" priority="5">
     <xsl:param name="transform-lof-to-nav" as="xs:boolean?" tunnel="yes"/>
     <xsl:if test="$transform-lof-to-nav">
       <nav>
@@ -1822,7 +1822,6 @@
               tunnel="yes"/>
           </xsl:apply-templates>
         </xsl:variable><!-- prelim already consists of ancestor sections -->
-       <xsl:if test="$split-genids[current()] = 'd26e14588'"><xsl:message select="'###', string-join($prelim-export//*:body/*[1]/@role, '-')"/></xsl:if>
         <xsl:variable name="remove-surrounding-text" as="element(html:html)">
           <xsl:apply-templates select="$prelim-export" mode="remove-surrounding-text"/>
         </xsl:variable>
@@ -1843,10 +1842,12 @@
  
   <xsl:function name="tr:epub-type-pullable" as="xs:boolean">
     <xsl:param name="body" as="element(html:body)"/>
-      <xsl:variable name="epub-tokens-from-first-elt" select="tokenize($body/*[@epub:type][1]/@epub:type, '\s+')" as="xs:string*"/>
+    <xsl:variable name="epub-tokens-from-first-elt" select="tokenize($body/*[@epub:type][1]/@epub:type, '\s+')" as="xs:string*"/>
     <!-- every child must contain the same epub:type(s) that is to be pulled up -->
     <xsl:sequence select="$pull-up-epub-type-to-body = ('true', 'yes') 
                           and 
+                          $body[*]
+                          and
                           (every $child in $body/* satisfies $child[@epub:type]
                                                                   [some $epub-type-token 
                                                                    in tokenize(@epub:type, '\s+') 
@@ -1860,6 +1861,7 @@
   
   <xsl:template match="html:body[tr:epub-type-pullable(.)]" priority="2" mode="remove-surrounding-text remove-other-pub-type-content">
     <!-- pull up @epub:type for backmatter, bodymatter, frontmatter to body element-->
+    
     <xsl:copy>
       <xsl:apply-templates select="@*" mode="#current"/>
       <xsl:variable name="all-pullable-tokens" select="for $f in tokenize(*[1][@epub:type]/@epub:type, '\s+') return $f[. = $epub-types-for-pulling-to-body]" as="xs:string+"/>
