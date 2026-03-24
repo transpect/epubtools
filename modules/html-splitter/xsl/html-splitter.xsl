@@ -1840,16 +1840,16 @@
   
   <!-- https://www.w3.org/TR/epub-33/#sec-prefix-attr -->
   
-  <xsl:variable name="non-native-prefixes-regex" as="xs:string" 
+  <xsl:variable name="native-prefixes-regex" as="xs:string" 
                 select="'^(a11y|dcterms|marc|media|msv|onix|prism|rendition|schema|xsd):'"/>
   
   <xsl:template match="html:html[$final-pub-type eq 'EPUB3']
                                 [normalize-space($epub-config/@prefix)]
                                 [html:body//@epub:type[matches(., '^[a-z]+:')]
-                                                      [not(matches(., $non-native-prefixes-regex))]]" mode="export-chunk-with-surroundings">
+                                                      [not(matches(., $native-prefixes-regex))]]" mode="export-chunk-with-surroundings">
     <xsl:variable name="non-native-prefixes" as="xs:string*"
                   select="html:body//@epub:type[matches(., '^[a-z]+:')]
-                                               [not(matches(., $non-native-prefixes-regex))]/substring-before(., ':')"/>
+                                               [not(matches(., $native-prefixes-regex))]/substring-before(., ':')"/>
     <xsl:copy>
       <xsl:attribute name="epub:prefix" 
                      select="string-join(
