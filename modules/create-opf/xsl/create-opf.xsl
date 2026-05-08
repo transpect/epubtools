@@ -149,8 +149,21 @@
 
           <xsl:message select="'### Generate Accessibility meta tags: ', $create-a11y-meta"/>
           <xsl:if test="$create-a11y-meta = ('yes', 'true')">
-            <xsl:variable name="html-content" as="element(*)*" select="collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')][not(matches(@xml:base, '\P{L}(cover|toc|nav|ncx)', 'i'))]"/>
-            <xsl:variable name="nav-html" as="element(*)*" select="collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')][matches(@xml:base, '\P{L}(toc|nav)', 'i')]"/>
+            <xsl:variable name="html-content" as="element(*)*" 
+                          select="collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')]
+                                                                                 [not(
+                                                                                    matches(
+                                                                                      tokenize(@xml:base, '/')[last()], 
+                                                                                      '\P{L}(cover|toc|nav|ncx)', 
+                                                                                      'i')
+                                                                                    )]"/>
+            <xsl:variable name="nav-html" as="element(*)*" 
+                          select="collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')]
+                                                                                 [matches(
+                                                                                    tokenize(@xml:base, '/')[last()], 
+                                                                                    '\P{L}(toc|nav)', 
+                                                                                    'i'
+                                                                                  )]"/>
             <xsl:variable name="aud-video" select="some $av in $html-content//*:body//* satisfies $av[self::*:video|self::*:audio]"/>
             <xsl:variable name="audio" select="some $av in $html-content//*:body//* satisfies $av[self::*:audio]"/>
             <xsl:variable name="video" select="some $av in $html-content//*:body//* satisfies $av[self::*:video]"/>
