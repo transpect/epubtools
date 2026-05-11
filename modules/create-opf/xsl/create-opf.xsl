@@ -154,14 +154,14 @@
                                                                                  [not(
                                                                                     matches(
                                                                                       tokenize(@xml:base, '/')[last()], 
-                                                                                      '\P{L}(cover|toc|nav|ncx)', 
+                                                                                      '(cover|toc|nav|ncx)', 
                                                                                       'i')
                                                                                     )]"/>
             <xsl:variable name="nav-html" as="element(*)*" 
                           select="collection()/cx:document[@name='wrap-chunks']/*[local-name() = ('xhtml', 'html')]
                                                                                  [matches(
                                                                                     tokenize(@xml:base, '/')[last()], 
-                                                                                    '\P{L}(toc|nav)', 
+                                                                                    '^(toc|nav)', 
                                                                                     'i'
                                                                                   )]"/>
             <xsl:variable name="aud-video" select="some $av in $html-content//*:body//* satisfies $av[self::*:video|self::*:audio]"/>
