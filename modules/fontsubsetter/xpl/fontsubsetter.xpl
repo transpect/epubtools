@@ -16,7 +16,7 @@
   
   <p:documentation>This pipeline creates fontsubsets. The characters used 
     in each font will be displayed in a character set. The subset is created 
-    using the pyftsubset phython script from fonttools https://github.com/fonttools.
+    using the pyftsubset python script from fonttools https://github.com/fonttools.
   </p:documentation>
   
   <p:option name="script-path" select="'../../../scripts/pyftsubset.sh'"/>
@@ -41,7 +41,7 @@
   </p:input>
   
   <p:output port="result" primary="true" sequence="true">
-    <p:documentation>Ouput is a character set displaying all characters used inside a font</p:documentation>
+    <p:documentation>Output is a character set displaying all characters used inside a font</p:documentation>
     <p:pipe port="result" step="viewport-chars-identity"/>
   </p:output>
   <p:serialization port="result" omit-xml-declaration="false" indent="true"/>

@@ -139,7 +139,7 @@
                                                    else concat($new-base-uri, $style-dir-name, '/', current-grouping-key())"/>
             <xsl:attribute name="common" select="'true'"/>
             <!--<xsl:apply-templates select="current-group()/self::css:atrule[@type = 'charset']"/>-->
-            <!-- Everything will be serialized as UTF-8 ayway, so no need to retain the initial declaration.
+            <!-- Everything will be serialized as UTF-8 anyway, so no need to retain the initial declaration.
             Neither do we have to declare it explicitly provided the including HTML file is also UTF-8. -->
             <xsl:variable name="css:utf8-charset" as="element(css:atrule)">
               <atrule xmlns="http://www.w3.org/1996/css" type="charset">
