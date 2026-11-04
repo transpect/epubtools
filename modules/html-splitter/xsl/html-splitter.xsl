@@ -78,7 +78,10 @@
   <xsl:param name="debug-dir-uri" select="'debug'"/>
 
   <xsl:param name="pull-up-epub-type-to-body" select="'false'" as="xs:string"/>
-
+  <!-- ncx-from-toc-nav: yes|no
+       yes: creates the NCX from the toc nav of the input HTML
+       no:  creates the NCX from the hierarchy configuration (default) -->
+  <xsl:param name="ncx-from-toc-nav" select="'no'" as="xs:string"/>
   
   <xsl:variable name="common-dir-elimination-regex" as="xs:string"
     select="replace($datadir, '/+', '/+')"/>
@@ -166,9 +169,22 @@
                           ])"/>
     </xsl:document>
   </xsl:variable>
+  <xsl:variable name="content-toc-nav" as="element(html:nav)?"
+                select="($root/html:html/html:body//html:nav[   tr:contains-token(@epub:type, 'toc') 
+                                                             or tr:contains-token(@role, 'doc-toc')])[1]"/>
   <xsl:variable name="raw-ncx" as="document-node(element(ncx:navMap))">
     <xsl:document>
-      <xsl:apply-templates select="$fullflatten" mode="raw-ncx"/>
+      <xsl:choose>
+        <xsl:when test="$ncx-from-toc-nav = 'yes' and exists($content-toc-nav)">
+          <xsl:apply-templates select="$content-toc-nav" mode="nav-to-raw-ncx"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:if test="$ncx-from-toc-nav = 'yes'">
+            <xsl:message select="'[WARNING] ncx-from-toc-nav=yes, but no toc nav found in the input HTML. Creating the NCX from the configuration.'"/>
+          </xsl:if>
+          <xsl:apply-templates select="$fullflatten" mode="raw-ncx"/>
+        </xsl:otherwise>
+      </xsl:choose>
     </xsl:document>
   </xsl:variable>
 
@@ -1237,6 +1253,54 @@
         </xsl:otherwise>
       </xsl:choose>
     </navMap>
+  </xsl:template>
+
+  <!-- MODE: nav-to-raw-ncx 
+       Alternative to mode raw-ncx. The playOrder is derived from the generated 
+       id of the link target in $root to keep the NCX consistent to the toc nav -->
+
+  <xsl:template match="html:nav" mode="nav-to-raw-ncx">
+    <navMap xmlns="http://www.daisy.org/z3986/2005/ncx/">
+      <xsl:apply-templates select="html:ol/html:li" mode="#current"/>
+    </navMap>
+  </xsl:template>
+
+  <xsl:template match="html:li" mode="nav-to-raw-ncx">
+    <xsl:variable name="label-elt" as="element()?" select="(html:a, html:span)[1]"/>
+    <xsl:variable name="link" as="element(html:a)?" select="(html:a[@href], .//html:a[@href])[1]"/>
+    <xsl:variable name="target-id" as="xs:string?" 
+                  select="$link/@href[contains(., '#')]/replace(., '^.*?#', '')"/>
+    <xsl:variable name="target" as="element()?" select="key('by-id', $target-id, $root)[1]"/>
+    <xsl:choose>
+      <xsl:when test="empty($target)">
+        <xsl:message select="'[WARNING] Cannot resolve toc nav entry with href=', string($link/@href), 
+                             ' (', normalize-space($label-elt), '). Skipping the entry.'"/>
+        <xsl:apply-templates select="html:ol/html:li" mode="#current"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:variable name="label">
+          <xsl:apply-templates select="$label-elt/node()" mode="br-to-space"/>
+        </xsl:variable>
+        <navPoint xmlns="http://www.daisy.org/z3986/2005/ncx/" 
+                  id="" 
+                  class="default" 
+                  playOrder="{replace(
+                                generate-id($target), '^.+?(\d+)$', '$1'
+                              )}">
+          <navLabel>
+            <text>
+              <xsl:value-of select="translate(
+                                      replace(
+                                        normalize-space($label), '&#x2009;', ' '
+                                      ), '&#x2011;&#x202f;', '- '
+                                    )"/>
+            </text>
+          </navLabel>
+          <content genid="{$target-id}"/>
+          <xsl:apply-templates select="html:ol/html:li" mode="#current"/>
+        </navPoint>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <xsl:template match="html:br" mode="br-to-space">

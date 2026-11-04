@@ -81,6 +81,7 @@
   <p:option name="create-svg-cover" select="'false'"/>
   <p:option name="convert-svg-cover" select="'false'"/>
   <p:option name="pull-up-epub-type-to-body" select="'false'"/>
+  <p:option name="ncx-from-toc-nav" select="'no'"/>
   <p:option name="cwd"/>
   <p:option name="os"/>
  
@@ -935,6 +936,7 @@
     <p:with-option name="cwd" select="$cwd"/>
     <p:with-option name="os" select="$os"/>
     <p:with-option name="pull-up-epub-type-to-body" select="$pull-up-epub-type-to-body"/>
+    <p:with-option name="ncx-from-toc-nav" select="$ncx-from-toc-nav"/>
   </epub:html-splitter>
 
   <p:viewport match="c:file[@media-type='application/xhtml+xml']" name="html-file-size">

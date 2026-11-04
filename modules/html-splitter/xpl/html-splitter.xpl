@@ -63,6 +63,10 @@
   <p:option name="cwd"/>
   <p:option name="os"/>
   <p:option name="pull-up-epub-type-to-body" select="'false'" cx:type="xsd:string" required="false"/>
+  <p:option name="ncx-from-toc-nav" select="'no'" cx:type="xsd:string" required="false">
+    <p:documentation>yes|no. If yes, the NCX is created from the toc nav (nav[@epub:type = 'toc']) of the 
+      input HTML instead of the hierarchy configuration.</p:documentation>
+  </p:option>
   
   <p:import href="add-doctype.xpl"/>
   <p:import href="split-css.xpl"/>
@@ -161,6 +165,7 @@
         <p:with-param name="html-subdir-name" select="$html-subdir-name"><p:empty/></p:with-param>
         <p:with-param name="pull-up-epub-type-to-body" select="$pull-up-epub-type-to-body"><p:empty/></p:with-param>
         <p:with-param name="drop-epub-types-without-matching-aria-role" select="$drop-epub-types-without-matching-aria-role"><p:empty/></p:with-param>
+        <p:with-param name="ncx-from-toc-nav" select="$ncx-from-toc-nav"><p:empty/></p:with-param>
         <p:input port="stylesheet">
           <p:document href="../xsl/html-splitter.xsl"/>
         </p:input>

@@ -132,6 +132,10 @@
   <p:option name="pull-up-epub-type-to-body" select="'false'"  cx:type="xs:string" required="false">
      <p:documentation>Pulls up some @epub:type attributes to parent body element. Momentarily only frontmatter, bodymatter and backmatter.</p:documentation>
   </p:option>
+  <p:option name="ncx-from-toc-nav" select="'no'" cx:type="xs:string" required="false">
+    <p:documentation>yes|no. If yes, the NCX is created from the toc nav (nav[@epub:type = 'toc']) of the 
+      input HTML instead of the hierarchy configuration.</p:documentation>
+  </p:option>
   
   <!-- URIs are resolved by XML catalogs, which are located as default in xmlcatalog/catalog.xml -->
   
@@ -146,7 +150,6 @@
   <p:import href="http://transpect.io/xproc-util/simple-progress-msg/xpl/simple-progress-msg.xpl"/>
   <p:import href="http://transpect.io/xproc-util/file-uri/xpl/file-uri.xpl"/>
   <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl"/>
-  
   
   <p:variable name="wrap-cover-in-svg" select="($use-svg[not(. = '')], /epub-config/cover/@svg, 'true')[1]">
     <p:pipe port="meta" step="epub-convert"/>
@@ -342,6 +345,7 @@
     <p:with-option name="create-svg-cover" select="$create-svg-cover"/>
     <p:with-option name="convert-svg-cover" select="$convert-svg-cover"/>
     <p:with-option name="pull-up-epub-type-to-body" select="$pull-up-epub-type-to-body"/>
+    <p:with-option name="ncx-from-toc-nav" select="$ncx-from-toc-nav"/>
   </epub:create-ops>
 
   <epub:create-opf name="create-opf">
