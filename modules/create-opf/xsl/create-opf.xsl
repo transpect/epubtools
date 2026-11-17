@@ -10,10 +10,12 @@
   xmlns:cx="http://xmlcalabash.com/ns/extensions" 
   xmlns:c="http://www.w3.org/ns/xproc-step"
   xmlns:functx="http://www.functx.com"
+  xmlns:tr="http://transpect.io"
   xmlns="http://www.idpf.org/2007/opf" 
-  version="2.0" exclude-result-prefixes="c cx html xsi xs ncx functx">
+  version="2.0" exclude-result-prefixes="c cx html tr xsi xs ncx functx">
 
   <xsl:import href="http://transpect.io/xslt-util/functx/xsl/functx.xsl"/>
+  <xsl:import href="http://transpect.io/xslt-util/xmlid/xsl/xmlid.xsl"/>
 
   <xsl:param name="target" select="'EPUB2'"/>
   <xsl:param name="layout" select="'reflowable'"/>
@@ -319,14 +321,16 @@
           <!-- This fails to match the cover file id. Exclude it for EPUB3 since there are other mechanisms?
                Or fix it? -->
           <meta name="cover"
-                content="{opf:normalize-id(
+                content="{tr:normalize-xmlid(
                             if(normalize-space(collection()/epub-config/cover[1]/@opf-id))
                             then 
                               collection()/epub-config/cover[1]/@opf-id
                             else
                               concat(
                                 'idcover_', 
-                                opf:id-from-filename(replace(collection()/epub-config/cover/@href, '^.+/', ''))
+                                opf:id-from-filename(
+                                  replace(collection()/epub-config/cover/@href, '^.+/', '')
+                                )
                               )
                             )}"/>
         </xsl:if>
@@ -338,12 +342,12 @@
         <xsl:for-each-group select="collection()//c:file[not($target = ('EPUB2', 'KF8') and matches(@name, 'nav\.xhtml'))]"
                             group-by="@name">
           <xsl:variable name="strip-path" select="opf:strip-path(@name)"/>
-          <xsl:variable name="id" select="opf:id-from-filename(@name)"/>
+          <xsl:variable name="id" select="tr:normalize-xmlid(opf:id-from-filename(@name))"/>
           <xsl:variable name="matching-media-overlay-id" 
                         select="for $i in collection()//c:file[matches(@name, '\.smil$')]
                                                               [replace(@name, '\.smil$', '') = replace($strip-path, '\.x?html$', '')]
-                                return opf:id-from-filename($i/@name)" as="xs:string*"/>
-          <item href="{$strip-path}" media-type="{@media-type}" id="{opf:normalize-id($id)}">
+                                return tr:normalize-xmlid(opf:id-from-filename($i/@name))" as="xs:string*"/>
+          <item href="{$strip-path}" media-type="{@media-type}" id="{$id}">
             <xsl:variable name="properties" as="xs:string*">
               <xsl:if test="@name = $nav/@name">
                 <xsl:value-of select="'nav'"/>
@@ -380,16 +384,18 @@
             <xsl:if test="replace($strip-path, '^.+/', '') eq $cover-nondir">
               <!-- rewrite id attribute: same as in metadata/meta[@name eq 'cover']/@content-->
               <xsl:attribute name="id"
-                             select="opf:normalize-id(
+                             select="tr:normalize-xmlid(
                                        if(normalize-space(collection()/epub-config/cover[1]/@opf-id))
                                        then 
                                          collection()/epub-config/cover[1]/@opf-id
                                        else
                                          concat(
                                            'idcover_', 
-                                           opf:id-from-filename(replace(collection()/epub-config/cover/@href, '^.+/', ''))
+                                           opf:id-from-filename(
+                                             replace(collection()/epub-config/cover/@href, '^.+/', '')
+                                           )
                                          )
-                                       )"/>
+                                     )"/>
               <xsl:if test="$target eq 'EPUB3'">
                 <xsl:attribute name="properties" select="'cover-image'"/>
               </xsl:if>
@@ -409,7 +415,7 @@
           <xsl:sort select="number(@sequence)" data-type="number"/>
           <xsl:variable name="strip-path" select="replace(@name, 'OEBPS/', '')"/>
           <xsl:variable name="id" select="replace(replace($strip-path, '\.', ''),'/', '__')"/>
-          <itemref idref="{opf:normalize-id($id)}">
+          <itemref idref="{tr:normalize-xmlid($id)}">
             <xsl:if test="matches($strip-path, '_nolin\.xhtml$') or @linear = 'false'">
               <xsl:attribute name="linear" select="'no'"/>
             </xsl:if>
@@ -483,16 +489,14 @@
 
   <xsl:template match="html:a/@href" mode="guide">
     <xsl:choose>
-      <xsl:when test="(
-                       matches(base-uri(), concat('/chunks/', $html-subdir-name, '/'))
-                       or (
-                           normalize-space($html-subdir-name) 
-                           and
-                           (not(starts-with(., concat($html-subdir-name, '/'))))
-                           )
-                      )
-                      and 
-                      not(matches(., '^nav.xhtml'))">
+      <xsl:when test="matches(base-uri(), concat('/chunks/', $html-subdir-name, '/'))
+                      or (
+                          normalize-space($html-subdir-name) 
+                          and
+                          (not(starts-with(., concat($html-subdir-name, '/'))))
+                          and 
+                          not(matches(., '^nav.xhtml'))
+                          )">
         <xsl:attribute name="href" select="concat($html-subdir-name, '/', .)"/>
       </xsl:when>
       <xsl:otherwise>
@@ -524,11 +528,6 @@
     </xsl:choose>
   </xsl:function>
 
-  <xsl:function name="opf:normalize-id" as="xs:string">
-    <xsl:param name="input" as="xs:string"/>
-    <xsl:sequence select="translate(replace($input, '^(\I)', '_$1'), ',', '_')"/>
-  </xsl:function>
-
   <xsl:function name="opf:strip-path" as="xs:string">
     <xsl:param name="in" as="xs:string"/>
     <xsl:sequence select="replace($in, 'OEBPS/', '')"/>
@@ -536,10 +535,13 @@
 
   <xsl:function name="opf:id-from-filename" as="xs:string">
     <xsl:param name="in" as="xs:string"/>
-    <xsl:sequence
-      select="if( matches($in, '\.ncx$') ) 
+    <xsl:sequence select="if( matches($in, '\.ncx$') ) 
                           then 'ncx' 
-                          else replace(replace(opf:strip-path($in), '\.', ''),'[/~,]', '__')"/>
+                          else replace(
+                                 replace(
+                                   opf:strip-path($in), '\.', ''
+                                 ), '[/~,]', '__'
+                               )"/>
   </xsl:function>
 
 </xsl:stylesheet>

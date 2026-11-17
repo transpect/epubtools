@@ -32,6 +32,7 @@
 
 	<!-- create references between smil and html chunks -->
 	<xsl:include href="media-overlay.xsl"/>
+  <xsl:import href="http://transpect.io/xslt-util/xmlid/xsl/xmlid.xsl"/>
 
   <xsl:output method="text" />
 
@@ -85,7 +86,7 @@
   
   <xsl:variable name="common-dir-elimination-regex" as="xs:string"
     select="replace($datadir, '/+', '/+')"/>
-  <xsl:variable name="orig-filename" select="replace(base-uri(/*), '^.*/', '')"/>
+  <xsl:variable name="orig-filename" select="tr:normalize-xmlid(replace(base-uri(/*), '^.*/', ''))"/>
   <xsl:variable name="raw-smil-filename" select="concat(replace(base-uri(/*), '[.]\w+$', ''), '.raw.smil')"/>
   <xsl:variable name="epub-config" select="collection($collection-uri)/epub-config" as="element(epub-config)"/>
   <!-- If heading conf is submitted in a separate file, it will have precedence. It may be submitted as /epub-config/hierarchy -->
